@@ -1,0 +1,39 @@
+node_modules/
+.pnpm-store/
+.next/
+coverage/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.vercel/
+playwright-report/
+test-results/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets and private keys
+secrets/
+.secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Local caches
+.cache/
+.turbo/
+.eslintcache
+
+# OS metadata
+.DS_Store
+Thumbs.db
