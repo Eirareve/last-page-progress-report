@@ -4,6 +4,8 @@ import {
   AGENT_CONTRACT_VERSION,
   AGENT_RESULT_SCHEMA_VERSIONS,
   DeterministicMockAgentAdapter,
+  DEFAULT_MOCK_AGENT_FIXTURE,
+  MOCK_AGENT_ADAPTER_VERSION,
   PLAIN_SEMANTIC_BUNDLE_SCHEMA_VERSION,
   ROUND_ANALYSIS_BUNDLE_SCHEMA_VERSION,
   type ProviderNeutralAgentPort,
@@ -98,7 +100,7 @@ describe("RoundAnalysisOrchestrator", () => {
         outcome.event.receipts.every(
           (receipt) =>
             receipt.resolvedMode === "mock" &&
-            receipt.agentContractVersion === "0.1.0",
+            receipt.agentContractVersion === AGENT_CONTRACT_VERSION,
         ),
       ).toBe(true);
     },
@@ -599,6 +601,46 @@ describe("PlainSemanticReviewOrchestrator", () => {
     expect(outcome.event.eventType).toBe("PLAIN_SEMANTIC_BUNDLE_FAILED");
     expect(outcome.event).not.toHaveProperty("bundle");
   });
+
+  it("commits proposal outcomes in the same atomic bundle without another main call", async () => {
+    const setup = await makePlainSetup();
+    const adapter = new DeterministicMockAgentAdapter({
+      ...DEFAULT_MOCK_AGENT_FIXTURE,
+      semanticRestorationMode: "proposal",
+    });
+    const call = vi.spyOn(adapter, "executePlainSemanticReview");
+    const outcome = await orchestratePlainSemanticReview({
+      ...setup,
+      port: adapter,
+    });
+
+    expect(call).toHaveBeenCalledOnce();
+    expect(outcome.outcomeKind).toBe("resolved");
+    if (outcome.outcomeKind !== "resolved") return;
+    expect(outcome.event.bundle).toMatchObject({
+      semanticReview: {
+        semanticFragments: [
+          { id: "stage3:v1:semantic_fragment:0:operation-1" },
+        ],
+      },
+      restorationOutcomes: [
+        {
+          kind: "proposal",
+          fragmentId: "stage3:v1:semantic_fragment:0:operation-1",
+          proposal: {
+            proposalId:
+              "stage3:v1:semantic_restoration_proposal:0:operation-1",
+          },
+        },
+      ],
+    });
+    expect(outcome.event.receipts).toHaveLength(1);
+    expect(outcome.budgetUsage.logicalCalls).toHaveLength(1);
+    expect(outcome.budgetUsage.logicalCalls[0]?.budgetSlot).toBe(
+      "plain_semantic",
+    );
+    expect(outcome.budgetEvaluation.totals.logicalMainCalls).toBe(1);
+  });
 });
 
 describe("PortraitShiftSummaryOrchestrator", () => {
@@ -1036,7 +1078,7 @@ function applicationContext(input: {
     requestedMode: input.requestedMode ?? "mock",
     inputFingerprint: applicationDigest(input.fingerprint),
     promptVersion: null,
-    adapterVersion: "0.1.0",
+    adapterVersion: MOCK_AGENT_ADAPTER_VERSION,
     stage: input.stage,
     stageInstanceId: `stage-instance-${input.stage}`,
     bindings: {
@@ -1065,7 +1107,7 @@ function portReturning(input: {
 } {
   return {
     executionMode: "mock" as const,
-    adapterVersion: "0.1.0",
+    adapterVersion: MOCK_AGENT_ADAPTER_VERSION,
     executeRoundAnalysis: vi.fn(async () => ({
       outcomeKind: "candidate" as const,
       candidate: input.round,

@@ -14,8 +14,10 @@ import {
   AGENT_RESULT_SCHEMA_VERSIONS,
   AGENT_RETRYABLE_ERROR_CODES,
   PLAIN_SEMANTIC_CANDIDATE_BUNDLE_SCHEMA_VERSION,
+  PLAIN_SEMANTIC_BUNDLE_SCHEMA_VERSION,
   PLAIN_TEXT_CANDIDATE_SCHEMA_VERSION,
   ROUND_ANALYSIS_CANDIDATE_BUNDLE_SCHEMA_VERSION,
+  SEMANTIC_RESTORATION_PROPOSAL_CANDIDATE_SCHEMA_VERSION,
   agentCapabilityErrorSchema,
   agentCapabilityError,
   agentCapabilityErrorCodeSchema,
@@ -133,6 +135,18 @@ const candidateSchemas: Record<
 };
 
 describe("stage 3 Agent capability contracts", () => {
+  it("versions the approved restoration repair on separate owned axes", () => {
+    expect(AGENT_CONTRACT_VERSION).toBe("0.2.0");
+    expect(AGENT_CANDIDATE_SCHEMA_VERSIONS.compareSemanticDrift).toBe("0.2.0");
+    expect(AGENT_RESULT_SCHEMA_VERSIONS.compareSemanticDrift).toBe("0.2.0");
+    expect(PLAIN_SEMANTIC_CANDIDATE_BUNDLE_SCHEMA_VERSION).toBe("0.2.0");
+    expect(PLAIN_SEMANTIC_BUNDLE_SCHEMA_VERSION).toBe("0.2.0");
+    expect(SEMANTIC_RESTORATION_PROPOSAL_CANDIDATE_SCHEMA_VERSION).toBe(
+      "0.2.0",
+    );
+    expect(PLAIN_TEXT_CANDIDATE_SCHEMA_VERSION).toBe("0.1.0");
+  });
+
   it("freezes exactly nine independently versioned capabilities", () => {
     expect(Object.keys(AGENT_CAPABILITY_CATALOG)).toEqual(
       AGENT_CAPABILITY_NAMES,
@@ -193,6 +207,7 @@ describe("stage 3 Agent capability contracts", () => {
         plainText: "Plain text.",
       },
       semanticReview: semanticCandidate,
+      restorationOutcomes: [],
     };
     expect(plainSemanticReviewCandidateBundleSchema.parse(bundle)).toEqual(
       bundle,

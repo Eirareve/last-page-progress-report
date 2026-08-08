@@ -21,6 +21,17 @@ export const mockAgentFixtureSchema = z.strictObject({
   preservedSummary: z.string().trim().min(1),
   portraitChangedSummary: z.string().trim().min(1),
   portraitUnchangedSummary: z.string().trim().min(1),
+  semanticRestorationMode: z.enum(["none", "proposal", "unavailable"]),
+  semanticFragmentPhrase: z.string().trim().min(1),
+  semanticFragmentReason: z.string().trim().min(1),
+  semanticFragmentConsequence: z.string().trim().min(1),
+  semanticRestorationReplacementText: z.string().trim().min(1),
+  semanticRestorationUnavailableReason: z.enum([
+    "insufficient_context",
+    "anchor_not_unique",
+    "unsafe_replacement",
+    "fragment_not_restorable",
+  ]),
 });
 
 export type MockAgentFixture = z.infer<typeof mockAgentFixtureSchema>;
@@ -39,5 +50,11 @@ export const DEFAULT_MOCK_AGENT_FIXTURE: MockAgentFixture = Object.freeze(
     preservedSummary: "朴素版本保留了当前精确版本的主要内容。",
     portraitChangedSummary: "最终选择与最初选择不同。",
     portraitUnchangedSummary: "最终选择与最初选择相同。",
+    semanticRestorationMode: "none",
+    semanticFragmentPhrase: "Precise",
+    semanticFragmentReason: "The plain rendering needs an explicit restoration option.",
+    semanticFragmentConsequence: "The qualification could otherwise be lost.",
+    semanticRestorationReplacementText: " [restored qualification]",
+    semanticRestorationUnavailableReason: "insufficient_context",
   }),
 );

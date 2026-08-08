@@ -5,13 +5,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   DeterministicMockAgentAdapter,
+  DEFAULT_MOCK_AGENT_FIXTURE,
   MOCK_AGENT_ADAPTER_VERSION,
   roundAnalysisCandidateBundleSchema,
   validateRoundAnalysisCandidateBundle,
+  validatePlainSemanticReviewCandidateBundle,
 } from "@/agent";
 import type { AgentExecutionEnvelope } from "@/agent";
 import {
   AGENT_TEST_VALIDATION_CONTEXT,
+  AGENT_TEST_CREATED_AT,
   makePlainSemanticPortInput,
   makePortraitSummaryInput,
   makeRequestContext,
@@ -46,7 +49,7 @@ describe("deterministic Mock Agent adapter", () => {
     ).toEqual(
       await adapter.summarizePortraitShift(portraitInput, makeRequestContext()),
     );
-    expect(MOCK_AGENT_ADAPTER_VERSION).toBe("0.1.0");
+    expect(MOCK_AGENT_ADAPTER_VERSION).toBe("0.2.0");
   });
 
   it("does not let request and operation metadata change semantic output", async () => {
@@ -63,6 +66,51 @@ describe("deterministic Mock Agent adapter", () => {
       }),
     );
     expect(second).toEqual(first);
+  });
+
+  it("repeats the same frozen restoration proposal with fixed fixture, IDs, and time", async () => {
+    const adapter = new DeterministicMockAgentAdapter({
+      ...DEFAULT_MOCK_AGENT_FIXTURE,
+      semanticRestorationMode: "proposal",
+    });
+    const input = makePlainSemanticPortInput();
+    const context = makeRequestContext({
+      capability: "executePlainSemanticReview",
+      stage: "PLAIN_REWRITE",
+      bindings: {
+        revisions: {
+          preciseRevisionId: input.sourcePreciseRevisionId,
+          plainRevisionId: input.targetPlainRevisionId,
+        },
+        content: input.contentBinding,
+      },
+    });
+    const first = await adapter.executePlainSemanticReview(input, context);
+    const second = await adapter.executePlainSemanticReview(input, context);
+    expect(second).toEqual(first);
+    const projection = {
+      ...AGENT_TEST_VALIDATION_CONTEXT,
+      semanticFragmentIds: [
+        "stage3:v1:semantic_fragment:0:operation-1",
+      ],
+      semanticRestorationProposalIds: [
+        "stage3:v1:semantic_restoration_proposal:0:operation-1",
+      ],
+      semanticRestorationProposalCreatedAt: AGENT_TEST_CREATED_AT,
+    };
+    expect(
+      await validatePlainSemanticReviewCandidateBundle(
+        candidateFrom(first),
+        input,
+        projection,
+      ),
+    ).toEqual(
+      await validatePlainSemanticReviewCandidateBundle(
+        candidateFrom(second),
+        input,
+        projection,
+      ),
+    );
   });
 
   it("rejects a RequestContext that misstates the Mock adapter version", async () => {

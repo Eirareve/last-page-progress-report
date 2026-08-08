@@ -8,6 +8,7 @@ import type {
   RoundAnalysisPortInput,
   SummarizePortraitShiftInput,
 } from "@/agent";
+import { MOCK_AGENT_ADAPTER_VERSION } from "@/agent";
 import {
   charliePositionSchema,
   charlieResponseSchema,
@@ -157,7 +158,7 @@ export function makeRequestContext(
       attempt: 1,
       inputFingerprint: AGENT_TEST_DIGEST,
       promptVersion: null,
-      adapterVersion: "0.1.0",
+      adapterVersion: MOCK_AGENT_ADAPTER_VERSION,
       stage: "ROUND_1_PAST_SELF",
       stageInstanceId: "stage-instance-1",
       bindings: {

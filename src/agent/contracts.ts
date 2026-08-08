@@ -40,6 +40,10 @@ import type {
   retrieveVerifiedEvidenceValidatedResultSchema,
   roundAnalysisCandidateBundleSchema,
   semanticFragmentCandidateSchema,
+  semanticRestorationCandidateOutcomeSchema,
+  semanticRestorationProposalCandidateSchema,
+  semanticRestorationUnavailableReasonSchema,
+  semanticRestorationValidatedOutcomeSchema,
   summarizePortraitShiftCandidateSchema,
   summarizePortraitShiftInputSchema,
   summarizePortraitShiftValidatedResultSchema,
@@ -128,6 +132,18 @@ export type ProposeDocumentDiffValidatedResult = z.infer<
 export type SemanticFragmentCandidate = z.infer<
   typeof semanticFragmentCandidateSchema
 >;
+export type SemanticRestorationProposalCandidate = z.infer<
+  typeof semanticRestorationProposalCandidateSchema
+>;
+export type SemanticRestorationCandidateOutcome = z.infer<
+  typeof semanticRestorationCandidateOutcomeSchema
+>;
+export type SemanticRestorationValidatedOutcome = z.infer<
+  typeof semanticRestorationValidatedOutcomeSchema
+>;
+export type SemanticRestorationUnavailableReason = z.infer<
+  typeof semanticRestorationUnavailableReasonSchema
+>;
 export type CompareSemanticDriftInput = z.infer<
   typeof compareSemanticDriftInputSchema
 >;
@@ -188,6 +204,8 @@ export type AgentProjectionContext = Readonly<{
   documentDiffCreatedAt?: string;
   plainRevisionId?: string;
   semanticFragmentIds?: readonly string[];
+  semanticRestorationProposalIds?: readonly string[];
+  semanticRestorationProposalCreatedAt?: string;
 }>;
 
 export type AgentCandidateValidationContext = AgentProjectionContext &

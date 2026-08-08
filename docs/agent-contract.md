@@ -1,10 +1,11 @@
 # Agent Contract
 
-> `agentContractVersion: 0.1.0`
-> Status: approved stage 3 baseline
+> `agentContractVersion: 0.2.0`
+> Status: approved stage 3 restoration-proposal repair
 > DRI: Codex（technical consistency）
 > Final approver: project owner
-> Execution guide: v1.2.5 (`SHA-256 5715711665D2C3D6985602052C9ADB31C28FF59907981F810DAEB2610AF8C020`)
+> Compatibility: breaking for Agent/PlainSemantic Candidate and Validated Bundle consumers
+> Approval: project owner, 2026-08-08
 
 ## 1. Authority and scope
 
@@ -45,16 +46,15 @@ public access interface.
 
 ## 3. Version ownership
 
-The Agent Contract owner version is `0.1.0`. Every concrete Candidate,
-Validated Result, and bundle has an explicitly owned version constant. Initial
-owned versions are `0.1.0`, but they remain separate axes even when their values
-are equal.
+The Agent Contract owner version is `0.2.0`. Every concrete Candidate,
+Validated Result, and bundle has an explicitly owned version constant. Version
+axes remain separate even when their values are equal.
 
 - Candidates carry a capability-specific `candidateSchemaVersion`.
 - Validated Results carry a capability-specific `resultSchemaVersion`.
 - Candidate and Validated bundles carry a bundle-specific
   `bundleSchemaVersion`.
-- Agent-derived execution receipts set `agentContractVersion=0.1.0` and map
+- Agent-derived execution receipts set `agentContractVersion=0.2.0` and map
   their concrete validated result or bundle version to the existing receipt
   `resultSchemaVersion` field.
 
@@ -73,7 +73,7 @@ The complete nine-capability inventory is:
 | `detectTension` | `llm_assisted_service` | transient validated tension analysis |
 | `generateCharlieResponse` | `llm_assisted_service` | Domain `CharliePosition` and `CharlieResponse` projections |
 | `proposeDocumentDiff` | `llm_assisted_service` | Domain `DiffProposalResult` |
-| `compareSemanticDrift` | `llm_assisted_service` | bound plain draft, Domain `SemanticDrift`, and `SemanticFragment[]` |
+| `compareSemanticDrift` | `llm_assisted_service` | bound plain draft, Domain `SemanticDrift`, `SemanticFragment[]`, and per-fragment restoration outcomes |
 | `buildDissentRecord` | `deterministic_domain_service` | Domain `DissentRecord` |
 | `summarizePortraitShift` | `llm_assisted_service` | factual bound summary |
 
@@ -147,15 +147,39 @@ confirmation.
 ### 5.7 compareSemanticDrift
 
 The `PlainSemanticReviewCandidateBundle` owns a `plainTextCandidate` transport
-slot and the semantic comparison Candidate. It is one logical
-`compareSemanticDrift` capability, not a plain-rewrite tenth capability. The
-result binds precise and not-yet-committed plain revision IDs and projects the
-plain draft, existing Domain `SemanticDrift`, and existing Domain
-`SemanticFragment[]`. These values become committable only together in a
+slot, the semantic comparison Candidate, and restoration outcomes. It is one
+logical `compareSemanticDrift` capability, not a plain-rewrite or restoration
+tenth capability. The result binds precise and not-yet-committed plain revision
+IDs and projects the plain draft, existing Domain `SemanticDrift`, and existing
+Domain `SemanticFragment[]`.
+
+Every fragment has exactly one bundle-owned restoration outcome: either a
+frozen, post-validated Domain `SemanticRestorationProposal`, or a typed
+`unavailable` reason. The Candidate proposal binds a
+trusted-projection-matched `fragmentId`, both baseline revisions, target plain
+revision, source-text hash, stable plain-text anchor, replacement text,
+`previewText.before/after`, `proposalHash`, and owned proposal/Candidate
+versions. The validator independently resolves the anchor against the
+just-produced plain draft, recomputes source and proposal hashes, reconstructs
+the preview, applies text safety, then supplies trusted proposal ID, timestamp,
+and `status=proposed`. Candidate self-report is never a validation result.
+
+The frozen Domain lifecycle still allows `SemanticFragment.restorationProposalId`
+only after the user-confirmed proposal has actually been applied. Stage 3
+therefore binds the concrete trusted proposal to its unresolved fragment through
+the atomic outcome's `fragmentId` and carries the proposal separately; it does
+not use the old unconditional-null behavior to discard a safely producible
+proposal. Stage 4 must set the Domain fragment link only through the frozen
+confirmation/application path.
+
+The Candidate `previewText.before/after` pair maps without loss to the frozen
+Domain proposal's existing `beforePreview/afterPreview` fields; the Domain
+Schema is unchanged. These values become committable only together in a
 complete validated bundle. The plain draft is non-blank and passes the same
 post-safety policy as other generated text. Every projected semantic-fragment
 phrase must be a continuous NFC-normalized span of the bound precise revision;
-invented source fragments are rejected.
+invented source fragments are rejected. A safe proposal carries a concrete
+trusted proposal ID; an unavailable outcome carries no fabricated proposal.
 
 ### 5.8 buildDissentRecord
 
@@ -197,7 +221,9 @@ must reject at least:
 - stale or mismatched content and revision bindings;
 - an invalid Diff target, anchor, old text, or more than one operation;
 - a Charlie response without exactly one answerable question;
-- invalid lengths, enum values, references, IDs, or version fields.
+- invalid lengths, enum values, references, IDs, or version fields;
+- a missing/duplicate fragment restoration outcome, stale proposal revision,
+  invalid anchor/source hash/preview, or mismatched `proposalHash`.
 
 A rejected Candidate is not a partial result, Session value, application event,
 or receipt with a successful outcome.
@@ -216,10 +242,12 @@ carried by the verified evidence context. In placeholder mode those committable
 allowlists are empty; placeholder cards may guide deterministic Mock wording but
 their IDs cannot be persisted as verified evidence references.
 
-`PlainSemanticReviewCandidateBundle` transports the plain draft and semantic
-comparison. `ValidatedPlainSemanticBundle` atomically contains the new plain
-revision draft, bound `SemanticDrift`, `SemanticFragment[]`, and the applicable
-receipt. A partial plain revision is never exposed.
+`PlainSemanticReviewCandidateBundle` transports the plain draft, semantic
+comparison, and one restoration outcome per fragment.
+`ValidatedPlainSemanticBundle` atomically contains the new plain revision
+draft, bound `SemanticDrift`, `SemanticFragment[]`, all frozen proposal or typed
+unavailable outcomes, and the applicable receipt. A partial plain revision,
+fragment set, or proposal inventory is never exposed.
 
 Bundle operation contexts bind the single future FSM operation. Child logical
 capability contexts retain their own capability identifiers, fingerprints, and
@@ -235,8 +263,9 @@ from a trusted operation ID using:
 stage3:v1:<entityKind>:<zero-based ordinal>:<encodeURIComponent(operationId)>
 ```
 
-Entity kinds are owned by Agent/application code. Candidates cannot select or
-override IDs.
+Entity kinds are owned by Agent/application code. Candidate identities must
+equal independently derived trusted projections; they cannot select or
+override persisted IDs.
 
 Mock semantic output is a pure function of validated business input, a frozen
 Fixture, the Mock adapter version, and explicitly supplied trusted IDs. Ambient
@@ -303,3 +332,21 @@ Candidate payloads, prompts, or `internalExcerpt`.
 
 No real provider SDK, provider secret, production Prompt, network model call,
 MCP integration, `/api/agent`, UI, or deployment is part of this Contract.
+
+## 12. Version 0.2.0 compatibility and recovery
+
+This repair is **breaking** for Agent/PlainSemantic producers and consumers:
+`agentContractVersion`, `compareSemanticDrift` Candidate/Result versions, the
+Plain/Semantic Candidate Bundle version, and the Validated Plain/Semantic Bundle
+version are `0.2.0`; restoration outcomes are required. The unchanged
+bundle-owned plain-text Candidate remains independently versioned `0.1.0`. No
+generic `schemaVersion` was added.
+
+There is no persisted Stage 3 production Session data to migrate because Stage
+4 persistence does not exist yet. Future editable recovery bound to Agent
+Contract `0.1.0`, or a pre-repair in-flight Plain/Semantic operation, must be
+rejected/interrupted and re-executed under `0.2.0`; code must not synthesize
+missing outcomes or null proposal identities. Any future legacy COMPLETE
+snapshot may only use the already-frozen explicit read-only compatibility path.
+Candidate/event fingerprints include the owned versions, so late `0.1.0`
+results are rejected rather than committed under `0.2.0`.

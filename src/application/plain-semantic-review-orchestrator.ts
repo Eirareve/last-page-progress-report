@@ -296,11 +296,12 @@ export async function orchestratePlainSemanticReview(input: {
     ? primaryExecutionIdentity(input.port, input.capabilityContext)
     : NULL_EXECUTION_IDENTITY;
   if (usePrimary && primaryError === null) {
-    const primary = validatePlainCandidate(
+    const primary = await validatePlainCandidate(
       primaryCandidate,
       portInput,
       input.validationContext.safetyPolicy,
       preflight.operationContext.operationId,
+      startedAt,
     );
     if (primary.ok) {
       bundle = primary.value;
@@ -329,11 +330,12 @@ export async function orchestratePlainSemanticReview(input: {
     } else {
       receiptObservation = input.fallback.observation;
       receiptExecutionIdentity = input.fallback.executionIdentity;
-      const fallback = validatePlainCandidate(
+      const fallback = await validatePlainCandidate(
         input.fallback.candidate,
         portInput,
         input.validationContext.safetyPolicy,
         preflight.operationContext.operationId,
+        startedAt,
       );
       if (fallback.ok) {
         bundle = fallback.value;
@@ -475,11 +477,12 @@ function validatePlainSemanticBindings(
   return null;
 }
 
-function validatePlainCandidate(
+async function validatePlainCandidate(
   candidate: unknown,
   input: PlainSemanticReviewPortInput,
   safetyPolicy: AgentCandidateValidationContext["safetyPolicy"],
   operationId: string,
+  createdAt: string,
 ) {
   const parsed = plainSemanticReviewCandidateBundleSchema.safeParse(candidate);
   const fragmentCount = parsed.success
@@ -499,6 +502,16 @@ function validatePlainCandidate(
         ordinal,
       }),
     ),
+    semanticRestorationProposalIds: Array.from(
+      { length: fragmentCount },
+      (_, ordinal) =>
+        deriveStage3EntityId({
+          operationId,
+          entityKind: "semantic_restoration_proposal",
+          ordinal,
+        }),
+    ),
+    semanticRestorationProposalCreatedAt: createdAt,
   });
 }
 

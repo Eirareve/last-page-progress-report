@@ -94,7 +94,7 @@ describe("Stage 3 entity identity", () => {
       capability: "buildDissentRecord",
       outcome: "succeeded",
       resolvedMode: "deterministic",
-      agentContractVersion: "0.1.0",
+      agentContractVersion: AGENT_CONTRACT_VERSION,
     });
   });
 });
@@ -122,7 +122,7 @@ describe("Deterministic application facades", () => {
     expect(portrait.receipt).toMatchObject({
       outcome: "succeeded",
       resolvedMode: "deterministic",
-      agentContractVersion: "0.1.0",
+      agentContractVersion: AGENT_CONTRACT_VERSION,
     });
 
     const shiftRequest = {
@@ -211,7 +211,7 @@ describe("Deterministic application facades", () => {
       outcome: "failed",
       resolvedMode: "unavailable",
       fallbackReason: "content_mode_not_verified",
-      agentContractVersion: "0.1.0",
+      agentContractVersion: AGENT_CONTRACT_VERSION,
     });
   });
 
@@ -247,7 +247,7 @@ describe("Stage 3 ContractVersionVector projection", () => {
 
     expect(projected).toEqual({
       ...existing,
-      agentContractVersion: "0.1.0",
+      agentContractVersion: AGENT_CONTRACT_VERSION,
       finalReviewSchemaVersion: "0.1.0",
     });
     expect(projected.contentSchemaVersion).toBe("7.4.2");
@@ -256,6 +256,11 @@ describe("Stage 3 ContractVersionVector projection", () => {
   });
 
   it("never overwrites a conflicting historical Stage 3 version", () => {
+    expect(() =>
+      projectStage3ContractVersions(
+        makeContractVersionVector({ agentContractVersion: "0.1.0" }),
+      ),
+    ).toThrow(/cannot overwrite/);
     expect(() =>
       projectStage3ContractVersions(
         makeContractVersionVector({ agentContractVersion: "9.9.9" }),

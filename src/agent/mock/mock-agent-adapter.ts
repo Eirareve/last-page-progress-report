@@ -1,4 +1,11 @@
 import type { RequestContext } from "../../runtime";
+import {
+  SEMANTIC_RESTORATION_PROPOSAL_VERSION,
+  computeSemanticRestorationProposalHash,
+  createStableTextPointAnchor,
+  normalizeTextNfc,
+  sha256NfcUtf8,
+} from "../../domain";
 import type {
   AgentExecutionEnvelope,
   PlainSemanticReviewPortInput,
@@ -20,6 +27,7 @@ import {
   PLAIN_SEMANTIC_CANDIDATE_BUNDLE_SCHEMA_VERSION,
   PLAIN_TEXT_CANDIDATE_SCHEMA_VERSION,
   ROUND_ANALYSIS_CANDIDATE_BUNDLE_SCHEMA_VERSION,
+  SEMANTIC_RESTORATION_PROPOSAL_CANDIDATE_SCHEMA_VERSION,
 } from "../versions";
 import {
   DEFAULT_MOCK_AGENT_FIXTURE,
@@ -106,6 +114,80 @@ export class DeterministicMockAgentAdapter implements ProviderNeutralAgentPort {
   ): Promise<AgentExecutionEnvelope> {
     const identityError = this.#identityError(context, "compareSemanticDrift");
     if (identityError !== null) return identityError;
+    const plainText = normalizeTextNfc(input.preciseText);
+    const fragmentId = deriveMockSemanticEntityId(
+      context.operationId,
+      "semantic_fragment",
+      0,
+    );
+    const semanticFragments =
+      this.#fixture.semanticRestorationMode === "none"
+        ? []
+        : [
+            {
+              ...candidateHeader("compareSemanticDrift"),
+              fragmentId,
+              phrase: this.#fixture.semanticFragmentPhrase,
+              reason: this.#fixture.semanticFragmentReason,
+              consequence: this.#fixture.semanticFragmentConsequence,
+            },
+          ];
+    const restorationOutcomes = [];
+    if (this.#fixture.semanticRestorationMode === "unavailable") {
+      restorationOutcomes.push({
+        kind: "unavailable" as const,
+        fragmentId,
+        reason: this.#fixture.semanticRestorationUnavailableReason,
+      });
+    }
+    if (this.#fixture.semanticRestorationMode === "proposal") {
+      const targetAnchor = await createStableTextPointAnchor({
+        textDocument: "plain_text",
+        baseRevisionId: input.targetPlainRevisionId,
+        baselineText: plainText,
+        offsetCodePoint: Array.from(plainText).length,
+      });
+      const replacementText = normalizeTextNfc(
+        this.#fixture.semanticRestorationReplacementText,
+      );
+      const afterPreview = `${plainText}${replacementText}`;
+      const proposalMaterial = {
+        proposalVersion: SEMANTIC_RESTORATION_PROPOSAL_VERSION,
+        fragmentId,
+        baselinePreciseRevisionId: input.sourcePreciseRevisionId,
+        baselinePlainRevisionId: input.targetPlainRevisionId,
+        targetPlainRevisionId: input.targetPlainRevisionId,
+        sourcePlainTextHash: await sha256NfcUtf8(plainText),
+        targetAnchor,
+        replacementText,
+        beforePreview: plainText,
+        afterPreview,
+      } as const;
+      restorationOutcomes.push({
+        kind: "proposal" as const,
+        fragmentId,
+        proposal: {
+          agentContractVersion: AGENT_CONTRACT_VERSION,
+          semanticRestorationProposalCandidateSchemaVersion:
+            SEMANTIC_RESTORATION_PROPOSAL_CANDIDATE_SCHEMA_VERSION,
+          proposalVersion: proposalMaterial.proposalVersion,
+          fragmentId,
+          baselinePreciseRevisionId:
+            proposalMaterial.baselinePreciseRevisionId,
+          baselinePlainRevisionId: proposalMaterial.baselinePlainRevisionId,
+          targetPlainRevisionId: proposalMaterial.targetPlainRevisionId,
+          sourcePlainTextHash: proposalMaterial.sourcePlainTextHash,
+          targetAnchor,
+          replacementText,
+          previewText: {
+            before: plainText,
+            after: afterPreview,
+          },
+          proposalHash:
+            await computeSemanticRestorationProposalHash(proposalMaterial),
+        },
+      });
+    }
     return mockExecutionEnvelope(plainSemanticReviewCandidateBundleSchema.parse({
       agentContractVersion: AGENT_CONTRACT_VERSION,
       plainSemanticCandidateBundleSchemaVersion:
@@ -116,7 +198,7 @@ export class DeterministicMockAgentAdapter implements ProviderNeutralAgentPort {
         plainTextCandidateSchemaVersion: PLAIN_TEXT_CANDIDATE_SCHEMA_VERSION,
         sourcePreciseRevisionId: input.sourcePreciseRevisionId,
         targetPlainRevisionId: input.targetPlainRevisionId,
-        plainText: input.preciseText,
+        plainText,
       },
       semanticReview: {
         ...candidateHeader("compareSemanticDrift"),
@@ -126,8 +208,9 @@ export class DeterministicMockAgentAdapter implements ProviderNeutralAgentPort {
         lost: [],
         ambiguities: [],
         consequences: [],
-        semanticFragments: [],
+        semanticFragments,
       },
+      restorationOutcomes,
     }));
   }
 
@@ -171,6 +254,16 @@ export class DeterministicMockAgentAdapter implements ProviderNeutralAgentPort {
       observation: ZERO_AGENT_EXECUTION_OBSERVATION,
     });
   }
+}
+
+function deriveMockSemanticEntityId(
+  operationId: string,
+  entityKind: "semantic_fragment" | "semantic_restoration_proposal",
+  ordinal: number,
+): string {
+  return ["stage3", "v1", entityKind, ordinal, encodeURIComponent(operationId)].join(
+    ":",
+  );
 }
 
 function mockExecutionEnvelope(candidate: unknown): AgentExecutionEnvelope {

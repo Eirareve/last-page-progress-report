@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   AGENT_CANDIDATE_SCHEMA_VERSIONS,
   AGENT_CONTRACT_VERSION,
+  DEFAULT_MOCK_AGENT_FIXTURE,
   DeterministicMockAgentAdapter,
   compareSemanticDriftCandidateSchema,
   extractUserPrincipleCandidateSchema,
   generateCharlieResponseCandidateSchema,
   roundAnalysisCandidateBundleSchema,
+  semanticRestorationProposalCandidateSchema,
   summarizePortraitShiftCandidateSchema,
   validateCompareSemanticDriftCandidate,
   validateExtractUserPrincipleCandidate,
@@ -24,6 +26,7 @@ import {
 } from "../fixtures/domain";
 import {
   AGENT_TEST_CHARLIE_RESPONSE,
+  AGENT_TEST_CREATED_AT,
   AGENT_TEST_FACT,
   AGENT_TEST_PRINCIPLE,
   AGENT_TEST_PROJECTION,
@@ -340,6 +343,7 @@ describe("Agent Candidate to Validated Result pipeline", () => {
       semanticFragments: [
         {
           ...header("compareSemanticDrift"),
+          fragmentId: "stage3:v1:semantic_fragment:0:operation-1",
           phrase: "Precise",
           reason: "The plain text omitted the qualifier",
           consequence: "The claim appears broader",
@@ -401,7 +405,7 @@ describe("Agent Candidate to Validated Result pipeline", () => {
       plainInput,
       context,
     );
-    const plain = validatePlainSemanticReviewCandidateBundle(
+    const plain = await validatePlainSemanticReviewCandidateBundle(
       candidateFrom(plainEnvelope),
       plainInput,
       AGENT_TEST_VALIDATION_CONTEXT,
@@ -415,8 +419,188 @@ describe("Agent Candidate to Validated Result pipeline", () => {
         semanticReview: {
           drift: { plainRevisionId: AGENT_TEST_PROJECTION.plainRevisionId },
         },
+        restorationOutcomes: [],
       },
     });
+  });
+
+  it("freezes a valid restoration proposal with trusted identity and timestamp", async () => {
+    const input = makePlainSemanticPortInput();
+    const candidate = await makeRestorationCandidate("proposal", input);
+    const result = await validatePlainSemanticReviewCandidateBundle(
+      candidate,
+      input,
+      restorationProjection(),
+    );
+    expect(result).toMatchObject({
+      ok: true,
+      value: {
+        restorationOutcomes: [
+          {
+            kind: "proposal",
+            fragmentId: RESTORATION_FRAGMENT_ID,
+            proposal: {
+              proposalId: RESTORATION_PROPOSAL_ID,
+              fragmentId: RESTORATION_FRAGMENT_ID,
+              baselinePlainRevisionId: input.targetPlainRevisionId,
+              targetPlainRevisionId: input.targetPlainRevisionId,
+              replacementText:
+                DEFAULT_MOCK_AGENT_FIXTURE.semanticRestorationReplacementText,
+              status: "proposed",
+              createdAt: AGENT_TEST_CREATED_AT,
+            },
+          },
+        ],
+      },
+    });
+    if (result.ok) {
+      const outcome = result.value.restorationOutcomes[0];
+      expect(outcome?.kind).toBe("proposal");
+      if (outcome?.kind === "proposal") {
+        expect(outcome.proposal.beforePreview).toBe(input.preciseText);
+        expect(outcome.proposal.afterPreview).toContain(
+          DEFAULT_MOCK_AGENT_FIXTURE.semanticRestorationReplacementText,
+        );
+      }
+    }
+  });
+
+  it("rejects generic version fields and model self-certification on restoration Candidates", async () => {
+    const candidate = (await makeRestorationCandidate(
+      "proposal",
+    )) as Record<string, unknown> & {
+      restorationOutcomes: Array<{
+        kind: "proposal";
+        proposal: Record<string, unknown>;
+      }>;
+    };
+    const proposal = candidate.restorationOutcomes[0]!.proposal;
+    expect(semanticRestorationProposalCandidateSchema.parse(proposal)).toEqual(
+      proposal,
+    );
+    expect(
+      semanticRestorationProposalCandidateSchema.safeParse({
+        ...proposal,
+        schemaVersion: "0.2.0",
+      }).success,
+    ).toBe(false);
+    expect(
+      semanticRestorationProposalCandidateSchema.safeParse({
+        ...proposal,
+        validationResult: { valid: true },
+      }).success,
+    ).toBe(false);
+    const withoutOwnedVersion = { ...proposal };
+    delete withoutOwnedVersion.semanticRestorationProposalCandidateSchemaVersion;
+    expect(
+      semanticRestorationProposalCandidateSchema.safeParse(withoutOwnedVersion)
+        .success,
+    ).toBe(false);
+  });
+
+  it("preserves an explicit typed unavailable restoration outcome", async () => {
+    const input = makePlainSemanticPortInput();
+    const candidate = await makeRestorationCandidate("unavailable", input);
+    const result = await validatePlainSemanticReviewCandidateBundle(
+      candidate,
+      input,
+      restorationProjection(),
+    );
+    expect(result).toMatchObject({
+      ok: true,
+      value: {
+        restorationOutcomes: [
+          {
+            kind: "unavailable",
+            fragmentId: RESTORATION_FRAGMENT_ID,
+            reason: "insufficient_context",
+          },
+        ],
+      },
+    });
+  });
+
+  it("rejects stale revision, anchor integrity, and proposalHash mismatches atomically", async () => {
+    const input = makePlainSemanticPortInput();
+    const candidate = (await makeRestorationCandidate(
+      "proposal",
+      input,
+    )) as Record<string, unknown> & {
+      restorationOutcomes: Array<{
+        kind: "proposal";
+        fragmentId: string;
+        proposal: Record<string, unknown> & {
+          targetAnchor: Record<string, unknown>;
+        };
+      }>;
+    };
+    const proposal = candidate.restorationOutcomes[0]!.proposal;
+
+    const stale = await validatePlainSemanticReviewCandidateBundle(
+      {
+        ...candidate,
+        restorationOutcomes: [
+          {
+            ...candidate.restorationOutcomes[0],
+            proposal: { ...proposal, baselinePlainRevisionId: "plain-stale" },
+          },
+        ],
+      },
+      input,
+      restorationProjection(),
+    );
+    expect(stale).toMatchObject({
+      ok: false,
+      error: { code: "stale_revision" },
+    });
+    expect(stale).not.toHaveProperty("value.plainRevision");
+
+    const anchorMismatch = await validatePlainSemanticReviewCandidateBundle(
+      {
+        ...candidate,
+        restorationOutcomes: [
+          {
+            ...candidate.restorationOutcomes[0],
+            proposal: {
+              ...proposal,
+              targetAnchor: {
+                ...proposal.targetAnchor,
+                prefixTextSha256: `sha256:${"c".repeat(64)}`,
+              },
+            },
+          },
+        ],
+      },
+      input,
+      restorationProjection(),
+    );
+    expect(anchorMismatch).toMatchObject({
+      ok: false,
+      error: { code: "stale_revision" },
+    });
+    expect(anchorMismatch).not.toHaveProperty("value.semanticReview");
+
+    const hashMismatch = await validatePlainSemanticReviewCandidateBundle(
+      {
+        ...candidate,
+        restorationOutcomes: [
+          {
+            ...candidate.restorationOutcomes[0],
+            proposal: {
+              ...proposal,
+              proposalHash: `sha256:${"d".repeat(64)}`,
+            },
+          },
+        ],
+      },
+      input,
+      restorationProjection(),
+    );
+    expect(hashMismatch).toMatchObject({
+      ok: false,
+      error: { code: "invalid_output" },
+    });
+    expect(hashMismatch).not.toHaveProperty("value.restorationOutcomes");
   });
 
   it("fails the whole Round bundle when one child fails safety validation", async () => {
@@ -519,7 +703,7 @@ describe("Agent Candidate to Validated Result pipeline", () => {
     const raw = candidateFrom(envelope) as Record<string, unknown> & {
       plainTextCandidate: Record<string, unknown>;
     };
-    const unsafe = validatePlainSemanticReviewCandidateBundle(
+    const unsafe = await validatePlainSemanticReviewCandidateBundle(
       {
         ...raw,
         plainTextCandidate: {
@@ -549,6 +733,7 @@ describe("Agent Candidate to Validated Result pipeline", () => {
         semanticFragments: [
           {
             ...header("compareSemanticDrift"),
+            fragmentId: "fragment-1",
             phrase: "invented phrase",
             reason: "It was allegedly omitted.",
             consequence: "The meaning would change.",
@@ -607,4 +792,44 @@ function candidateFrom(envelope: AgentExecutionEnvelope): unknown {
     throw new Error(`Expected Candidate, received ${envelope.error.code}`);
   }
   return envelope.candidate;
+}
+
+const RESTORATION_FRAGMENT_ID =
+  "stage3:v1:semantic_fragment:0:operation-1";
+const RESTORATION_PROPOSAL_ID =
+  "stage3:v1:semantic_restoration_proposal:0:operation-1";
+
+function restorationProjection() {
+  return {
+    ...AGENT_TEST_VALIDATION_CONTEXT,
+    semanticFragmentIds: [RESTORATION_FRAGMENT_ID],
+    semanticRestorationProposalIds: [RESTORATION_PROPOSAL_ID],
+    semanticRestorationProposalCreatedAt: AGENT_TEST_CREATED_AT,
+  };
+}
+
+async function makeRestorationCandidate(
+  mode: "proposal" | "unavailable",
+  input = makePlainSemanticPortInput(),
+): Promise<unknown> {
+  const adapter = new DeterministicMockAgentAdapter({
+    ...DEFAULT_MOCK_AGENT_FIXTURE,
+    semanticRestorationMode: mode,
+  });
+  return candidateFrom(
+    await adapter.executePlainSemanticReview(
+      input,
+      makeRequestContext({
+        capability: "executePlainSemanticReview",
+        stage: "PLAIN_REWRITE",
+        bindings: {
+          revisions: {
+            preciseRevisionId: input.sourcePreciseRevisionId,
+            plainRevisionId: input.targetPlainRevisionId,
+          },
+          content: input.contentBinding,
+        },
+      }),
+    ),
+  );
 }

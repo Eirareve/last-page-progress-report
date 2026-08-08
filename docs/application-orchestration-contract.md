@@ -93,8 +93,12 @@ Charlie response, or diff partial-success event exists.
 `plain_semantic` is one provider-call budget slot. The plain text is a
 bundle-owned transport field, not a tenth Agent capability. Only a complete
 `ValidatedPlainSemanticBundle`, containing both the plain revision and its
-bound semantic review, produces `PLAIN_SEMANTIC_BUNDLE_RESOLVED`. Failure
-produces `PLAIN_SEMANTIC_BUNDLE_FAILED` with no partial plain revision payload.
+bound semantic review plus exactly one validated proposal-or-unavailable
+outcome per fragment, produces `PLAIN_SEMANTIC_BUNDLE_RESOLVED`. Proposal IDs
+and creation time come from trusted deterministic projection; Candidate
+revision, anchor, source hash, preview, proposal hash, and safety are validated
+before the event exists. Failure produces `PLAIN_SEMANTIC_BUNDLE_FAILED` with
+no partial plain revision, semantic review, or proposal payload.
 
 ### Portrait summary and Final Review
 
@@ -131,7 +135,7 @@ at one clock boundary. Before execution they recompute the same canonical
 semantic fingerprint contract as provider-backed capabilities and reject stale
 content/revision bindings. The dissent ID is derived only from the parsed
 RequestContext operation ID. Agent-owned deterministic receipts require
-`agentContractVersion=0.1.0`; `computePortraitShift` omits Agent version.
+`agentContractVersion=0.2.0`; `computePortraitShift` omits Agent version.
 
 Round Analysis always emits one receipt for each of its four logical
 capabilities even when they share a provider request. Plain/Semantic emits a
@@ -159,6 +163,12 @@ There are six unique provider-call slots, each consumable at most once:
 `round1 -> round_1`, `round2 -> round_2`, and `round3 -> round_3`. A network
 retry and a structured-output repair are independently limited to one per
 logical call and stay inside that slot.
+
+The Agent Contract `0.2.0` restoration repair does not add a budget slot,
+logical capability receipt, primary call, retry, repair, token, latency, or
+cost allowance. Plain text, semantic comparison, and restoration outcomes
+still share the single `plain_semantic` call and one
+`compareSemanticDrift` receipt.
 
 | Envelope | Input tokens | Output tokens | Latency | Estimated cost |
 | --- | ---: | ---: | ---: | ---: |

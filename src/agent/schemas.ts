@@ -13,6 +13,8 @@ import {
   roundIdSchema,
   semanticDriftSchema,
   semanticFragmentSchema,
+  semanticRestorationProposalSchema,
+  SEMANTIC_RESTORATION_PROPOSAL_VERSION,
   sha256DigestSchema,
   stableTextAnchorSchema,
   userPrincipleSchema,
@@ -32,6 +34,7 @@ import {
   PLAIN_TEXT_CANDIDATE_SCHEMA_VERSION,
   ROUND_ANALYSIS_CANDIDATE_BUNDLE_SCHEMA_VERSION,
   ROUND_ANALYSIS_BUNDLE_SCHEMA_VERSION,
+  SEMANTIC_RESTORATION_PROPOSAL_CANDIDATE_SCHEMA_VERSION,
 } from "./versions";
 import {
   AGENT_ARRAY_MAX_ITEMS,
@@ -398,10 +401,84 @@ export const proposeDocumentDiffValidatedResultSchema = z.strictObject({
 
 export const semanticFragmentCandidateSchema = z.strictObject({
   ...candidateHeader("compareSemanticDrift"),
+  fragmentId: identifierSchema,
   phrase: nonEmptyTextSchema,
   reason: nonEmptyTextSchema,
   consequence: nonEmptyTextSchema,
 });
+
+export const semanticRestorationUnavailableReasonSchema = z.enum([
+  "insufficient_context",
+  "anchor_not_unique",
+  "unsafe_replacement",
+  "fragment_not_restorable",
+]);
+
+export const semanticRestorationPreviewTextSchema = z.strictObject({
+  before: z.string().max(AGENT_PLAIN_TEXT_CANDIDATE_MAX_LENGTH),
+  after: z.string().max(AGENT_PLAIN_TEXT_CANDIDATE_MAX_LENGTH),
+});
+
+export const semanticRestorationProposalCandidateSchema = z.strictObject({
+  agentContractVersion: z.literal(AGENT_CONTRACT_VERSION),
+  semanticRestorationProposalCandidateSchemaVersion: z.literal(
+    SEMANTIC_RESTORATION_PROPOSAL_CANDIDATE_SCHEMA_VERSION,
+  ),
+  proposalVersion: z.literal(SEMANTIC_RESTORATION_PROPOSAL_VERSION),
+  fragmentId: identifierSchema,
+  baselinePreciseRevisionId: identifierSchema,
+  baselinePlainRevisionId: identifierSchema,
+  targetPlainRevisionId: identifierSchema,
+  sourcePlainTextHash: sha256DigestSchema,
+  targetAnchor: stableTextAnchorSchema,
+  replacementText: nonEmptyTextSchema,
+  previewText: semanticRestorationPreviewTextSchema,
+  proposalHash: sha256DigestSchema,
+});
+
+const semanticRestorationProposalCandidateOutcomeSchema = z.strictObject({
+  kind: z.literal("proposal"),
+  fragmentId: identifierSchema,
+  proposal: semanticRestorationProposalCandidateSchema,
+}).superRefine((outcome, context) => {
+  if (outcome.fragmentId !== outcome.proposal.fragmentId) {
+    context.addIssue({
+      code: "custom",
+      message: "Restoration outcome and proposal fragment IDs must match",
+      path: ["proposal", "fragmentId"],
+    });
+  }
+});
+
+const semanticRestorationUnavailableCandidateOutcomeSchema = z.strictObject({
+  kind: z.literal("unavailable"),
+  fragmentId: identifierSchema,
+  reason: semanticRestorationUnavailableReasonSchema,
+});
+
+export const semanticRestorationCandidateOutcomeSchema = z.discriminatedUnion(
+  "kind",
+  [
+    semanticRestorationProposalCandidateOutcomeSchema,
+    semanticRestorationUnavailableCandidateOutcomeSchema,
+  ],
+);
+
+export const semanticRestorationValidatedOutcomeSchema = z.discriminatedUnion(
+  "kind",
+  [
+    z.strictObject({
+      kind: z.literal("proposal"),
+      fragmentId: identifierSchema,
+      proposal: semanticRestorationProposalSchema,
+    }),
+    z.strictObject({
+      kind: z.literal("unavailable"),
+      fragmentId: identifierSchema,
+      reason: semanticRestorationUnavailableReasonSchema,
+    }),
+  ],
+);
 
 export const compareSemanticDriftInputSchema = z.strictObject({
   preciseRevisionId: identifierSchema,
@@ -528,6 +605,13 @@ export const plainSemanticReviewCandidateBundleSchema = z.strictObject({
   contentBinding: agentContentBindingSchema,
   plainTextCandidate: plainTextCandidateSchema,
   semanticReview: compareSemanticDriftCandidateSchema,
+  restorationOutcomes: z.array(semanticRestorationCandidateOutcomeSchema),
+}).superRefine((bundle, context) => {
+  refineExactRestorationOutcomeInventory(
+    bundle.semanticReview.semanticFragments.map(({ fragmentId }) => fragmentId),
+    bundle.restorationOutcomes.map(({ fragmentId }) => fragmentId),
+    context,
+  );
 });
 
 export const validatedPlainSemanticBundleSchema = z.strictObject({
@@ -542,7 +626,35 @@ export const validatedPlainSemanticBundleSchema = z.strictObject({
     plainText: z.string().max(AGENT_PLAIN_TEXT_CANDIDATE_MAX_LENGTH),
   }),
   semanticReview: compareSemanticDriftValidatedResultSchema,
+  restorationOutcomes: z.array(semanticRestorationValidatedOutcomeSchema),
+}).superRefine((bundle, context) => {
+  refineExactRestorationOutcomeInventory(
+    bundle.semanticReview.semanticFragments.map(({ id }) => id),
+    bundle.restorationOutcomes.map(({ fragmentId }) => fragmentId),
+    context,
+  );
 });
+
+function refineExactRestorationOutcomeInventory(
+  fragmentIds: readonly string[],
+  outcomeFragmentIds: readonly string[],
+  context: z.RefinementCtx,
+): void {
+  const expected = [...fragmentIds].sort();
+  const actual = [...outcomeFragmentIds].sort();
+  if (
+    new Set(fragmentIds).size !== fragmentIds.length ||
+    new Set(outcomeFragmentIds).size !== outcomeFragmentIds.length ||
+    JSON.stringify(expected) !== JSON.stringify(actual)
+  ) {
+    context.addIssue({
+      code: "custom",
+      message:
+        "Every semantic fragment requires exactly one restoration proposal or unavailable outcome",
+      path: ["restorationOutcomes"],
+    });
+  }
+}
 
 function validatedHeader(capability: AgentCapabilityName) {
   return {

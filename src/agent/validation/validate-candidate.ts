@@ -1,6 +1,9 @@
 import {
+  computeSemanticRestorationProposalHash,
   diffProposalResultSchema,
+  normalizeTextNfc,
   resolveStableTextAnchor,
+  semanticRestorationProposalSchema,
   sha256NfcUtf8,
   userPrincipleSchema,
 } from "../../domain";
@@ -19,6 +22,7 @@ import type {
   ProposeDocumentDiffValidatedResult,
   SummarizePortraitShiftInput,
   SummarizePortraitShiftValidatedResult,
+  SemanticRestorationValidatedOutcome,
   ValidatedPlainSemanticBundle,
   ValidatedRoundAnalysisBundle,
 } from "../contracts";
@@ -434,6 +438,16 @@ export function validateCompareSemanticDriftCandidate(
       "semanticFragmentIds",
     );
   }
+  if (
+    candidate.semanticFragments.some(
+      (fragment, index) => fragment.fragmentId !== fragmentIds[index],
+    )
+  ) {
+    return staleBinding(
+      "compareSemanticDrift",
+      "Semantic fragment identity does not match the trusted projection",
+    );
+  }
   const safety = validateAgentTextSafety([
     ...candidate.preserved,
     ...candidate.lost,
@@ -460,8 +474,8 @@ export function validateCompareSemanticDriftCandidate(
       "Every semantic fragment must be grounded in the bound precise revision",
     );
   }
-  const semanticFragments = candidate.semanticFragments.map((fragment, index) => ({
-    id: fragmentIds[index],
+  const semanticFragments = candidate.semanticFragments.map((fragment) => ({
+    id: fragment.fragmentId,
     phrase: fragment.phrase,
     reason: fragment.reason,
     consequence: fragment.consequence,
@@ -644,14 +658,18 @@ function validateRoundEvidenceBoundary(
   };
 }
 
-export function validatePlainSemanticReviewCandidateBundle(
+export async function validatePlainSemanticReviewCandidateBundle(
   rawCandidate: unknown,
   input: PlainSemanticReviewPortInput,
   projection: Pick<
     AgentCandidateValidationContext,
-    "plainRevisionId" | "semanticFragmentIds" | "safetyPolicy"
+    | "plainRevisionId"
+    | "semanticFragmentIds"
+    | "semanticRestorationProposalIds"
+    | "semanticRestorationProposalCreatedAt"
+    | "safetyPolicy"
   >,
-): AgentOperationResult<ValidatedPlainSemanticBundle> {
+): Promise<AgentOperationResult<ValidatedPlainSemanticBundle>> {
   const parsed = plainSemanticReviewCandidateBundleSchema.safeParse(rawCandidate);
   if (!parsed.success) {
     return invalidSchema("compareSemanticDrift");
@@ -690,6 +708,16 @@ export function validatePlainSemanticReviewCandidateBundle(
   );
   if (!semantic.ok) return semantic;
 
+  const restoration = await validateSemanticRestorationOutcomes({
+    outcomes: candidate.restorationOutcomes,
+    semanticFragments: semantic.value.semanticFragments,
+    preciseRevisionId: input.sourcePreciseRevisionId,
+    plainRevisionId: input.targetPlainRevisionId,
+    plainText: candidate.plainTextCandidate.plainText,
+    projection,
+  });
+  if (!restoration.ok) return restoration;
+
   return agentSuccess(
     validatedPlainSemanticBundleSchema.parse({
       agentContractVersion: AGENT_CONTRACT_VERSION,
@@ -701,8 +729,163 @@ export function validatePlainSemanticReviewCandidateBundle(
         plainText: candidate.plainTextCandidate.plainText,
       },
       semanticReview: semantic.value,
+      restorationOutcomes: restoration.value,
     }),
   );
+}
+
+async function validateSemanticRestorationOutcomes(input: {
+  outcomes: ReturnType<typeof plainSemanticReviewCandidateBundleSchema.parse>["restorationOutcomes"];
+  semanticFragments: ValidatedPlainSemanticBundle["semanticReview"]["semanticFragments"];
+  preciseRevisionId: string;
+  plainRevisionId: string;
+  plainText: string;
+  projection: Pick<
+    AgentCandidateValidationContext,
+    | "semanticRestorationProposalIds"
+    | "semanticRestorationProposalCreatedAt"
+    | "safetyPolicy"
+  >;
+}): Promise<AgentOperationResult<SemanticRestorationValidatedOutcome[]>> {
+  const proposalIds = input.projection.semanticRestorationProposalIds ?? [];
+  const createdAt = input.projection.semanticRestorationProposalCreatedAt;
+  if (
+    proposalIds.length !== input.semanticFragments.length ||
+    new Set(proposalIds).size !== proposalIds.length ||
+    proposalIds.some((identifier) => identifier.trim().length === 0) ||
+    (input.semanticFragments.length > 0 &&
+      (createdAt === undefined || !Number.isFinite(Date.parse(createdAt))))
+  ) {
+    return invalidTrustedProjection(
+      "compareSemanticDrift",
+      "semanticRestorationProposalIds/semanticRestorationProposalCreatedAt",
+    );
+  }
+
+  const currentPlainText = normalizeTextNfc(input.plainText);
+  const currentPlainTextHash = await sha256NfcUtf8(currentPlainText);
+  const validated: SemanticRestorationValidatedOutcome[] = [];
+  for (const fragment of input.semanticFragments) {
+    const fragmentIndex = input.semanticFragments.findIndex(
+      ({ id }) => id === fragment.id,
+    );
+    const outcome = input.outcomes.find(
+      ({ fragmentId }) => fragmentId === fragment.id,
+    );
+    if (outcome === undefined) {
+      return invalidOutput(
+        "compareSemanticDrift",
+        "A semantic fragment is missing its restoration outcome",
+      );
+    }
+    if (outcome.kind === "unavailable") {
+      validated.push({
+        kind: "unavailable",
+        fragmentId: fragment.id,
+        reason: outcome.reason,
+      });
+      continue;
+    }
+
+    const proposal = outcome.proposal;
+    if (
+      proposal.fragmentId !== fragment.id ||
+      proposal.baselinePreciseRevisionId !== input.preciseRevisionId ||
+      proposal.baselinePlainRevisionId !== input.plainRevisionId ||
+      proposal.targetPlainRevisionId !== input.plainRevisionId ||
+      proposal.targetAnchor.textDocument !== "plain_text" ||
+      proposal.targetAnchor.baseRevisionId !== input.plainRevisionId ||
+      proposal.sourcePlainTextHash !== currentPlainTextHash
+    ) {
+      return staleBinding(
+        "compareSemanticDrift",
+        "Semantic restoration proposal revision or source-text binding is stale",
+      );
+    }
+
+    const anchor = await resolveStableTextAnchor({
+      anchor: proposal.targetAnchor,
+      currentText: currentPlainText,
+      currentRevisionId: input.plainRevisionId,
+      allowDeterministicRebase: false,
+    });
+    if (anchor.kind === "stale") {
+      return staleBinding(
+        "compareSemanticDrift",
+        `Semantic restoration anchor is stale: ${anchor.reason}`,
+      );
+    }
+
+    const replacementText = normalizeTextNfc(proposal.replacementText);
+    const points = Array.from(currentPlainText);
+    const afterPreview = [
+      ...points.slice(0, anchor.startCodePoint),
+      ...Array.from(replacementText),
+      ...points.slice(anchor.endCodePoint),
+    ].join("");
+    if (
+      normalizeTextNfc(proposal.previewText.before) !== currentPlainText ||
+      normalizeTextNfc(proposal.previewText.after) !== afterPreview
+    ) {
+      return invalidOutput(
+        "compareSemanticDrift",
+        "Semantic restoration preview does not match its resolved anchor",
+      );
+    }
+
+    const safety = validateAgentTextSafety(
+      [replacementText, afterPreview],
+      input.projection.safetyPolicy,
+    );
+    if (!safety.safe) {
+      return safetyFailure("compareSemanticDrift", safety.reason);
+    }
+
+    const hashMaterial = {
+      proposalVersion: proposal.proposalVersion,
+      fragmentId: fragment.id,
+      baselinePreciseRevisionId: input.preciseRevisionId,
+      baselinePlainRevisionId: input.plainRevisionId,
+      targetPlainRevisionId: input.plainRevisionId,
+      sourcePlainTextHash: currentPlainTextHash,
+      targetAnchor: proposal.targetAnchor,
+      replacementText,
+      beforePreview: currentPlainText,
+      afterPreview,
+    } as const;
+    if (
+      (await computeSemanticRestorationProposalHash(hashMaterial)) !==
+      proposal.proposalHash
+    ) {
+      return invalidOutput(
+        "compareSemanticDrift",
+        "Semantic restoration proposalHash does not match trusted material",
+      );
+    }
+
+    const domainProposal = semanticRestorationProposalSchema.safeParse({
+      proposalId: proposalIds[fragmentIndex],
+      ...hashMaterial,
+      proposalHash: proposal.proposalHash,
+      status: "proposed",
+      createdAt: createdAt!,
+      confirmedAt: null,
+      appliedAt: null,
+      staleReason: null,
+    });
+    if (!domainProposal.success) {
+      return invalidOutput(
+        "compareSemanticDrift",
+        "Validated restoration proposal failed the frozen Domain Schema",
+      );
+    }
+    validated.push({
+      kind: "proposal",
+      fragmentId: fragment.id,
+      proposal: domainProposal.data,
+    });
+  }
+  return agentSuccess(validated);
 }
 
 function validatedHeader(
