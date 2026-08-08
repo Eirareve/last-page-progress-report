@@ -1,0 +1,17 @@
+{
+  "evidenceCardAuthoringCollectionSchemaVersion": "0.1.0",
+  "templateOnly": true,
+  "records": [],
+  "recordTemplate": {
+    "id": null,
+    "round": null,
+    "title": null,
+    "factIds": [],
+    "interpretationIds": [],
+    "publicText": null,
+    "question": null,
+    "allowedFollowUps": [],
+    "prohibitedClaims": [],
+    "attribution": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "contentManifestSchemaVersion": "0.1.0",
+  "contentContractVersion": "0.1.0",
+  "manifestStatus": "template_registry",
+  "modes": {
+    "placeholder": {
+      "manifestPath": "placeholder/manifest.json",
+      "productionEligible": false,
+      "templateOnly": false,
+      "purpose": "development_test_mock_only"
+    },
+    "verified": {
+      "manifestPath": "verified/manifest.template.json",
+      "productionEligible": false,
+      "templateOnly": true,
+      "purpose": "human_authoring_template"
+    }
+  }
+}

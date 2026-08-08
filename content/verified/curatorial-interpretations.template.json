@@ -1,0 +1,16 @@
+{
+  "curatorialInterpretationAuthoringCollectionSchemaVersion": "0.1.0",
+  "templateOnly": true,
+  "records": [],
+  "recordTemplate": {
+    "id": null,
+    "contentType": "CURATORIAL_INTERPRETATION",
+    "interpretation": null,
+    "basedOnVerifiedFactIds": [],
+    "prohibitedClaims": [],
+    "presentationMode": "one_possible_interpretation",
+    "approvedBy": null,
+    "approvedAt": null,
+    "approvalStatus": null
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "placeholderPortraitConfigSchemaVersion": "0.1.0",
+  "contentMode": "placeholder",
+  "records": [
+    {
+      "id": "early-charlie-placeholder",
+      "recordKind": "placeholder_portrait_scene",
+      "stage": "early",
+      "assetPath": "/placeholders/early.svg",
+      "altText": "[PLACEHOLDER_IMAGE: APPROVED_VISUAL_REQUIRED]",
+      "provenance": "placeholder"
+    },
+    {
+      "id": "peak-charlie-placeholder",
+      "recordKind": "placeholder_portrait_scene",
+      "stage": "peak",
+      "assetPath": "/placeholders/peak.svg",
+      "altText": "[PLACEHOLDER_IMAGE: APPROVED_VISUAL_REQUIRED]",
+      "provenance": "placeholder"
+    },
+    {
+      "id": "future-facing-charlie-placeholder",
+      "recordKind": "placeholder_portrait_scene",
+      "stage": "futureFacing",
+      "assetPath": "/placeholders/future-facing.svg",
+      "altText": "[PLACEHOLDER_IMAGE: APPROVED_VISUAL_REQUIRED]",
+      "provenance": "placeholder"
+    }
+  ]
+}
