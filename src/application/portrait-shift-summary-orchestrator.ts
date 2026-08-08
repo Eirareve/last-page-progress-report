@@ -38,11 +38,12 @@ import type {
   PortraitShiftSummaryOrchestrationOutcome,
 } from "./orchestration.contracts";
 import {
-  portraitShiftSummaryFailureArtifactSchema,
-  portraitShiftSummarySucceededEventSchema,
+  portraitShiftSummaryFailedEventSchema,
+  portraitShiftSummaryResolvedEventSchema,
   portraitSummaryFailedTerminalArtifactSchema,
   portraitSummaryResolvedTerminalArtifactSchema,
 } from "./orchestration.schemas";
+import { APPLICATION_ORCHESTRATION_CONTRACT_VERSION } from "./schemas";
 
 export async function orchestratePortraitShiftSummary(input: {
   boundary: OrchestrationOperationBoundary;
@@ -379,18 +380,19 @@ export async function orchestratePortraitShiftSummary(input: {
       ? {}
       : { observation: receiptObservation }),
   });
-  const event = portraitShiftSummarySucceededEventSchema.parse({
+  const event = portraitShiftSummaryResolvedEventSchema.parse({
     ...applicationEventHeader({
       operationContext: preflight.operationContext,
       outcome: "succeeded",
       completedAt,
     }),
-    eventType: "PORTRAIT_SHIFT_SUMMARY_SUCCEEDED",
+    eventType: "PORTRAIT_SHIFT_SUMMARY_RESOLVED",
     result,
     receipts: [receipt],
   });
   return portraitSummaryResolvedTerminalArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
+    applicationOrchestrationContractVersion:
+      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
     terminalKind: "portrait_summary_resolved",
     outcomeKind: "resolved",
     event,
@@ -423,26 +425,22 @@ function failedOutcome(
     executionIdentity,
     ...(observation === undefined ? {} : { observation }),
   });
-  const failure = portraitShiftSummaryFailureArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
-    operationId: preflight.operationContext.operationId,
-    requestId: preflight.operationContext.requestId,
-    capability: preflight.operationContext.capability,
-    stage: preflight.operationContext.stage,
-    stageInstanceId: preflight.operationContext.stageInstanceId,
-    inputFingerprint: preflight.operationContext.inputFingerprint,
-    bindings: preflight.operationContext.bindings,
-    outcome: "failed",
-    completedAt,
-    artifactKind: "portrait_shift_summary_failure",
+  const event = portraitShiftSummaryFailedEventSchema.parse({
+    ...applicationEventHeader({
+      operationContext: preflight.operationContext,
+      outcome: "failed",
+      completedAt,
+    }),
+    eventType: "PORTRAIT_SHIFT_SUMMARY_FAILED",
     error,
     receipts: [receipt],
   });
   return portraitSummaryFailedTerminalArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
+    applicationOrchestrationContractVersion:
+      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
     terminalKind: "portrait_summary_failed",
     outcomeKind: "failed",
-    failure,
+    event,
     budgetEvaluation,
     budgetUsage,
   });

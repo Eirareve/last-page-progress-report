@@ -1,6 +1,6 @@
 # Domain Contract
 
-> `domainContractVersion: 0.1.0`
+> `domainContractVersion: 0.2.0`
 > Status: draft for final human approval
 > DRI: Codex（技术一致性）
 > Final approver: 项目负责人
@@ -17,7 +17,7 @@ The runtime Schema files below are the executable source of truth; this document
 
 | Surface | Required stage 1 types | Canonical Schema / type source |
 |---|---|---|
-| Experience | `ExperienceStage`, `StageKind`, `CharlieStage`, `ExperienceEvent` and its four canonical event categories | [`experience.schema.ts`](../src/domain/schemas/experience.schema.ts), [`experience.ts`](../src/domain/contracts/experience.ts) |
+| Experience | `ExperienceStage`, `StageKind`, `CharlieStage`, `ExperienceEvent`, `UserExperienceEvent`, and `ApplicationOperationResultEvent` | [`experience.schema.ts`](../src/domain/schemas/experience.schema.ts), [`experience.ts`](../src/domain/contracts/experience.ts) |
 | Portrait | `PortraitPrelude`, `InitialPortraitChoice`, `FinalPortraitChoice`, `PortraitDescriptor`, `PortraitShiftComparison`, `InitialPortraitRecord` | [`portrait.schema.ts`](../src/domain/schemas/portrait.schema.ts), [`portrait.ts`](../src/domain/contracts/portrait.ts) |
 | Manuscript | `ManuscriptState`, `ManuscriptRevisionIntent`, `RevisionEntry`, `DocumentDiff`, `DiffProposalResult`, `DocumentTarget` | [`manuscript.schema.ts`](../src/domain/schemas/manuscript.schema.ts), [`manuscript.ts`](../src/domain/contracts/manuscript.ts) |
 | Evidence/content semantics | `EvidenceCard`, `VerifiedFact`, `CuratorialInterpretation`, `OriginalInteraction`, `UserPrinciple`, `CharliePosition`, `CharlieResponse`, `DissentRecord` | [`evidence.schema.ts`](../src/domain/schemas/evidence.schema.ts), [`evidence.ts`](../src/domain/contracts/evidence.ts) |
@@ -150,3 +150,17 @@ Accepting `RETURN_TO_MANUSCRIPT_REVIEW` and entering `MANUSCRIPT_REVISION` atomi
 
 - The `proposalHash` canonical payload above is proposed as part of this draft and awaits final human approval.
 - Later Agent/Final Review service payloads remain intentionally unfrozen until stage 3.
+
+## 12. Stage-4 entry compatibility
+
+Domain Contract `0.2.0` is a breaking correction to the public Session-event
+API: supplier retry, repair, fallback, timeout, rate-limit, invalid-output, and
+raw content/network errors are no longer `ExperienceEvent` values. They have no
+aliases or migration mapping. Application orchestration must emit the matching
+operation-level resolved/failed event instead.
+
+The persisted `SessionState` shape and `sessionSchemaVersion=0.1.0` are
+unchanged because Session snapshots do not persist an event queue. A recovered
+in-flight operation is invalidated under the Runtime Contract; a late event
+using the pre-repair vocabulary or Application Orchestration Contract `0.1.0`
+is rejected as stale/incompatible rather than migrated.

@@ -1,6 +1,6 @@
 # Application Orchestration Contract
 
-Contract version: `0.1.0`
+Contract version: `0.2.0`
 
 This document freezes the Stage 3 application boundary between trusted
 Domain/Runtime/Content inputs, provider-neutral Agent and Final Review ports,
@@ -102,10 +102,12 @@ no partial plain revision, semantic review, or proposal payload.
 
 ### Portrait summary and Final Review
 
-Portrait summary produces `PORTRAIT_SHIFT_SUMMARY_SUCCEEDED` only with a
-validated Agent result. Failure is a typed non-FSM
-`portrait_shift_summary_failure` artifact because the frozen event inventory
-has no portrait-summary failure event. The deterministic
+Portrait summary produces `PORTRAIT_SHIFT_SUMMARY_RESOLVED` only with a
+validated Agent result. Failure produces one bound
+`PORTRAIT_SHIFT_SUMMARY_FAILED` operation-level event. Provider retry, repair,
+fallback, timeout, rate-limit, invalid-output, and raw network details remain
+inside orchestration and are represented only by the typed event error and
+receipt observation. The deterministic
 `computePortraitShift` function remains outside Agent.
 
 Final Review produces `CHARLIE_SIGNATURE_REVIEW_RESOLVED` only for a validated
@@ -201,3 +203,13 @@ code; a different fingerprint returns conflict. The wrapper returns pending
 and applied records but performs no Session or persistence write. Stage 4 must
 atomically persist the business state and applied record; Stage 3 does not
 claim cross-instance exactly-once execution.
+
+## Stage-4 entry compatibility
+
+Application Orchestration Contract `0.2.0` is breaking for the portrait-summary
+terminal event name and failure shape. `PORTRAIT_SHIFT_SUMMARY_SUCCEEDED` and
+the non-event `portrait_shift_summary_failure` artifact are rejected; callers
+must consume `PORTRAIT_SHIFT_SUMMARY_RESOLVED` or
+`PORTRAIT_SHIFT_SUMMARY_FAILED`. There is no persisted Stage 3 production event
+data to migrate. In-flight `0.1.0` results are version-bound and are rejected as
+stale after refresh or deployment.

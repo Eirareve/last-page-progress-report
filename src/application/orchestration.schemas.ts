@@ -105,10 +105,10 @@ export const plainSemanticBundleFailedEventSchema =
     refineEventIdentityAndReceipts(event, context, PLAIN_RECEIPT_VERSIONS);
   });
 
-export const portraitShiftSummarySucceededEventSchema =
+export const portraitShiftSummaryResolvedEventSchema =
   operationResultGuardInputSchema.extend({
     ...applicationEventHeaderShape,
-    eventType: z.literal("PORTRAIT_SHIFT_SUMMARY_SUCCEEDED"),
+    eventType: z.literal("PORTRAIT_SHIFT_SUMMARY_RESOLVED"),
     capability: z.literal("executePortraitShiftSummary"),
     outcome: z.literal("succeeded"),
     result: summarizePortraitShiftValidatedResultSchema,
@@ -132,18 +132,16 @@ export const portraitShiftSummarySucceededEventSchema =
     }
   });
 
-export const portraitShiftSummaryFailureArtifactSchema =
+export const portraitShiftSummaryFailedEventSchema =
   operationResultGuardInputSchema.extend({
-    applicationOrchestrationContractVersion: z.literal(
-      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
-    ),
-    artifactKind: z.literal("portrait_shift_summary_failure"),
+    ...applicationEventHeaderShape,
+    eventType: z.literal("PORTRAIT_SHIFT_SUMMARY_FAILED"),
     capability: z.literal("executePortraitShiftSummary"),
     outcome: z.literal("failed"),
     error: agentCapabilityErrorSchema,
     receipts: portraitSummaryReceiptInventorySchema,
-  }).superRefine((artifact, context) => {
-    refineReceiptBindings(artifact, context, PORTRAIT_RECEIPT_VERSIONS);
+  }).superRefine((event, context) => {
+    refineEventIdentityAndReceipts(event, context, PORTRAIT_RECEIPT_VERSIONS);
   });
 
 export const charlieSignatureReviewResolvedEventSchema =
@@ -178,7 +176,8 @@ export const applicationOrchestrationEventSchema = z.discriminatedUnion(
     roundAnalysisBundleFailedEventSchema,
     plainSemanticBundleResolvedEventSchema,
     plainSemanticBundleFailedEventSchema,
-    portraitShiftSummarySucceededEventSchema,
+    portraitShiftSummaryResolvedEventSchema,
+    portraitShiftSummaryFailedEventSchema,
     charlieSignatureReviewResolvedEventSchema,
     charlieSignatureReviewFailedEventSchema,
   ],
@@ -229,7 +228,7 @@ export const portraitSummaryResolvedTerminalArtifactSchema = z
     ...terminalArtifactBaseShape,
     terminalKind: z.literal("portrait_summary_resolved"),
     outcomeKind: z.literal("resolved"),
-    event: portraitShiftSummarySucceededEventSchema,
+    event: portraitShiftSummaryResolvedEventSchema,
   })
   .superRefine(refineTerminalBudget);
 export const portraitSummaryFailedTerminalArtifactSchema = z
@@ -237,7 +236,7 @@ export const portraitSummaryFailedTerminalArtifactSchema = z
     ...terminalArtifactBaseShape,
     terminalKind: z.literal("portrait_summary_failed"),
     outcomeKind: z.literal("failed"),
-    failure: portraitShiftSummaryFailureArtifactSchema,
+    event: portraitShiftSummaryFailedEventSchema,
   })
   .superRefine(refineTerminalBudget);
 export const finalReviewResolvedTerminalArtifactSchema = z

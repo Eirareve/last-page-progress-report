@@ -5,7 +5,7 @@ import {
   runtimeIdentifierSchema,
 } from "../runtime/schemas";
 
-export const APPLICATION_ORCHESTRATION_CONTRACT_VERSION = "0.1.0" as const;
+export const APPLICATION_ORCHESTRATION_CONTRACT_VERSION = "0.2.0" as const;
 export const STAGE3_EXECUTION_BUDGET_VERSION = "0.1.0" as const;
 export const STAGE3_ENTITY_ID_FORMAT_VERSION = "v1" as const;
 

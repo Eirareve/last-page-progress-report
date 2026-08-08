@@ -38,6 +38,7 @@ import {
   finalReviewFailedTerminalArtifactSchema,
   finalReviewResolvedTerminalArtifactSchema,
 } from "./orchestration.schemas";
+import { APPLICATION_ORCHESTRATION_CONTRACT_VERSION } from "./schemas";
 
 export async function orchestrateCharlieSignatureReview(input: {
   boundary: OrchestrationOperationBoundary;
@@ -300,7 +301,8 @@ export async function orchestrateCharlieSignatureReview(input: {
       receipts: [receipt],
     });
     return finalReviewResolvedTerminalArtifactSchema.parse({
-      applicationOrchestrationContractVersion: "0.1.0",
+      applicationOrchestrationContractVersion:
+        APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
       terminalKind: "final_review_resolved",
       outcomeKind: "resolved",
       event,
@@ -320,7 +322,8 @@ export async function orchestrateCharlieSignatureReview(input: {
     receipts: [receipt],
   });
   return finalReviewFailedTerminalArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
+    applicationOrchestrationContractVersion:
+      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
     terminalKind: "final_review_failed",
     outcomeKind: "failed",
     event,

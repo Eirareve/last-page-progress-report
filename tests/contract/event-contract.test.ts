@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applicationOperationResultEventSchema,
   experienceEventSchema,
-  failureExperienceEventSchema,
-  resultExperienceEventSchema,
   stageDescriptorSchema,
   STAGE_DESCRIPTORS,
-  systemExperienceEventSchema,
   userExperienceEventSchema,
 } from "@/domain";
 
@@ -17,11 +15,15 @@ const USER_EVENTS = [
   "SUBMIT_INITIAL_REASON",
   "SUBMIT_RESPONSE",
   "SUBMIT_CLARIFICATION",
+  "CONTINUE_WITHOUT_CLARIFICATION",
   "ACCEPT_DIFF",
   "REJECT_DIFF",
   "CHOOSE_FRAGMENT_PLACEMENT",
+  "CONFIRM_SEMANTIC_RESTORATION_PROPOSAL",
+  "REJECT_SEMANTIC_RESTORATION_PROPOSAL",
   "CHOOSE_FINAL_PORTRAIT",
   "SUBMIT_FINAL_REASON",
+  "CONTINUE_WITHOUT_FINAL_REASON",
   "REQUEST_CHARLIE_SIGNATURE_REVIEW",
   "CONTINUE_WITHOUT_SIGNATURE_REVIEW",
   "RETRY_CHARLIE_SIGNATURE_REVIEW",
@@ -31,29 +33,33 @@ const USER_EVENTS = [
   "CHOOSE_DISPOSITION",
 ] as const;
 
-const RESULT_EVENTS = [
+const APPLICATION_RESULT_EVENTS = [
   "ROUND_ANALYSIS_BUNDLE_RESOLVED",
   "ROUND_ANALYSIS_BUNDLE_FAILED",
   "PLAIN_SEMANTIC_BUNDLE_RESOLVED",
   "PLAIN_SEMANTIC_BUNDLE_FAILED",
   "POST_PLACEMENT_CHECK_SUCCEEDED",
+  "POST_PLACEMENT_CHECK_FAILED",
   "PORTRAIT_SHIFT_COMPUTED",
-  "PORTRAIT_SHIFT_SUMMARY_SUCCEEDED",
+  "PORTRAIT_SHIFT_SUMMARY_RESOLVED",
+  "PORTRAIT_SHIFT_SUMMARY_FAILED",
   "CHARLIE_SIGNATURE_REVIEW_RESOLVED",
   "CHARLIE_SIGNATURE_REVIEW_FAILED",
+  "FINAL_ENVELOPE_PERSISTED",
+  "FINAL_ENVELOPE_PERSIST_FAILED",
 ] as const;
 
-const SYSTEM_EVENTS = [
+const LEGACY_AND_NON_FSM_NAMES = [
+  "BEGIN_EXPERIENCE",
+  "CONTINUE_TO_PORTRAIT_CHOICE",
+  "SUBMIT_INITIAL_PORTRAIT_CHOICE",
+  "SUBMIT_ROUND_RESPONSE",
+  "SUBMIT_ROUND_CLARIFICATION",
   "ADVANCE",
   "RETRY_NETWORK",
   "REPAIR_STRUCTURED_OUTPUT",
   "USE_MOCK_FALLBACK",
   "USE_STATIC_TEMPLATE",
-  "BUILD_FINAL_ENVELOPE",
-  "FINALIZE_SESSION",
-] as const;
-
-const FAILURE_EVENTS = [
   "AGENT_TIMEOUT",
   "AGENT_RATE_LIMITED",
   "AGENT_NETWORK_ERROR",
@@ -63,14 +69,8 @@ const FAILURE_EVENTS = [
   "CONTENT_VERSION_MISMATCH",
   "IMAGE_LOAD_FAILED",
   "PERSISTENCE_FAILED",
-] as const;
-
-const LEGACY_AND_NON_FSM_NAMES = [
-  "BEGIN_EXPERIENCE",
-  "CONTINUE_TO_PORTRAIT_CHOICE",
-  "SUBMIT_INITIAL_PORTRAIT_CHOICE",
-  "SUBMIT_ROUND_RESPONSE",
-  "SUBMIT_ROUND_CLARIFICATION",
+  "BUILD_FINAL_ENVELOPE",
+  "FINALIZE_SESSION",
   "ROUND_ANALYSIS_SUCCEEDED",
   "ROUND_ANALYSIS_FAILED",
   "PLAIN_SEMANTIC_BUNDLE_SUCCEEDED",
@@ -85,6 +85,7 @@ const LEGACY_AND_NON_FSM_NAMES = [
   "SUBMIT_FINAL_PORTRAIT_CHOICE",
   "PORTRAIT_SUMMARY_SUCCEEDED",
   "PORTRAIT_SUMMARY_FAILED",
+  "PORTRAIT_SHIFT_SUMMARY_SUCCEEDED",
   "REQUEST_SIGNATURE_REVIEW",
   "SIGNATURE_REVIEW_SUCCEEDED",
   "SIGNATURE_REVIEW_FAILED",
@@ -100,15 +101,13 @@ const LEGACY_AND_NON_FSM_NAMES = [
 describe("ExperienceEvent contract", () => {
   it("accepts the complete canonical stage-4 inventory by category", () => {
     expect(userExperienceEventSchema.options).toEqual(USER_EVENTS);
-    expect(resultExperienceEventSchema.options).toEqual(RESULT_EVENTS);
-    expect(systemExperienceEventSchema.options).toEqual(SYSTEM_EVENTS);
-    expect(failureExperienceEventSchema.options).toEqual(FAILURE_EVENTS);
+    expect(applicationOperationResultEventSchema.options).toEqual(
+      APPLICATION_RESULT_EVENTS,
+    );
 
     for (const event of [
       ...USER_EVENTS,
-      ...RESULT_EVENTS,
-      ...SYSTEM_EVENTS,
-      ...FAILURE_EVENTS,
+      ...APPLICATION_RESULT_EVENTS,
     ]) {
       expect(experienceEventSchema.safeParse(event).success, event).toBe(true);
     }
@@ -134,15 +133,13 @@ describe("ExperienceEvent contract", () => {
     }
   });
 
-  it("keeps bounded operation recovery but forbids live-signature fallback events", () => {
-    expect(STAGE_DESCRIPTORS.FINAL_SIGNATURE.allowedEvents).toEqual(
-      expect.arrayContaining(["RETRY_NETWORK", "REPAIR_STRUCTURED_OUTPUT"]),
-    );
-    expect(STAGE_DESCRIPTORS.FINAL_SIGNATURE.allowedEvents).not.toContain(
-      "USE_MOCK_FALLBACK",
-    );
-    expect(STAGE_DESCRIPTORS.FINAL_SIGNATURE.allowedEvents).not.toContain(
-      "USE_STATIC_TEMPLATE",
-    );
+  it("keeps provider retry, repair, fallback, timeout, and raw errors outside the FSM", () => {
+    for (const event of LEGACY_AND_NON_FSM_NAMES) {
+      for (const descriptor of Object.values(STAGE_DESCRIPTORS)) {
+        expect(descriptor.allowedEvents, `${descriptor.stage}:${event}`).not.toContain(
+          event,
+        );
+      }
+    }
   });
 });

@@ -60,6 +60,7 @@ import {
   roundAnalysisFailedTerminalArtifactSchema,
   roundAnalysisResolvedTerminalArtifactSchema,
 } from "./orchestration.schemas";
+import { APPLICATION_ORCHESTRATION_CONTRACT_VERSION } from "./schemas";
 
 const ROUND_CAPABILITIES = [
   "extractUserPrinciple",
@@ -609,7 +610,8 @@ export async function orchestrateRoundAnalysis(input: {
     receipts,
   });
   return roundAnalysisResolvedTerminalArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
+    applicationOrchestrationContractVersion:
+      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
     terminalKind: "round_analysis_resolved",
     outcomeKind: "resolved",
     event,
@@ -781,7 +783,8 @@ function failedOutcome(
     ),
   });
   return roundAnalysisFailedTerminalArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
+    applicationOrchestrationContractVersion:
+      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
     terminalKind: "round_analysis_failed",
     outcomeKind: "failed",
     event,

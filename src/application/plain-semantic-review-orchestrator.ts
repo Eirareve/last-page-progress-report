@@ -46,6 +46,7 @@ import {
   plainSemanticFailedTerminalArtifactSchema,
   plainSemanticResolvedTerminalArtifactSchema,
 } from "./orchestration.schemas";
+import { APPLICATION_ORCHESTRATION_CONTRACT_VERSION } from "./schemas";
 
 export async function orchestratePlainSemanticReview(input: {
   boundary: OrchestrationOperationBoundary;
@@ -397,7 +398,8 @@ export async function orchestratePlainSemanticReview(input: {
     receipts: [receipt],
   });
   return plainSemanticResolvedTerminalArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
+    applicationOrchestrationContractVersion:
+      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
     terminalKind: "plain_semantic_resolved",
     outcomeKind: "resolved",
     event,
@@ -441,7 +443,8 @@ function failedOutcome(
     receipts: [receipt],
   });
   return plainSemanticFailedTerminalArtifactSchema.parse({
-    applicationOrchestrationContractVersion: "0.1.0",
+    applicationOrchestrationContractVersion:
+      APPLICATION_ORCHESTRATION_CONTRACT_VERSION,
     terminalKind: "plain_semantic_failed",
     outcomeKind: "failed",
     event,

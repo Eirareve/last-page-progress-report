@@ -1,6 +1,6 @@
 # Naming Contract
 
-> `namingContractVersion: 0.1.0`
+> `namingContractVersion: 0.2.0`
 > Status: draft for final human approval
 > DRI: Codex（技术一致性）
 > Final approver: 项目负责人
@@ -16,7 +16,7 @@
 
 Frozen product-literal exceptions are `CharlieStage.futureFacing` and the content categories `VERIFIED_FACT | CURATORIAL_INTERPRETATION | ORIGINAL_INTERACTION`. They must not acquire snake-case aliases.
 
-The only public Session-event vocabulary is the stage-4 guide inventory represented by [`experienceEventSchema`](../src/domain/schemas/experience.schema.ts). Legacy synonyms are invalid input, not compatibility aliases. `START_NEW_SESSION` remains a separate application command and is deliberately rejected by the Session-event Schema.
+The only public Session-event vocabulary is the stage-4 inventory represented by [`experienceEventSchema`](../src/domain/schemas/experience.schema.ts): formal user events and application operation-level result events. Supplier retry, repair, fallback, timeout, rate-limit, invalid-output, raw content/network failures, reducer-only advancement, and UI image fallback are not Session events. Legacy synonyms are invalid input, not compatibility aliases. `START_NEW_SESSION` remains a separate application command and is deliberately rejected by the Session-event Schema.
 
 ## 2. Version fields
 
@@ -55,3 +55,10 @@ For `DocumentDiff.operation=annotate`, `targetAnchor` always anchors `precise_te
 ## 4. Open issues
 
 None for the stage 1 naming surface.
+
+## 5. Stage-4 entry compatibility
+
+Version `0.2.0` is breaking for callers that dispatched the removed supplier or
+system-detail names. No alias is accepted. Persisted Session Schema `0.1.0`
+does not contain an event log and therefore needs no data migration; stale
+in-flight results are rejected through the operation/version guard.

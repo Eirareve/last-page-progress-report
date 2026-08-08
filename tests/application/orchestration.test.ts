@@ -654,11 +654,28 @@ describe("PortraitShiftSummaryOrchestrator", () => {
 
     expect(outcome.outcomeKind).toBe("resolved");
     if (outcome.outcomeKind !== "resolved") return;
-    expect(outcome.event.eventType).toBe("PORTRAIT_SHIFT_SUMMARY_SUCCEEDED");
+    expect(outcome.event.eventType).toBe("PORTRAIT_SHIFT_SUMMARY_RESOLVED");
     expect(outcome.event.receipts[0]).toMatchObject({
       capability: "summarizePortraitShift",
       resolvedMode: "mock",
     });
+  });
+
+  it("maps provider or validation failure to one operation-level failed event", async () => {
+    const setup = await makePortraitSetup();
+    const outcome = await orchestratePortraitShiftSummary({
+      ...setup,
+      port: portReturning({ portrait: {} }),
+    });
+
+    expect(outcome.outcomeKind).toBe("failed");
+    if (outcome.outcomeKind !== "failed") return;
+    expect(outcome.event.eventType).toBe("PORTRAIT_SHIFT_SUMMARY_FAILED");
+    expect(outcome.event).toMatchObject({
+      capability: "executePortraitShiftSummary",
+      outcome: "failed",
+    });
+    expect(outcome.event.receipts).toHaveLength(1);
   });
 });
 

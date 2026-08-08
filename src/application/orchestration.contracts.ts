@@ -27,8 +27,8 @@ import type {
   plainSemanticBundleResolvedEventSchema,
   plainSemanticFailedTerminalArtifactSchema,
   plainSemanticResolvedTerminalArtifactSchema,
-  portraitShiftSummaryFailureArtifactSchema,
-  portraitShiftSummarySucceededEventSchema,
+  portraitShiftSummaryFailedEventSchema,
+  portraitShiftSummaryResolvedEventSchema,
   portraitSummaryFailedTerminalArtifactSchema,
   portraitSummaryResolvedTerminalArtifactSchema,
   roundAnalysisBundleFailedEventSchema,
@@ -53,11 +53,11 @@ export type PlainSemanticBundleResolvedEvent = z.infer<
 export type PlainSemanticBundleFailedEvent = z.infer<
   typeof plainSemanticBundleFailedEventSchema
 >;
-export type PortraitShiftSummarySucceededEvent = z.infer<
-  typeof portraitShiftSummarySucceededEventSchema
+export type PortraitShiftSummaryResolvedEvent = z.infer<
+  typeof portraitShiftSummaryResolvedEventSchema
 >;
-export type PortraitShiftSummaryFailureArtifact = z.infer<
-  typeof portraitShiftSummaryFailureArtifactSchema
+export type PortraitShiftSummaryFailedEvent = z.infer<
+  typeof portraitShiftSummaryFailedEventSchema
 >;
 export type CharlieSignatureReviewResolvedEvent = z.infer<
   typeof charlieSignatureReviewResolvedEventSchema
