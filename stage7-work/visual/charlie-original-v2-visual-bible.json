@@ -1,0 +1,113 @@
+{
+  "visualBibleVersion": "charlie-original-v2.0.2",
+  "status": "MASTER_CHARACTER_SELECTED_FOR_REFERENCE",
+  "characterDesignVersion": "charlie-original-v2",
+  "scope": "Review-only Master Charlie casting candidates; no stage scenes, no production assets, and not evidence",
+  "contractBoundary": "This visual bible is authoring input only. It does not modify ContentBundle, Evidence, FSM, Finalization, Agent, Runtime, Domain, or Provenance contracts.",
+  "workflow": {
+    "currentStep": "Use the project-owner-selected Master Charlie B as the sole identity reference for early, peak, and futureFacing scene candidates.",
+    "humanGate": "The project owner selected Master Charlie B; derived scene candidates still require separate human approval before public or production use.",
+    "nextStepAfterApproval": "Derive each stage through Agnes image editing/reference generation, then stop for fixed-portrait visual approval.",
+    "referenceRole": "facial_identity_anchor_only",
+    "futureEditInvariants": [
+      "same facial identity",
+      "same apparent age range",
+      "same bone structure and facial proportions",
+      "same natural hairline, hair texture, and base haircut",
+      "same skin tone and distinctive asymmetries",
+      "same visual universe and photographic finish"
+    ],
+    "futureEditableProperties": [
+      "scene",
+      "wardrobe",
+      "pose",
+      "gaze",
+      "restrained expression",
+      "lighting",
+      "camera distance"
+    ]
+  },
+  "selection": {
+    "selectedCandidateId": "MASTER-CHARLIE-B",
+    "selectedAssetId": "charlie-master-b-candidate-v2",
+    "selectedSourceRef": "stage7-review/assets/master-candidates-v2/charlie-master-b-candidate-v2-r2.png",
+    "selectedInputChecksum": "sha256:5d1717fe90b0bded660d6ac5b2b7327b51a1d3d485cab36e9c711c030d21741a",
+    "selectedBy": "project-owner",
+    "selectedAt": "2026-08-09T19:18:59.646Z",
+    "selectionPurpose": "identity_reference_only",
+    "approvedForPublicUse": false
+  },
+  "sharedDirection": {
+    "identityIntent": "A project-original, non-canonical adult Charlie with a distinctive and quietly magnetic presence. He must look like a believable person rather than a perfected model, stock-photo subject, actor, or literary illustration archetype.",
+    "medium": "A clean, photorealistic cinematic editorial portrait captured as a high-resolution RAW digital photograph; human casting photography, not an illustration or an imitation of printed artwork.",
+    "framing": "Vertical 3:4 chest-up or half-body portrait at natural eye level, single subject, relaxed shoulders, no theatrical pose.",
+    "cameraLanguage": "Believable full-frame digital portrait photography, approximately 85mm perspective, moderate shallow depth of field, natural optical bokeh, eyes naturally sharp without digital over-sharpening.",
+    "lighting": "Sophisticated soft directional window light with gentle negative fill, controlled highlight roll-off, dimensional but not dramatic, no fantasy glow or artificial rim halo.",
+    "palette": "Muted literary color palette: tobacco brown, faded navy, warm gray, soft cream, and restrained olive; natural skin color without orange-teal grading.",
+    "skinAndFace": "Visible pores, fine facial hair, faint under-eye texture, small tonal variation, subtle asymmetry, believable lips and teeth if visible, realistic moist eyes with non-identical catchlights, no beauty retouching.",
+    "hair": "Natural individual strands, slight flyaways, plausible density and hairline, no helmet-like clumps or glossy synthetic texture.",
+    "wardrobe": "Simple physically believable plain cotton collared shirt in a muted solid color, with normal woven fabric and natural folds; no costume styling, mottled print, logo, text, jewelry emphasis, or stage-specific uniform.",
+    "backdrop": "Quiet neutral real interior with smooth plaster and soft optical blur; no painted backdrop, canvas texture, bakery, laboratory, desk, book, paper, pen, clock, or stage narrative prop.",
+    "expression": "Restrained, attentive, emotionally available but not smiling for the camera; no melodrama, pity cue, diagnostic cue, or infantilization.",
+    "finish": "Clean high-resolution RAW digital editorial photography with natural microcontrast and highlight roll-off; physically plausible clothing folds and anatomy; no film grain, print grain, paper grain, canvas texture, painterly filter, aging overlay, or concept-art treatment."
+  },
+  "prohibited": [
+    "actor or public-figure likeness",
+    "film adaptation likeness or film still",
+    "book cover or existing copyrighted illustration composition",
+    "readable text, pseudo-writing, logo, watermark, or signature",
+    "private source material, source quotation, or free-form user prose",
+    "plastic or waxy skin",
+    "airbrushed beauty retouching",
+    "over-sharpened facial detail or crunchy HDR",
+    "perfect bilateral facial symmetry",
+    "glass eyes, duplicated catchlights, or malformed pupils",
+    "synthetic hair clumps",
+    "fantasy glow, generic concept art, digital painting, or obvious AI illustration aesthetics",
+    "canvas, paper, paint, stipple, crosshatch, etched, distressed, or aged texture overlay",
+    "stock-photo smile or fashion-campaign glamour pose",
+    "exaggerated sadness, fear, genius pose, villain coding, or cognitive-disability caricature",
+    "deformed hands, extra fingers, distorted anatomy, or implausible clothing"
+  ],
+  "reviewRubric": [
+    "believable human identity",
+    "casting appeal without glamour perfection",
+    "natural skin, eyes, hair, and anatomy",
+    "subtle facial asymmetry and imperfections",
+    "restrained expression",
+    "cinematic editorial lighting",
+    "literary muted palette",
+    "absence of generic AI illustration aesthetics",
+    "suitability as a stable identity reference"
+  ],
+  "candidates": [
+    {
+      "candidateId": "MASTER-CHARLIE-A",
+      "assetId": "charlie-master-a-candidate-v2",
+      "plannedFileStem": "charlie-master-a-candidate-v2-r2",
+      "altText": "Master Charlie 候选 A：一位三十多岁的男子在柔和窗光中以克制、开放的神情面对镜头。",
+      "faceDirection": "Apparent age 34 to 37. A softly angular oval face, gently prominent ears, warm medium-brown eyes, one eyebrow subtly higher than the other, a long straight nose with a tiny natural deviation, a lean jaw, faint smile lines, short dark-brown wavy hair with an imperfect side part, and a quiet openness. Distinctive rather than conventionally perfect."
+    },
+    {
+      "candidateId": "MASTER-CHARLIE-B",
+      "assetId": "charlie-master-b-candidate-v2",
+      "plannedFileStem": "charlie-master-b-candidate-v2-r2",
+      "altText": "Master Charlie 候选 B：一位接近四十岁的男子在安静室内呈现沉思而不疏离的气质。",
+      "faceDirection": "Apparent age 37 to 40. A narrower oblong face, gently high cheekbones, hazel-brown deep-set eyes, uneven natural brows, a slightly crooked nose bridge, a modest chin, short chestnut-brown hair with a small cowlick and a receding-but-natural temple line, and a composed, thoughtful presence without coldness."
+    },
+    {
+      "candidateId": "MASTER-CHARLIE-C",
+      "assetId": "charlie-master-c-candidate-v2",
+      "plannedFileStem": "charlie-master-c-candidate-v2-r2",
+      "altText": "Master Charlie 候选 C：一位三十岁出头的男子以安静、真诚而不过分微笑的神情站在中性背景前。",
+      "faceDirection": "Apparent age 31 to 35. A balanced oval-to-heart-shaped face with a broader brow, soft but defined cheekbones, dark warm-brown eyes, a subtly asymmetric mouth, a straight medium nose, a fine jawline, short thick dark hair with loose natural texture and flyaways, and an earnest grounded warmth without youthful styling."
+    },
+    {
+      "candidateId": "MASTER-CHARLIE-D",
+      "assetId": "charlie-master-d-candidate-v2",
+      "plannedFileStem": "charlie-master-d-candidate-v2-r2",
+      "altText": "Master Charlie 候选 D：一位约四十岁的男子在低饱和电影光线中呈现内敛而可信的存在感。",
+      "faceDirection": "Apparent age 39 to 42. A rectangular-oval face with a slim build, deeper-set brown eyes, subtle temple and forehead lines, a broad straight nose with realistic asymmetry, gently prominent ears, a restrained mouth, short slightly unruly dark-brown hair beginning to thin naturally at the temples, and a reserved but humane presence."
+    }
+  ]
+}

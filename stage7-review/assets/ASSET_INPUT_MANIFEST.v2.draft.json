@@ -1,0 +1,140 @@
+{
+  "assetManifestVersion": "stage7-assets-v2.0.0-draft",
+  "manifestStatus": "APPROVED_FOR_PRODUCTION_INTEGRATION",
+  "createdAt": "2026-08-09T19:31:10.929Z",
+  "inputChecksumAlgorithm": "sha256-file-bytes",
+  "provider": "Agnes",
+  "providerModel": "agnes-image-2.1-flash",
+  "promptSpec": {
+    "path": "stage7-work/visual/fixed-portrait-candidate-spec-v2.json",
+    "checksum": "sha256:db6d62e96ff982da60144f71ba7ee478655104ae88d182afb514c775e1fdd99b",
+    "characterDesignVersion": "charlie-original-v2"
+  },
+  "masterReference": {
+    "candidateId": "MASTER-CHARLIE-B",
+    "assetId": "charlie-master-b-candidate-v2",
+    "sourceRef": "stage7-review/assets/master-candidates-v2/charlie-master-b-candidate-v2-r2.png",
+    "inputChecksum": "sha256:5d1717fe90b0bded660d6ac5b2b7327b51a1d3d485cab36e9c711c030d21741a",
+    "selectionPurpose": "identity_reference_only",
+    "selectedBy": "project-owner",
+    "selectedAt": "2026-08-09T19:18:59.646Z",
+    "approvedForPublicUse": false
+  },
+  "approval": {
+    "approvalStatus": "approved",
+    "approvedBy": "project-owner",
+    "approvedAt": "2026-08-09T19:42:24.0561146Z",
+    "approvedForPublicUse": true
+  },
+  "fallbackPlan": {
+    "status": "approved",
+    "fixedPortraitBehavior": "After explicit approval, each fixed portrait becomes its own stable runtime asset and fallback target.",
+    "dynamicPortraitFailureBehavior": "Keep or restore the approved fixed triptych; Agnes failure, timeout, rate limit, unavailable service, or invalid output must not block the experience or COMPLETE.",
+    "productionEffectBeforeApproval": "none",
+    "productionEffectAfterApproval": "Each approved fixed portrait is its own stable fallback; dynamic portrait failure never blocks the experience or COMPLETE.",
+    "approvedBy": "project-owner",
+    "approvedAt": "2026-08-09T19:42:24.0561146Z"
+  },
+  "internalVisualQa": {
+    "status": "approved_by_project_owner",
+    "identityRemediation": "A first scene iteration was excluded because of face smoothing and age drift. Submitted r1 candidates used a shorter exact-identity edit instruction and closer framing.",
+    "humanDecisionRequired": false
+  },
+  "entries": [
+    {
+      "inputId": "ASSET-V2-001",
+      "sourceRef": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-early-candidate-v2-r1.png",
+      "intendedTarget": "verified portrait config: early",
+      "inputChecksum": "sha256:f5677da75c26a3e4eaac2499b459b946886b7838e3c0a6b84cb4e7b61f82bc40",
+      "approvalStatus": "approved",
+      "candidateStatus": "APPROVED_ASSET",
+      "assetId": "charlie-early-candidate-v2",
+      "charlieStage": "early",
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_using_selected_master_B_identity_reference",
+      "licenseOrPermission": "project-owner approved for project public use under applicable Agnes service terms",
+      "approvedForPublicUse": true,
+      "altText": "正式视觉候选：同一位查理身处面包房工作区，姿态放松，神情温和而信任周围的人。",
+      "characterDesignVersion": "charlie-original-v2",
+      "masterReferenceAssetId": "charlie-master-b-candidate-v2",
+      "fallbackAssetId": "charlie-early-candidate-v2",
+      "proposedFallbackAssetIdAfterApproval": "charlie-early-candidate-v2",
+      "evidenceRole": "not_evidence",
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 4636465
+    },
+    {
+      "inputId": "ASSET-V2-002",
+      "sourceRef": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-peak-candidate-v2-r1.png",
+      "intendedTarget": "verified portrait config: peak",
+      "inputChecksum": "sha256:86020d6dc25716362f311c63c3b5408bc044cc1310b507359ae760f67a71e836",
+      "approvalStatus": "approved",
+      "candidateStatus": "APPROVED_ASSET",
+      "assetId": "charlie-peak-candidate-v2",
+      "charlieStage": "peak",
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_using_selected_master_B_identity_reference",
+      "licenseOrPermission": "project-owner approved for project public use under applicable Agnes service terms",
+      "approvedForPublicUse": true,
+      "altText": "正式视觉候选：同一位查理处于安静研究环境，神情敏锐、自持，并与周围保持轻微距离。",
+      "characterDesignVersion": "charlie-original-v2",
+      "masterReferenceAssetId": "charlie-master-b-candidate-v2",
+      "fallbackAssetId": "charlie-peak-candidate-v2",
+      "proposedFallbackAssetIdAfterApproval": "charlie-peak-candidate-v2",
+      "evidenceRole": "not_evidence",
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 3822688
+    },
+    {
+      "inputId": "ASSET-V2-003",
+      "sourceRef": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-future-facing-candidate-v2-r1.png",
+      "intendedTarget": "verified portrait config: futureFacing",
+      "inputChecksum": "sha256:cb2067a0d367ca9e0e729e65a36b68c0fc8d4cac73d56cc66cc48207fc7d02fb",
+      "approvalStatus": "approved",
+      "candidateStatus": "APPROVED_ASSET",
+      "assetId": "charlie-future-facing-candidate-v2",
+      "charlieStage": "futureFacing",
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_using_selected_master_B_identity_reference",
+      "licenseOrPermission": "project-owner approved for project public use under applicable Agnes service terms",
+      "approvedForPublicUse": true,
+      "altText": "正式视觉候选：同一位查理在傍晚光线中与书写和时间留下的痕迹相伴，情绪清醒而克制。",
+      "characterDesignVersion": "charlie-original-v2",
+      "masterReferenceAssetId": "charlie-master-b-candidate-v2",
+      "fallbackAssetId": "charlie-future-facing-candidate-v2",
+      "proposedFallbackAssetIdAfterApproval": "charlie-future-facing-candidate-v2",
+      "evidenceRole": "not_evidence",
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 4034320
+    }
+  ],
+  "excludedVariants": [
+    {
+      "path": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-early-candidate-v2.png",
+      "checksum": "sha256:31ab60380257a4495adf2ad9ce637e990778d5d1c526c4aee104f496106a5e00",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "First scene iteration showed excessive face smoothing and insufficient preservation of Master B's natural detail.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-peak-candidate-v2.png",
+      "checksum": "sha256:2561008267ee98cdaa40f3f8cfd4d5a420989c5905a99660b770425cc28fe69c",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "First scene iteration showed excessive face smoothing and insufficient preservation of Master B's natural detail.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-future-facing-candidate-v2.png",
+      "checksum": "sha256:5aab424d124150434842de912f4da417b8c9f72f36ad7c5591c74ddde1413c48",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "First scene iteration had visible apparent-age and facial-identity drift from Master B.",
+      "approvedForPublicUse": false
+    }
+  ]
+}

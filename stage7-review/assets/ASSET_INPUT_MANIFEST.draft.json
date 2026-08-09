@@ -1,0 +1,130 @@
+{
+  "assetManifestVersion": "stage7-assets-1.0.0-draft",
+  "manifestStatus": "REJECTED_BY_HUMAN_VISUAL_REVIEW",
+  "createdAt": "2026-08-09T18:32:59.931Z",
+  "inputChecksumAlgorithm": "sha256-file-bytes",
+  "provider": "Agnes",
+  "providerModel": "agnes-image-2.1-flash",
+  "promptSpec": {
+    "path": "stage7-work/visual/portrait-candidate-spec.json",
+    "checksum": "sha256:d9cd6a330031613d3e62fb1d784aaf8f531f8ba4dd25c38b5b0f97db7789dda2",
+    "characterDesignVersion": "charlie-original-v1"
+  },
+  "approval": {
+    "approvalStatus": "rejected",
+    "approvedBy": "project-owner",
+    "approvedAt": "2026-08-09T18:43:06.768Z",
+    "approvedForPublicUse": false
+  },
+  "humanReview": {
+    "decision": "rejected",
+    "reasonCategory": "visual_quality",
+    "reasons": [
+      "Obvious AI-generated illustration aesthetics",
+      "Insufficiently believable material and human realism",
+      "Insufficient character appeal and editorial finish",
+      "Semantically correct stages but not mature production visual assets"
+    ],
+    "preservationRule": "Keep every candidate file and recorded checksum unchanged as a rejected audit record. Never promote or overwrite these files."
+  },
+  "fallbackPlan": {
+    "status": "not_approved",
+    "fixedPortraitBehavior": "After approval, each fixed portrait is its own stable runtime asset and fallbackAssetId target.",
+    "dynamicPortraitFailureBehavior": "Keep or restore the approved fixed triptych; Agnes timeout, rate limit, provider failure, or invalid output must not block the experience or COMPLETE.",
+    "productionEffectBeforeApproval": "none"
+  },
+  "entries": [
+    {
+      "inputId": "ASSET-001",
+      "sourceRef": "stage7-review/assets/candidates/charlie-early-candidate-v1.png",
+      "intendedTarget": "verified portrait config: early",
+      "inputChecksum": "sha256:806aedc5cf666671a6172368de181810e16885eac02691abab86af2bc8d1c90d",
+      "approvalStatus": "rejected",
+      "candidateStatus": "REJECTED_ASSET_CANDIDATE",
+      "assetId": "charlie-early-candidate-v1",
+      "charlieStage": "early",
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_text_to_image_candidate",
+      "licenseOrPermission": "pending_project_owner_confirmation_of_Agnes_terms_and_project_public_use",
+      "approvedForPublicUse": false,
+      "altText": "原创插画候选：早期查理站在安静的面包房工作区，神情开放而期待。",
+      "characterDesignVersion": "charlie-original-v1",
+      "fallbackAssetId": null,
+      "proposedFallbackAssetIdAfterApproval": "charlie-early-candidate-v1",
+      "evidenceRole": "not_evidence",
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 6658115
+    },
+    {
+      "inputId": "ASSET-002",
+      "sourceRef": "stage7-review/assets/candidates/charlie-peak-candidate-v2.png",
+      "intendedTarget": "verified portrait config: peak",
+      "inputChecksum": "sha256:647b2646a07ca9e0cb57c0af008e53d971dcfba9f37e7432cfd72b0e7ca91e52",
+      "approvalStatus": "rejected",
+      "candidateStatus": "REJECTED_ASSET_CANDIDATE",
+      "assetId": "charlie-peak-candidate-v2",
+      "charlieStage": "peak",
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_candidate_using_ASSET-001_identity_reference",
+      "licenseOrPermission": "pending_project_owner_confirmation_of_Agnes_terms_and_project_public_use",
+      "approvedForPublicUse": false,
+      "altText": "原创插画候选：高峰期查理坐在资料与抽象图形之间，专注而显得孤独。",
+      "characterDesignVersion": "charlie-original-v1",
+      "fallbackAssetId": null,
+      "proposedFallbackAssetIdAfterApproval": "charlie-peak-candidate-v2",
+      "evidenceRole": "not_evidence",
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 4822178
+    },
+    {
+      "inputId": "ASSET-003",
+      "sourceRef": "stage7-review/assets/candidates/charlie-future-facing-candidate-v3.png",
+      "intendedTarget": "verified portrait config: futureFacing",
+      "inputChecksum": "sha256:ec6e53d3d19342bca34c320e7c1682811b96657b97d34e0ff98e77f925f3c0ce",
+      "approvalStatus": "rejected",
+      "candidateStatus": "REJECTED_ASSET_CANDIDATE",
+      "assetId": "charlie-future-facing-candidate-v3",
+      "charlieStage": "futureFacing",
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_candidate_using_ASSET-001_identity_reference",
+      "licenseOrPermission": "pending_project_owner_confirmation_of_Agnes_terms_and_project_public_use",
+      "approvedForPublicUse": false,
+      "altText": "原创插画候选：面向未来的查理坐在桌前握着笔，神情清醒而克制。",
+      "characterDesignVersion": "charlie-original-v1",
+      "fallbackAssetId": null,
+      "proposedFallbackAssetIdAfterApproval": "charlie-future-facing-candidate-v3",
+      "evidenceRole": "not_evidence",
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 4485192
+    }
+  ],
+  "excludedVariants": [
+    {
+      "path": "stage7-review/assets/candidates/charlie-peak-candidate-v1.png",
+      "checksum": "sha256:587ef8a87f4d83f29cacb1c5356eb84101ef629a884b25feb2d087c1fb8fd305",
+      "status": "excluded_before_human_review",
+      "reason": "Over-preserved the early bakery setting and apron, weakening stage distinction.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/candidates/charlie-future-facing-candidate-v1.png",
+      "checksum": "sha256:6c3943e1014ed680df9df783de1d24ec0496da7ee5ef2c90e5a5e5d2d4c5c911",
+      "status": "excluded_before_human_review",
+      "reason": "Over-preserved the early bakery setting and apron, weakening stage distinction.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/candidates/charlie-future-facing-candidate-v2.png",
+      "checksum": "sha256:4a347557da47efbc3872cff13a4a12aa119a15a7863c490ed7db2e53ea01ea45",
+      "status": "excluded_before_human_review",
+      "reason": "Contained pseudo-signature marks on the paper despite the no-text constraint.",
+      "approvedForPublicUse": false
+    }
+  ]
+}

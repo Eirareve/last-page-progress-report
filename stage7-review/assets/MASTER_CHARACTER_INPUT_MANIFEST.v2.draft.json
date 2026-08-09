@@ -1,0 +1,179 @@
+{
+  "assetManifestVersion": "stage7-master-character-v2.0.0-draft",
+  "manifestStatus": "MASTER_CHARACTER_SELECTED_FOR_REFERENCE",
+  "createdAt": "2026-08-09T19:02:17.550Z",
+  "inputChecksumAlgorithm": "sha256-file-bytes",
+  "provider": "Agnes",
+  "providerModel": "agnes-image-2.1-flash",
+  "visualBible": {
+    "path": "stage7-work/visual/charlie-original-v2-visual-bible.json",
+    "checksum": "sha256:4abfc434ef93d53818472813bdb82b2a1c1ca1b58242ce6aaeb1ad36d3fc8731",
+    "characterDesignVersion": "charlie-original-v2"
+  },
+  "approval": {
+    "approvalStatus": "master_selected_for_identity_reference",
+    "selectedCandidateId": "MASTER-CHARLIE-B",
+    "approvedBy": "project-owner",
+    "approvedAt": "2026-08-09T19:18:59.646Z",
+    "approvedForPublicUse": false
+  },
+  "scope": {
+    "purpose": "Human selection of face, apparent age range, hair, bone structure, and baseline temperament for Master Charlie",
+    "stagePortraitsIncluded": false,
+    "productionEffectBeforeApproval": "none",
+    "evidenceRole": "not_evidence",
+    "fallbackRole": "none"
+  },
+  "entries": [
+    {
+      "inputId": "MASTER-ASSET-A",
+      "candidateId": "MASTER-CHARLIE-A",
+      "assetId": "charlie-master-a-candidate-v2",
+      "sourceRef": "stage7-review/assets/master-candidates-v2/charlie-master-a-candidate-v2-r2.png",
+      "inputChecksum": "sha256:7e870ac841c89d77d62c0631cbaeddff4560bd437cc8fb8286b6849cd43fd828",
+      "candidateStatus": "MASTER_CHARACTER_CANDIDATE_NOT_SELECTED",
+      "approvalStatus": "not_selected",
+      "approvedForPublicUse": false,
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_text_to_image_master_casting_candidate",
+      "licenseOrPermission": "pending_project_owner_confirmation_of_Agnes_terms_and_project_public_use",
+      "characterDesignVersion": "charlie-original-v2",
+      "altText": "Master Charlie 候选 A：一位三十多岁的男子在柔和窗光中以克制、开放的神情面对镜头。",
+      "evidenceRole": "not_evidence",
+      "stageRole": "none",
+      "fallbackAssetId": null,
+      "productionAssetId": null,
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 5266746
+    },
+    {
+      "inputId": "MASTER-ASSET-B",
+      "candidateId": "MASTER-CHARLIE-B",
+      "assetId": "charlie-master-b-candidate-v2",
+      "sourceRef": "stage7-review/assets/master-candidates-v2/charlie-master-b-candidate-v2-r2.png",
+      "inputChecksum": "sha256:5d1717fe90b0bded660d6ac5b2b7327b51a1d3d485cab36e9c711c030d21741a",
+      "candidateStatus": "MASTER_CHARACTER_REFERENCE_SELECTED",
+      "approvalStatus": "selected_as_identity_reference",
+      "approvedForPublicUse": false,
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_text_to_image_master_casting_candidate",
+      "licenseOrPermission": "pending_project_owner_confirmation_of_Agnes_terms_and_project_public_use",
+      "characterDesignVersion": "charlie-original-v2",
+      "altText": "Master Charlie 候选 B：一位接近四十岁的男子在安静室内呈现沉思而不疏离的气质。",
+      "evidenceRole": "not_evidence",
+      "stageRole": "none",
+      "fallbackAssetId": null,
+      "productionAssetId": null,
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 5383137
+    },
+    {
+      "inputId": "MASTER-ASSET-C",
+      "candidateId": "MASTER-CHARLIE-C",
+      "assetId": "charlie-master-c-candidate-v2",
+      "sourceRef": "stage7-review/assets/master-candidates-v2/charlie-master-c-candidate-v2-r2.png",
+      "inputChecksum": "sha256:bfc01a0f787801dbb37b5244eee53280b0b42a1122d5cc5d44f4f6d6afb45aa4",
+      "candidateStatus": "MASTER_CHARACTER_CANDIDATE_NOT_SELECTED",
+      "approvalStatus": "not_selected",
+      "approvedForPublicUse": false,
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_text_to_image_master_casting_candidate",
+      "licenseOrPermission": "pending_project_owner_confirmation_of_Agnes_terms_and_project_public_use",
+      "characterDesignVersion": "charlie-original-v2",
+      "altText": "Master Charlie 候选 C：一位三十岁出头的男子以安静、真诚而不过分微笑的神情站在中性背景前。",
+      "evidenceRole": "not_evidence",
+      "stageRole": "none",
+      "fallbackAssetId": null,
+      "productionAssetId": null,
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 5563199
+    },
+    {
+      "inputId": "MASTER-ASSET-D",
+      "candidateId": "MASTER-CHARLIE-D",
+      "assetId": "charlie-master-d-candidate-v2",
+      "sourceRef": "stage7-review/assets/master-candidates-v2/charlie-master-d-candidate-v2-r2.png",
+      "inputChecksum": "sha256:c8334e005e0423a2ad5cd7687967cac1e2eae7557463afde722eba9408e8fc51",
+      "candidateStatus": "MASTER_CHARACTER_CANDIDATE_NOT_SELECTED",
+      "approvalStatus": "not_selected",
+      "approvedForPublicUse": false,
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_text_to_image_master_casting_candidate",
+      "licenseOrPermission": "pending_project_owner_confirmation_of_Agnes_terms_and_project_public_use",
+      "characterDesignVersion": "charlie-original-v2",
+      "altText": "Master Charlie 候选 D：一位约四十岁的男子在低饱和电影光线中呈现内敛而可信的存在感。",
+      "evidenceRole": "not_evidence",
+      "stageRole": "none",
+      "fallbackAssetId": null,
+      "productionAssetId": null,
+      "mimeType": "image/png",
+      "width": 1728,
+      "height": 2304,
+      "byteLength": 5426884
+    }
+  ],
+  "excludedVariants": [
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-a-candidate-v2.png",
+      "checksum": "sha256:43cd2934153f888015597a60a44cb8b5e954187daec330c4e59b60411839004e",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Painterly texture across clothing and background contradicted the RAW photographic direction.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-b-candidate-v2.png",
+      "checksum": "sha256:01d671ff8b600e7d026ec59d2d3910042368558000622787b4a5e0332e689cfd",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Painterly texture across clothing and background contradicted the RAW photographic direction.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-c-candidate-v2.png",
+      "checksum": "sha256:f97304414a2a2ff3e3f3888c289a47831a9c295af9bb13bb8cca57c02df6eaad",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Painterly texture across clothing and background contradicted the RAW photographic direction.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-d-candidate-v2.png",
+      "checksum": "sha256:010acdaf17fd0a4c5381329edb0763fa4f72eba84558faee8d4ef466f3cc195f",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Painterly texture across clothing and background contradicted the RAW photographic direction.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-a-candidate-v2-r1.png",
+      "checksum": "sha256:c2620e15241fbeaf12d9e03787d29722060b966067fe6f7382adf6a6fd728752",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Long negative prompt still produced visible texture-overlay artifacts.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-b-candidate-v2-r1.png",
+      "checksum": "sha256:066fa699b302994e26f7037857e773fb5ae3461517bd6c38fad3cf5ff5c9f9a4",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Long negative prompt still produced visible texture-overlay artifacts.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-c-candidate-v2-r1.png",
+      "checksum": "sha256:d9f8cf5e0f4cc1909105142767632777bb04500112872ec5c6eb1805d9339220",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Long negative prompt still produced visible texture-overlay artifacts.",
+      "approvedForPublicUse": false
+    },
+    {
+      "path": "stage7-review/assets/master-candidates-v2/charlie-master-d-candidate-v2-r1.png",
+      "checksum": "sha256:6b95e8b655099bcdc55afbd497524c8f2d9480a620c148a8e189beac308d4fa5",
+      "status": "excluded_by_internal_visual_qa",
+      "reason": "Long negative prompt still produced visible texture-overlay artifacts.",
+      "approvedForPublicUse": false
+    }
+  ]
+}

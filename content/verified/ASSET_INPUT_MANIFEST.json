@@ -1,0 +1,59 @@
+{
+  "assetManifestVersion": "stage7-assets-v2.0.0",
+  "manifestStatus": "approved",
+  "approvedBy": "project-owner",
+  "approvedAt": "2026-08-09T19:42:24.0561146Z",
+  "inputChecksumAlgorithm": "sha256-file-bytes",
+  "characterDesignVersion": "charlie-original-v2",
+  "masterReference": {
+    "assetId": "charlie-master-b-candidate-v2",
+    "sourceRef": "stage7-review/assets/master-candidates-v2/charlie-master-b-candidate-v2-r2.png",
+    "inputChecksum": "sha256:5d1717fe90b0bded660d6ac5b2b7327b51a1d3d485cab36e9c711c030d21741a",
+    "selectedBy": "project-owner",
+    "selectedAt": "2026-08-09T19:18:59.646Z",
+    "approvedForPublicUse": false,
+    "purpose": "identity_reference_only"
+  },
+  "fallbackPlan": {
+    "approvalStatus": "approved",
+    "behavior": "Each fixed portrait is its own stable fallback. Dynamic portrait failure, timeout, rate limit, provider unavailability, or invalid output never blocks the experience or COMPLETE."
+  },
+  "entries": [
+    {
+      "assetId": "charlie-early-candidate-v2",
+      "charlieStage": "early",
+      "sourceRef": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-early-candidate-v2-r1.png",
+      "productionPath": "public/portraits/charlie-original-v2/early.png",
+      "inputChecksum": "sha256:f5677da75c26a3e4eaac2499b459b946886b7838e3c0a6b84cb4e7b61f82bc40",
+      "approvedForPublicUse": true,
+      "fallbackAssetId": "charlie-early-candidate-v2",
+      "evidenceRole": "not_evidence"
+    },
+    {
+      "assetId": "charlie-peak-candidate-v2",
+      "charlieStage": "peak",
+      "sourceRef": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-peak-candidate-v2-r1.png",
+      "productionPath": "public/portraits/charlie-original-v2/peak.png",
+      "inputChecksum": "sha256:86020d6dc25716362f311c63c3b5408bc044cc1310b507359ae760f67a71e836",
+      "approvedForPublicUse": true,
+      "fallbackAssetId": "charlie-peak-candidate-v2",
+      "evidenceRole": "not_evidence"
+    },
+    {
+      "assetId": "charlie-future-facing-candidate-v2",
+      "charlieStage": "futureFacing",
+      "sourceRef": "stage7-review/assets/fixed-portrait-candidates-v2/charlie-future-facing-candidate-v2-r1.png",
+      "productionPath": "public/portraits/charlie-original-v2/future-facing.png",
+      "inputChecksum": "sha256:cb2067a0d367ca9e0e729e65a36b68c0fc8d4cac73d56cc66cc48207fc7d02fb",
+      "approvedForPublicUse": true,
+      "fallbackAssetId": "charlie-future-facing-candidate-v2",
+      "evidenceRole": "not_evidence"
+    }
+  ],
+  "rejectedAuditRecords": [
+    "stage7-review/assets/ASSET_INPUT_MANIFEST.draft.json",
+    "stage7-review/assets/fixed-portrait-candidates-v2/charlie-early-candidate-v2.png",
+    "stage7-review/assets/fixed-portrait-candidates-v2/charlie-peak-candidate-v2.png",
+    "stage7-review/assets/fixed-portrait-candidates-v2/charlie-future-facing-candidate-v2.png"
+  ]
+}

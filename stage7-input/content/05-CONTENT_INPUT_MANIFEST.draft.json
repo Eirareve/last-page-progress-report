@@ -1,0 +1,161 @@
+{
+  "manifestStatus": "DRAFT_PENDING_HUMAN_APPROVAL",
+  "purpose": "Stage 7 external input audit manifest; not Domain/SessionState/ContentBundle Contract",
+  "checksumNote": "inputChecksum is intentionally left for Codex to compute from the frozen input using the repository-approved audit procedure. Do not reuse these values as contentBundleChecksum or internalContentBundleChecksum.",
+  "entries": [
+    {
+      "inputId": "CONTENT-001",
+      "sourceRef": "用户提供版权页截图 + 目录/页数确认",
+      "intendedTarget": "book edition authoring record",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "EDITION_METADATA",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "__HUMAN_TO_FILL__",
+      "verifiedAt": "__HUMAN_TO_FILL__"
+    },
+    {
+      "inputId": "CONTENT-002",
+      "sourceRef": "用户上传 进步报告-8",
+      "intendedTarget": "VF-R1-001",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "__HUMAN_TO_FILL__",
+      "verifiedAt": "__HUMAN_TO_FILL__"
+    },
+    {
+      "inputId": "CONTENT-003",
+      "sourceRef": "用户上传 进步报告-9",
+      "intendedTarget": "VF-R1-002",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "__HUMAN_TO_FILL__",
+      "verifiedAt": "__HUMAN_TO_FILL__"
+    },
+    {
+      "inputId": "CONTENT-004",
+      "sourceRef": "用户上传 进步报告-15",
+      "intendedTarget": "VF-R2-001",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "__HUMAN_TO_FILL__",
+      "verifiedAt": "__HUMAN_TO_FILL__"
+    },
+    {
+      "inputId": "CONTENT-005",
+      "sourceRef": "用户上传 进步报告-16",
+      "intendedTarget": "VF-R2-002",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "__HUMAN_TO_FILL__",
+      "verifiedAt": "__HUMAN_TO_FILL__"
+    },
+    {
+      "inputId": "CONTENT-006",
+      "sourceRef": "用户上传 进步报告-17",
+      "intendedTarget": "VF-R3-001",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "__HUMAN_TO_FILL__",
+      "verifiedAt": "__HUMAN_TO_FILL__"
+    },
+    {
+      "inputId": "CONTENT-007",
+      "sourceRef": "用户上传 进步报告-17",
+      "intendedTarget": "VF-R3-002",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "__HUMAN_TO_FILL__",
+      "verifiedAt": "__HUMAN_TO_FILL__"
+    },
+    {
+      "inputId": "CONTENT-008",
+      "sourceRef": "本审核包策展解释草案",
+      "intendedTarget": "CI-R1-001",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "CURATORIAL_INTERPRETATION",
+      "editionId": null,
+      "verifiedBy": null,
+      "verifiedAt": null
+    },
+    {
+      "inputId": "CONTENT-009",
+      "sourceRef": "本审核包策展解释草案",
+      "intendedTarget": "CI-R2-001",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "CURATORIAL_INTERPRETATION",
+      "editionId": null,
+      "verifiedBy": null,
+      "verifiedAt": null
+    },
+    {
+      "inputId": "CONTENT-010",
+      "sourceRef": "本审核包策展解释草案",
+      "intendedTarget": "CI-R3-001",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "CURATORIAL_INTERPRETATION",
+      "editionId": null,
+      "verifiedBy": null,
+      "verifiedAt": null
+    },
+    {
+      "inputId": "CONTENT-011",
+      "sourceRef": "本审核包 Evidence Card 草案",
+      "intendedTarget": "EC-R1-PAST-SELF",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "EVIDENCE_CARD",
+      "editionId": null,
+      "verifiedBy": null,
+      "verifiedAt": null
+    },
+    {
+      "inputId": "CONTENT-012",
+      "sourceRef": "本审核包 Evidence Card 草案",
+      "intendedTarget": "EC-R2-FUTURE-PREDICTION",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "EVIDENCE_CARD",
+      "editionId": null,
+      "verifiedBy": null,
+      "verifiedAt": null
+    },
+    {
+      "inputId": "CONTENT-013",
+      "sourceRef": "本审核包 Evidence Card 草案",
+      "intendedTarget": "EC-R3-FUTURE-RELATIONSHIPS",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "EVIDENCE_CARD",
+      "editionId": null,
+      "verifiedBy": null,
+      "verifiedAt": null
+    },
+    {
+      "inputId": "CONTENT-014",
+      "sourceRef": "仓库现有 original-interaction.json；需 Codex 只读确认实际路径与 checksum",
+      "intendedTarget": "existing repository original-interaction",
+      "inputChecksum": "__CODEX_COMPUTE_FROM_FROZEN_INPUT__",
+      "approvalStatus": "pending_human_approval",
+      "classification": "ORIGINAL_INTERACTION",
+      "editionId": null,
+      "verifiedBy": null,
+      "verifiedAt": null
+    }
+  ]
+}

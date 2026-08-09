@@ -1,0 +1,44 @@
+{
+  "specVersion": "stage7-fixed-portrait-candidate-v2.0.0",
+  "status": "ASSET_CANDIDATES_PENDING_HUMAN_APPROVAL",
+  "provider": "Agnes",
+  "characterDesignVersion": "charlie-original-v2",
+  "outputIntent": "Three review-only fixed portrait candidates derived from the selected Master Charlie B identity reference; not production assets and not evidence",
+  "masterReference": {
+    "candidateId": "MASTER-CHARLIE-B",
+    "assetId": "charlie-master-b-candidate-v2",
+    "path": "stage7-review/assets/master-candidates-v2/charlie-master-b-candidate-v2-r2.png",
+    "checksum": "sha256:5d1717fe90b0bded660d6ac5b2b7327b51a1d3d485cab36e9c711c030d21741a",
+    "role": "facial_identity_anchor_only",
+    "selectedBy": "project-owner",
+    "selectedAt": "2026-08-09T19:18:59.646Z",
+    "approvedForPublicUse": false
+  },
+  "generationStrategy": "Use the selected master as the sole image reference in three independent Agnes identity-preserving edit requests. Preserve facial identity and natural photographic finish; intentionally replace the master backdrop, shirt, pose, crop, and lighting with stage-specific context.",
+  "identityInvariants": "Preserve the exact same person from the reference: apparent age, narrow oblong face, cheekbones, hazel-brown deep-set eyes, uneven brows, slightly crooked nose bridge, modest chin, natural temple line, short chestnut-brown hair, skin tone, facial proportions, and subtle asymmetries.",
+  "sharedPhotography": "A clean high-resolution RAW digital editorial photograph with natural skin, eyes, hair, anatomy, fabric, optical depth, and restrained cinematic lighting. Vertical 3:4 portrait, chest-up or half-body, natural human proportions, true-to-life muted color, no texture overlay or painterly finish.",
+  "sharedConstraints": "No actor or public-figure likeness, film still, book-cover composition, existing copyrighted illustration, readable text, pseudo-writing, logo, watermark, quotation, private source material, free-form user prose, cognitive-disability caricature, infantilization, genius stereotype, villain coding, melodrama, stock-photo smile, plastic skin, beauty retouching, fantasy glow, generic concept art, distorted anatomy, or extra fingers. The image is interpretive visual material and not factual evidence.",
+  "candidates": [
+    {
+      "assetId": "charlie-early-candidate-v2",
+      "charlieStage": "early",
+      "plannedFileStem": "charlie-early-candidate-v2-r1",
+      "altText": "正式视觉候选：同一位查理身处面包房工作区，姿态放松，神情温和而信任周围的人。",
+      "scenePrompt": "Replace the neutral master setting with a physically believable working bakery in soft morning daylight: flour-dusted wood, metal trays, shelves, and bread shapes softly out of focus, with no signs or readable labels. Charlie wears a plain work shirt and simple natural-canvas apron. Show him waist-up in a candid three-quarter pose, shoulders relaxed, gently attentive to someone just outside the frame. His expression is warm, trusting, and willing to connect, without a posed smile. Do not make him younger, childlike, naive-looking, or visually coded by intelligence level."
+    },
+    {
+      "assetId": "charlie-peak-candidate-v2",
+      "charlieStage": "peak",
+      "plannedFileStem": "charlie-peak-candidate-v2-r1",
+      "altText": "正式视觉候选：同一位查理处于安静研究环境，神情敏锐、自持，并与周围保持轻微距离。",
+      "scenePrompt": "Replace the neutral master setting with a restrained mid-century research room in cool natural window light: a real desk edge, closed books, optical equipment, and softly blurred abstract charts with absolutely no readable letters, numbers, labels, or pseudo-writing. Charlie wears a well-fitted muted navy collared shirt without apron or costume styling. Show him chest-up, body angled slightly away, posture precise but natural, gaze focused just off camera. His expression is quiet, perceptive, self-possessed, and subtly distant, never smug, theatrical, villainous, or a generic genius stereotype."
+    },
+    {
+      "assetId": "charlie-future-facing-candidate-v2",
+      "charlieStage": "futureFacing",
+      "plannedFileStem": "charlie-future-facing-candidate-v2-r1",
+      "altText": "正式视觉候选：同一位查理在傍晚光线中与书写和时间留下的痕迹相伴，情绪清醒而克制。",
+      "scenePrompt": "Replace the neutral master setting with a spare private room in quiet late-afternoon light. Suggest writing, recording, and the passage of time through a closed clothbound notebook, a capped fountain pen, stacked blank paper seen only from the edge, and a soft elongated window shadow; show no readable writing, letters, numbers, clock face, labels, or pseudo-writing. Charlie wears a simple faded blue-gray shirt. Show him half-body beside the desk, one relaxed hand near but not gripping the pen, looking toward the window rather than performing sadness for the camera. His emotion is aware, restrained, humane, and forward-facing, without tragedy coding, pathology cues, visible impairment cues, fear caricature, or melodrama."
+    }
+  ]
+}

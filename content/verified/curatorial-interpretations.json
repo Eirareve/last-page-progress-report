@@ -1,0 +1,46 @@
+{
+  "records": [
+    {
+      "id": "CI-R1-001",
+      "contentType": "CURATORIAL_INTERPRETATION",
+      "interpretation": "后来的查理拥有更多信息，可以重新判断过去发生了什么；但“能够重新解释事件”与“能够取消过去自我的主体经验”并不是同一个命题。",
+      "basedOnVerifiedFactIds": ["VF-R1-001", "VF-R1-002"],
+      "prohibitedClaims": [
+        "这是作者唯一结论。",
+        "作品证明某一认知阶段拥有绝对解释权。"
+      ],
+      "presentationMode": "one_possible_interpretation",
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z",
+      "approvalStatus": "approved"
+    },
+    {
+      "id": "CI-R2-001",
+      "contentType": "CURATORIAL_INTERPRETATION",
+      "interpretation": "对未来变化拥有可靠预测，可以成为当前决策的重要依据，但预测本身并不自动产生替未来自我作出不可撤销决定的权力。",
+      "basedOnVerifiedFactIds": ["VF-R2-001", "VF-R2-002"],
+      "prohibitedClaims": [
+        "这是作者唯一结论。",
+        "科学预测等同于未来授权。"
+      ],
+      "presentationMode": "one_possible_interpretation",
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z",
+      "approvalStatus": "approved"
+    },
+    {
+      "id": "CI-R3-001",
+      "contentType": "CURATORIAL_INTERPRETATION",
+      "interpretation": "未来关系不仅取决于查理能力的变化，也取决于未来查理以及周围其他人的行动；因此，当前的查理无法完整预先确定未来关系的意义。",
+      "basedOnVerifiedFactIds": ["VF-R3-001", "VF-R3-002"],
+      "prohibitedClaims": [
+        "这是作者唯一结论。",
+        "未来查理必须维持或终止某段具体关系。"
+      ],
+      "presentationMode": "one_possible_interpretation",
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z",
+      "approvalStatus": "approved"
+    }
+  ]
+}

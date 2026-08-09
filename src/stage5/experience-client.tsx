@@ -683,6 +683,7 @@ function CompleteView({ heading, view, commands }: StageProps) {
         <section><h2>那句被留下的话</h2><p>{envelope.preciseText}</p></section>
         <section><h2>朴素版本</h2><p>{envelope.plainText}</p></section>
         <section><h2>三次看见之后</h2><p>{envelope.portraitShiftSummary}</p><p>最终选择：{envelope.finalPortraitChoice}</p></section>
+        <DynamicFinalPortrait view={view} />
         <section><h2>仍然没有消失的分歧</h2>{envelope.openDissents.length ? <ul>{envelope.openDissents.map((item) => <li key={item}>{item}</li>)}</ul> : <p>没有开放分歧。</p>}</section>
         <section><h2>签名与归宿</h2><p>{signatureLabel(envelope.signatureStatus)} · {envelope.finalDisposition}</p></section>
         <aside className="declaration-card"><strong>原创互动声明</strong><p>{envelope.originalDeclaration}</p><small>{envelope.attribution}</small></aside>
@@ -694,6 +695,65 @@ function CompleteView({ heading, view, commands }: StageProps) {
       <button className="primary-action" onClick={() => void commands.startNewSession()}>开始新的体验</button>
     </section>
   );
+}
+
+function DynamicFinalPortrait({ view }: { view: Stage5PresentationView }) {
+  const envelope = view.envelope!;
+  const fallbackAssetPath = fixedFallbackForChoice(
+    envelope.finalPortraitChoice,
+  );
+  const [imageUrl, setImageUrl] = useState(fallbackAssetPath);
+  const [generated, setGenerated] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch("/api/dynamic-portrait", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: view.sessionId,
+        experiencePhase: "COMPLETE",
+        visualProjection: {
+          finalPortraitChoice: envelope.finalPortraitChoice,
+          signatureStatus: envelope.signatureStatus,
+          finalDisposition: envelope.finalDisposition,
+        },
+      }),
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((result: { status?: unknown; imageUrl?: unknown } | null) => {
+        if (result?.status === "generated" && typeof result.imageUrl === "string") {
+          setImageUrl(result.imageUrl);
+          setGenerated(true);
+        }
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [envelope, view.sessionId]);
+
+  return (
+    <section className="dynamic-portrait-card">
+      <h2>面向这一刻的肖像</h2>
+      <Image
+        src={imageUrl}
+        alt="同一位查理在体验结尾面向记录与未来；此图为可选氛围视觉，不是事实证据。"
+        width={720}
+        height={900}
+        unoptimized
+        onError={() => {
+          setImageUrl(fallbackAssetPath);
+          setGenerated(false);
+        }}
+      />
+      <p>{generated ? "可选动态肖像" : "已批准固定肖像（稳定回退）"} · 非事实证据</p>
+    </section>
+  );
+}
+
+function fixedFallbackForChoice(choice: string): string {
+  if (choice === "early") return "/portraits/charlie-original-v2/early.png";
+  if (choice === "peak") return "/portraits/charlie-original-v2/peak.png";
+  return "/portraits/charlie-original-v2/future-facing.png";
 }
 
 function PortraitImage({ portrait }: { portrait: Stage5PresentationView["portraits"][number] }) {

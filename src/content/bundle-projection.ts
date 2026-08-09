@@ -10,12 +10,18 @@ import type {
 import {
   placeholderRuntimeContentBundleMaterialSchema,
   placeholderRuntimeContentBundleSchema,
+  publicBookEditionSchema,
+  publicCuratorialInterpretationContentRecordSchema,
+  publicEvidenceCardContentRecordSchema,
   publicRuntimeContentBundleMaterialSchema,
   publicRuntimeContentBundleSchema,
+  publicVerifiedFactContentRecordSchema,
   sealedVerifiedContentBundleSchema,
   verifiedContentBundleMaterialSchema,
 } from "./bundle.schemas";
 import type {
+  BookEditionAuthoringRecord,
+  CuratorialInterpretationAuthoringRecord,
   PlaceholderRuntimeContentBundle,
   PlaceholderRuntimeContentBundleMaterial,
   PublicRuntimeContentBundleMaterial,
@@ -23,6 +29,10 @@ import type {
   SealedVerifiedContentBundle,
   VerifiedContentBundleMaterial,
 } from "./bundle.contracts";
+import type {
+  ApprovedVerifiedFactAuthoringRecord,
+  EvidenceCardAuthoringRecord,
+} from "./content.contracts";
 import {
   computeInternalContentBundleChecksum,
   computePublicContentBundleChecksum,
@@ -162,6 +172,57 @@ export function projectDomainCuratorialInterpretation(
   });
 }
 
+export function projectPublicBookEditionRecord(
+  edition: BookEditionAuthoringRecord,
+) {
+  return publicBookEditionSchema.parse({
+    editionId: edition.editionId,
+    title: edition.title,
+    language: edition.language,
+    publisher: edition.publisher,
+    publicationYear: edition.publicationYear,
+    isbn: edition.isbn,
+    editionLabel: edition.editionLabel,
+  });
+}
+
+export function projectPublicVerifiedFactContentRecord(
+  fact: ApprovedVerifiedFactAuthoringRecord,
+) {
+  return publicVerifiedFactContentRecordSchema.parse({
+    id: fact.id,
+    contentType: "VERIFIED_FACT",
+    theme: fact.theme,
+    round: fact.round,
+    sourceLocation: fact.sourceLocation,
+    publicSummary: fact.publicSummary,
+    publicPresentationMode: fact.publicPresentationMode,
+    allowedInterpretations: fact.allowedInterpretations,
+    prohibitedInferences: fact.prohibitedInferences,
+    copyrightStatus: fact.copyrightStatus,
+    editionId: fact.editionId,
+  });
+}
+
+export function projectPublicCuratorialInterpretationContentRecord(
+  interpretation: CuratorialInterpretationAuthoringRecord,
+) {
+  return publicCuratorialInterpretationContentRecordSchema.parse({
+    id: interpretation.id,
+    contentType: "CURATORIAL_INTERPRETATION",
+    interpretation: interpretation.interpretation,
+    basedOnVerifiedFactIds: interpretation.basedOnVerifiedFactIds,
+    prohibitedClaims: interpretation.prohibitedClaims,
+    presentationMode: interpretation.presentationMode,
+  });
+}
+
+export function projectPublicEvidenceCardContentRecord(
+  card: EvidenceCardAuthoringRecord,
+) {
+  return publicEvidenceCardContentRecordSchema.parse({ ...card });
+}
+
 function projectPublicBundleMaterial(
   material: VerifiedContentBundleMaterial | SealedVerifiedContentBundle,
 ): PublicRuntimeContentBundleMaterial {
@@ -172,43 +233,20 @@ function projectPublicBundleMaterial(
     contentMode: "verified",
     contentBundleId: material.contentBundleId,
     contentBundleVersion: material.contentBundleVersion,
-    edition: {
-      editionId: material.edition.editionId,
-      title: material.edition.title,
-      language: material.edition.language,
-      publisher: material.edition.publisher,
-      publicationYear: material.edition.publicationYear,
-      isbn: material.edition.isbn,
-      editionLabel: material.edition.editionLabel,
-    },
+    edition: projectPublicBookEditionRecord(material.edition),
     approvalStatus: "approved",
     checksumAlgorithm: material.checksumAlgorithm,
     containsPlaceholderContent: false,
     originalInteraction: { ...material.originalInteraction },
-    verifiedFacts: material.verifiedFacts.map((fact) => ({
-      id: fact.id,
-      contentType: "VERIFIED_FACT",
-      theme: fact.theme,
-      round: fact.round,
-      sourceLocation: fact.sourceLocation,
-      publicSummary: fact.publicSummary,
-      publicPresentationMode: fact.publicPresentationMode,
-      allowedInterpretations: fact.allowedInterpretations,
-      prohibitedInferences: fact.prohibitedInferences,
-      copyrightStatus: fact.copyrightStatus,
-      editionId: fact.editionId,
-    })),
-    curatorialInterpretations: material.curatorialInterpretations.map(
-      (interpretation) => ({
-        id: interpretation.id,
-        contentType: "CURATORIAL_INTERPRETATION",
-        interpretation: interpretation.interpretation,
-        basedOnVerifiedFactIds: interpretation.basedOnVerifiedFactIds,
-        prohibitedClaims: interpretation.prohibitedClaims,
-        presentationMode: interpretation.presentationMode,
-      }),
+    verifiedFacts: material.verifiedFacts.map(
+      projectPublicVerifiedFactContentRecord,
     ),
-    evidenceCards: material.evidenceCards.map((card) => ({ ...card })),
+    curatorialInterpretations: material.curatorialInterpretations.map(
+      projectPublicCuratorialInterpretationContentRecord,
+    ),
+    evidenceCards: material.evidenceCards.map(
+      projectPublicEvidenceCardContentRecord,
+    ),
     portraits: material.portraits.map((portrait) => ({
       assetId: portrait.assetId,
       charlieStage: portrait.charlieStage,

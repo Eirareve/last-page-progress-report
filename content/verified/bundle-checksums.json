@@ -1,0 +1,7 @@
+{
+  "checksumAlgorithm": "rfc8785-sha256-nfc-v1",
+  "internalContentBundleChecksum": "sha256:f2cc2f727dc94428bbac7006ee55963f941516ade11f13f002d4fad3bf0f962f",
+  "contentBundleChecksum": "sha256:d2431aaf6b42103accd549c8562d11dfe656ba1788e790c9c3f5e6c3e29bb53e",
+  "generatedBy": "repository sealVerifiedContentBundle pipeline",
+  "frozenAt": "2026-08-09T19:42:24.0561146Z"
+}

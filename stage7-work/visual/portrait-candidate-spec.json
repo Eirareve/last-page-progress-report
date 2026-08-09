@@ -1,0 +1,50 @@
+{
+  "specVersion": "stage7-fixed-portrait-candidate-1.0.0",
+  "status": "REJECTED_BY_HUMAN_VISUAL_REVIEW",
+  "humanReview": {
+    "reviewedBy": "project-owner",
+    "reviewedAt": "2026-08-09T18:43:06.768Z",
+    "decision": "rejected",
+    "reasonCategory": "visual_quality",
+    "reasons": [
+      "Obvious AI-generated illustration aesthetics",
+      "Insufficiently believable material and human realism",
+      "Insufficient character appeal and editorial finish",
+      "Semantically correct stages but not mature production visual assets"
+    ],
+    "productionEffect": "none"
+  },
+  "provider": "Agnes",
+  "characterDesignVersion": "charlie-original-v1",
+  "outputIntent": "Three review-only fixed portrait candidates; not production assets and not evidence",
+  "generationStrategy": "Generate early from text, then use the early result only as an identity-and-style reference for peak and futureFacing; do not preserve its bakery setting, apron, pose, or composition",
+  "sharedCharacterDesign": "Original non-canonical fictional character design for Charlie: an adult man with a lean build, oval face, gently prominent ears, short slightly wavy dark-brown hair with a loose side part, warm brown eyes, a straight nose, clean-shaven face, and modest mid-century clothing. Preserve exactly the same facial identity, hair, build, skin tone, period, and muted wardrobe palette across all three images while allowing stage-appropriate clothing changes. This is a project-original design and must not resemble any actor, film adaptation, book cover, or existing illustration.",
+  "sharedStyle": "Refined editorial story illustration, hand-painted gouache and colored-pencil texture with subtle paper grain, restrained cinematic lighting, muted warm umber, dusty blue, soft cream, and desaturated green palette. Vertical 3:4 portrait, waist-up subject, calm natural anatomy, subtle emotionally respectful expression, no melodrama.",
+  "sharedConstraints": "No actor likeness, no film still, no copied book-cover composition, no recognizable copyrighted illustration, no logo, no watermark, no readable text, no quote, no diagnosis symbolism, no infantilization, no distorted facial features, no exaggerated expression used to imply cognitive disability. The image is an original interpretive portrait and is not factual evidence.",
+  "candidates": [
+    {
+      "assetId": "charlie-early-candidate-v1",
+      "charlieStage": "early",
+      "plannedFileStem": "charlie-early-candidate-v1",
+      "altText": "原创插画候选：早期查理站在安静的面包房工作区，神情开放而期待。",
+      "scenePrompt": "A quiet bakery work area suggested through simple shelves, flour-dusted wood, and soft morning light. Charlie stands with relaxed shoulders and open posture, attentive and quietly hopeful. Keep the emotion dignified and understated; do not make him childlike and do not use an exaggerated expression.",
+      "referenceStrategy": "text_to_image"
+    },
+    {
+      "assetId": "charlie-peak-candidate-v2",
+      "charlieStage": "peak",
+      "plannedFileStem": "charlie-peak-candidate-v2",
+      "altText": "原创插画候选：高峰期查理坐在资料与笔记之间，专注而显得孤独。",
+      "scenePrompt": "Use the reference image only for Charlie's exact facial identity and the shared illustration style. Do not preserve the bakery, bread, apron, pose, or composition. Create a clearly different, quiet private research room. Charlie wears a simple muted blue collared shirt without an apron and sits at a restrained desk with closed books and abstract geometric diagrams containing absolutely no letters, numbers, words, labels, or pseudo-writing. His posture is upright and precise, gaze focused slightly away from the viewer, conveying high concentration and social distance without arrogance or theatrical coldness.",
+      "referenceStrategy": "image_to_image_using_early_candidate"
+    },
+    {
+      "assetId": "charlie-future-facing-candidate-v3",
+      "charlieStage": "futureFacing",
+      "plannedFileStem": "charlie-future-facing-candidate-v3",
+      "altText": "原创插画候选：面向未来的查理坐在桌前准备留下文字，神情清醒而克制。",
+      "scenePrompt": "Use the reference image only for Charlie's exact facial identity and the shared illustration style. Do not preserve the bakery, bread, apron, pose, or composition. Create a clearly different, spare private room in quiet late-afternoon light. Charlie wears a simple muted blue collared shirt without an apron and sits at a plain desk, holding a capped pen loosely as if preparing to leave words later. Crop the composition so that no paper, notebook page, document, label, sign, or other writable surface is visible anywhere. The entire image must contain absolutely no letters, numbers, words, signatures, or pseudo-writing. His expression is aware, restrained, and forward-looking, showing resolve and uncertainty without fear caricature or visible impairment cues.",
+      "referenceStrategy": "image_to_image_using_early_candidate"
+    }
+  ]
+}

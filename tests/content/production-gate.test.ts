@@ -24,10 +24,20 @@ describe("bundled content source", () => {
     expect(loaded.bundle.portraits).toHaveLength(3);
   });
 
-  it("keeps the verified authoring template non-runnable", async () => {
-    await expect(createBundledContentLoader().load("verified")).rejects.toMatchObject(
-      { code: "verified_content_unavailable" },
-    );
+  it("loads the sealed verified bundle without private authoring fields", async () => {
+    const loaded = await createBundledContentLoader().load("verified");
+
+    expect(loaded.bundle).toMatchObject({
+      representation: "public_runtime",
+      contentMode: "verified",
+      contentBundleId: "last-page-verified-stage7",
+      contentBundleVersion: "0.2.0",
+      approvalStatus: "approved",
+      containsPlaceholderContent: false,
+      contentBundleChecksum:
+        "sha256:d2431aaf6b42103accd549c8562d11dfe656ba1788e790c9c3f5e6c3e29bb53e",
+    });
+    expect(JSON.stringify(loaded.bundle)).not.toContain("internalExcerpt");
   });
 });
 
@@ -117,7 +127,7 @@ describe("production gate entrypoints", () => {
     ).rejects.toBeInstanceOf(ContentGateRejectedError);
   });
 
-  it("blocks production while verified content is still only a template", async () => {
+  it("passes production with the complete approved verified bundle", async () => {
     await expect(
       runConfiguredContentGate(
         "build_time",
@@ -128,6 +138,12 @@ describe("production gate entrypoints", () => {
         },
         EVALUATED_AT,
       ),
-    ).rejects.toMatchObject({ code: "verified_content_unavailable" });
+    ).resolves.toMatchObject({
+      status: "passed",
+      targetEnvironment: "production",
+      contentBundleId: "last-page-verified-stage7",
+      checksum:
+        "sha256:d2431aaf6b42103accd549c8562d11dfe656ba1788e790c9c3f5e6c3e29bb53e",
+    });
   });
 });
