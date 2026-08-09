@@ -910,6 +910,16 @@ function makeVerifiedGatedContentFixture(
       contentBundleChecksum: reviewInput.contentBundleChecksum,
       contentSchemaVersion: "0.1.0",
     },
+    originalInteraction: {
+      item: {
+        id: "test-original-interaction",
+        contentType: "ORIGINAL_INTERACTION",
+        purpose: "manuscript",
+        text: "Synthetic manuscript.",
+      },
+      publicDeclaration: "Synthetic declaration.",
+      attribution: "Test fixture",
+    },
     evidenceCards: [],
     portraits: [],
     getDomainEvidenceCard(cardId) {
@@ -962,6 +972,16 @@ function makePlaceholderGatedContent(
         contentBundleVersion: reviewInput.contentBundleVersion,
         contentBundleChecksum: reviewInput.contentBundleChecksum,
         contentSchemaVersion: "0.1.0",
+      },
+      originalInteraction: {
+        item: {
+          id: "test-original-interaction",
+          contentType: "ORIGINAL_INTERACTION",
+          purpose: "manuscript",
+          text: "Synthetic manuscript.",
+        },
+        publicDeclaration: "Synthetic declaration.",
+        attribution: "Test fixture",
       },
       evidenceCards: [
         {

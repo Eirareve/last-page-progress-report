@@ -1,8 +1,12 @@
 import type { z } from "zod";
 
 import { finalEnvelopeSchema } from "../schemas/final-envelope.schema";
+import type { finalEnvelopeContentSnapshotSchema } from "../schemas/final-envelope.schema";
 
 type FinalEnvelopeValue = z.infer<typeof finalEnvelopeSchema>;
+export type FinalEnvelopeContentSnapshot = z.infer<
+  typeof finalEnvelopeContentSnapshotSchema
+>;
 
 export type FinalEnvelope<TExecutionProvenance = unknown> = DeepReadonly<
   Omit<FinalEnvelopeValue, "executionProvenance"> & {

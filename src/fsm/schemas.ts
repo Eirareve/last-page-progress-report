@@ -5,7 +5,7 @@ import { applicationOrchestrationEventSchema, stage3BudgetUsageSchema } from "..
 import {
   finalEnvelopeSchema,
   finalPortraitChoiceSchema,
-  portraitDescriptorSchema,
+  portraitDescriptorCollectionSchema,
   portraitShiftComparisonSchema,
   roundIdSchema,
   semanticDriftSchema,
@@ -25,10 +25,15 @@ import {
   sessionConfigurationSchema,
 } from "../runtime";
 
+export const stage4FinalEnvelopeSchema = finalEnvelopeSchema.extend({
+  sessionConfiguration: sessionConfigurationSchema,
+  executionProvenance: finalizationProvenanceStateSchema,
+});
+
 const startEventSchema = z.strictObject({ eventType: z.literal("START") });
 const setPortraitDescriptorsEventSchema = z.strictObject({
   eventType: z.literal("SET_PORTRAIT_DESCRIPTORS"),
-  descriptors: z.array(portraitDescriptorSchema).length(3),
+  descriptors: portraitDescriptorCollectionSchema,
 });
 const chooseInitialPortraitEventSchema = z.strictObject({
   eventType: z.literal("CHOOSE_INITIAL_PORTRAIT"),
@@ -185,7 +190,7 @@ export const finalEnvelopePersistedEventSchema =
     eventType: z.literal("FINAL_ENVELOPE_PERSISTED"),
     capability: z.literal("persistFinalEnvelope"),
     outcome: z.literal("succeeded"),
-    envelope: finalEnvelopeSchema,
+    envelope: stage4FinalEnvelopeSchema,
   });
 export const finalEnvelopePersistFailedEventSchema =
   operationResultGuardInputSchema.extend({
@@ -214,7 +219,7 @@ export const stage4SessionStateSchema = sessionStateSchema.and(
     configuration: sessionConfigurationSchema,
     runtime: runtimeStateSchema,
     provenance: finalizationProvenanceStateSchema,
-    finalEnvelope: finalEnvelopeSchema.nullable(),
+    finalEnvelope: stage4FinalEnvelopeSchema.nullable(),
   }),
 );
 

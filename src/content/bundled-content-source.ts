@@ -1,6 +1,7 @@
 import contentManifestJson from "../../content/content-manifest.json";
 import placeholderEvidenceCardsJson from "../../content/placeholder/evidence-cards.json";
 import placeholderManifestJson from "../../content/placeholder/manifest.json";
+import placeholderOriginalInteractionJson from "../../content/placeholder/original-interaction.json";
 import placeholderPortraitsJson from "../../content/placeholder/portrait-config.json";
 import verifiedManifestTemplateJson from "../../content/verified/manifest.template.json";
 import {
@@ -10,6 +11,7 @@ import {
   placeholderPortraitConfigCollectionSchema,
   verifiedManifestTemplateSchema,
 } from "./bundle.schemas";
+import { originalInteractionContentRecordSchema } from "./content.schemas";
 import {
   ContentLoader,
   ContentSourceUnavailableError,
@@ -30,6 +32,9 @@ export const BUNDLED_CONTENT_SOURCE: ContentBundleSource = Object.freeze({
     const portraits = placeholderPortraitConfigCollectionSchema.parse(
       placeholderPortraitsJson,
     );
+    const originalInteraction = originalInteractionContentRecordSchema.parse(
+      placeholderOriginalInteractionJson,
+    );
     const bundle = await sealPlaceholderContentBundle({
       representation: "placeholder_runtime",
       contentContractVersion: manifest.contentContractVersion,
@@ -40,6 +45,7 @@ export const BUNDLED_CONTENT_SOURCE: ContentBundleSource = Object.freeze({
       approvalStatus: "placeholder",
       checksumAlgorithm: manifest.checksumAlgorithm,
       containsPlaceholderContent: true,
+      originalInteraction,
       evidenceCards: evidenceCards.records,
       portraits: portraits.records,
     });

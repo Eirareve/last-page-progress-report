@@ -16,3 +16,4 @@ export * from "./required-capabilities";
 export * from "./round-analysis-orchestrator";
 export * from "./schemas";
 export * from "./semantic-input";
+export * from "./stage4-contract-versions";

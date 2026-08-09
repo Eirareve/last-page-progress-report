@@ -93,9 +93,17 @@ export async function reduceStage4Event(input: {
       if (initialChoice === null) {
         throw transition("initial_portrait_choice_missing");
       }
-      const descriptors = Object.fromEntries(
-        state.portraitDescriptors.map(({ stage, label }) => [stage, [label]]),
-      ) as Record<typeof initialChoice, string[]>;
+      const descriptors = {
+        early: state.portraitDescriptors
+          .filter(({ stage }) => stage === "early")
+          .map(({ label }) => label),
+        peak: state.portraitDescriptors
+          .filter(({ stage }) => stage === "peak")
+          .map(({ label }) => label),
+        futureFacing: state.portraitDescriptors
+          .filter(({ stage }) => stage === "futureFacing")
+          .map(({ label }) => label),
+      };
       nextState = move(
         {
           ...state,

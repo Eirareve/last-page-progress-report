@@ -18,7 +18,7 @@ describe("bundled content source", () => {
 
     expect(loaded.bundle.contentMode).toBe("placeholder");
     expect(loaded.bundle.contentBundleChecksum).toBe(
-      "sha256:bb487c96ea44606bdec3ce99f8ff9fee1196aa0d052691d03f4a585be5572ffd",
+      "sha256:2a620ed7d86146fd8d709759fda765ccabd412fc9cd07f3dd413f6a6bf6566c1",
     );
     expect(loaded.bundle.evidenceCards).toHaveLength(3);
     expect(loaded.bundle.portraits).toHaveLength(3);

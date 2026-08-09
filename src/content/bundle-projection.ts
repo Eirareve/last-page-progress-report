@@ -184,6 +184,7 @@ function projectPublicBundleMaterial(
     approvalStatus: "approved",
     checksumAlgorithm: material.checksumAlgorithm,
     containsPlaceholderContent: false,
+    originalInteraction: { ...material.originalInteraction },
     verifiedFacts: material.verifiedFacts.map((fact) => ({
       id: fact.id,
       contentType: "VERIFIED_FACT",
@@ -213,6 +214,9 @@ function projectPublicBundleMaterial(
       charlieStage: portrait.charlieStage,
       publicAssetPath: portrait.publicAssetPath,
       altText: portrait.altText,
+      descriptorOptions: portrait.descriptorOptions.map((option) => ({
+        ...option,
+      })),
       creator: portrait.creator,
       creationMethod: portrait.creationMethod,
       licenseOrPermission: portrait.licenseOrPermission,

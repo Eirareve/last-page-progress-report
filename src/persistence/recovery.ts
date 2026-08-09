@@ -4,6 +4,7 @@ import {
 } from "../domain";
 import type { Stage4PersistenceSidecars, Stage4SessionState } from "../fsm";
 import { stage4SessionStateSchema } from "../fsm";
+import type { ContractVersionVector } from "../provenance";
 import {
   recoverSessionState,
   refreshRuntimeState,
@@ -46,6 +47,7 @@ export function recoverStage4Session(input: {
   sidecars: Stage4PersistenceSidecars | null;
   integrityValid: boolean;
   expectedContentBinding: SessionContentBinding;
+  expectedContractVersionVector: ContractVersionVector;
   now: string;
   idGenerator: IdGenerator;
   migrations?: SessionMigrationRegistry;
@@ -66,6 +68,12 @@ export function recoverStage4Session(input: {
       const mismatches = contentBindingMismatches(
         state.contentBinding,
         input.expectedContentBinding,
+      );
+      mismatches.push(
+        ...contractVersionMismatches(
+          state.provenance.contractVersionVector,
+          input.expectedContractVersionVector,
+        ),
       );
       return mismatches.length === 0
         ? { compatible: true as const }
@@ -188,6 +196,19 @@ export function recoverStage4Session(input: {
     action,
     invalidatedOperationId: priorOperation?.operationId ?? null,
   };
+}
+
+function contractVersionMismatches(
+  actual: ContractVersionVector,
+  expected: ContractVersionVector,
+): string[] {
+  return Object.keys(expected)
+    .filter(
+      (field) =>
+        actual[field as keyof ContractVersionVector] !==
+        expected[field as keyof ContractVersionVector],
+    )
+    .map((field) => `provenance.contractVersionVector.${field}`);
 }
 
 function contentBindingMismatches(

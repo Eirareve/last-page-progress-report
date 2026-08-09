@@ -1,9 +1,14 @@
 # Runtime Contract
 
 > `runtimeContractVersion: 0.1.0`
-> Status: draft for final human approval
+> Status: frozen for Stage 5 implementation
 > DRI: Codex（技术一致性）
 > Final approver: 项目负责人
+> Stage 5 approval: project owner, 2026-08-09
+
+Stage 5 recovery compares the complete current ContractVersionVector as well
+as the content binding before a persisted Session can resume. A G1–G5 version
+mismatch is a hard recovery failure, never an implicit migration.
 
 ## 1. Scope
 

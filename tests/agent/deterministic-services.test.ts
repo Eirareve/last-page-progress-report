@@ -65,6 +65,16 @@ describe("deterministic Agent services", () => {
         contentBundleChecksum: `sha256:${"c".repeat(64)}`,
         contentSchemaVersion: "0.1.0",
       },
+      originalInteraction: {
+        item: {
+          id: "test-original-interaction",
+          contentType: "ORIGINAL_INTERACTION",
+          purpose: "manuscript",
+          text: "Synthetic manuscript.",
+        },
+        publicDeclaration: "Synthetic declaration.",
+        attribution: "Test fixture",
+      },
       evidenceCards: [],
       portraits: [],
     };

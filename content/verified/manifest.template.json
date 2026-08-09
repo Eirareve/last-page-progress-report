@@ -1,7 +1,7 @@
 {
-  "verifiedManifestSchemaVersion": "0.1.0",
-  "contentContractVersion": "0.1.0",
-  "contentSchemaVersion": "0.1.0",
+  "verifiedManifestSchemaVersion": "0.2.0",
+  "contentContractVersion": "0.2.0",
+  "contentSchemaVersion": "0.2.0",
   "contentMode": "verified",
   "manifestStatus": "template_only",
   "templateOnly": true,
@@ -19,7 +19,8 @@
     "verifiedFacts": "verified-facts.template.json",
     "curatorialInterpretations": "curatorial-interpretations.template.json",
     "evidenceCards": "evidence-cards.template.json",
-    "portraitConfig": "portrait-config.template.json"
+    "portraitConfig": "portrait-config.template.json",
+    "originalInteraction": "original-interaction.json"
   },
   "activationRequirements": [
     "replace_all_null_authoring_fields",

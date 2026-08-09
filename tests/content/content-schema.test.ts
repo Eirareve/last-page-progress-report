@@ -256,6 +256,7 @@ describe("placeholder isolation", () => {
         stage: "futureFacing",
         assetPath: "/placeholders/future-facing.svg",
         altText: "Placeholder scene for future-facing Charlie",
+        descriptorOptions: [{ id: "future-aware", label: "aware" }],
         provenance: "placeholder",
       }).success,
     ).toBe(true);
@@ -266,6 +267,7 @@ describe("placeholder isolation", () => {
         stage: "peak",
         assetPath: "/placeholders/future-facing.svg",
         altText: "Placeholder scene for future-facing Charlie",
+        descriptorOptions: [{ id: "future-aware", label: "aware" }],
         provenance: "placeholder",
       }).success,
     ).toBe(false);

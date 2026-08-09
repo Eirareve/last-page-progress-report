@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" role="img" aria-labelledby="t d">
+  <title id="t">高峰期查理肖像占位图</title><desc id="d">等待经人工批准的正式视觉资产</desc>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#78939a"/><stop offset="1" stop-color="#243a43"/></linearGradient></defs>
+  <rect width="720" height="900" fill="url(#g)"/><circle cx="360" cy="310" r="145" fill="#d6c5b5" opacity=".84"/><path d="M130 900c34-244 125-365 230-365s197 121 230 365" fill="#172d35"/><path d="M275 332h170" stroke="#33454c" stroke-width="10"/><path d="M260 274h70m60 0h70" stroke="#26383e" stroke-width="12"/><text x="48" y="74" fill="#f1f6f5" font-size="26" font-family="serif">PEAK · PLACEHOLDER</text>
+</svg>

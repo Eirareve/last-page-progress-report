@@ -1,6 +1,7 @@
 import { stage3BudgetUsageSchema } from "../application";
 import {
   manuscriptStateSchema,
+  originalInteractionSchema,
   portraitPreludeSchema,
   sessionStateSchema,
   type PortraitDescriptor,
@@ -24,7 +25,7 @@ import {
 
 export function createStage4Session(input: {
   contentBinding: Stage4SessionState["contentBinding"];
-  preciseText: string;
+  originalInteraction: Stage4SessionState["contentItemsUsed"][number];
   preciseRevisionId: string;
   portraitDescriptors: readonly PortraitDescriptor[];
   configuration: SessionConfiguration;
@@ -36,6 +37,9 @@ export function createStage4Session(input: {
   const sessionId = input.idGenerator.next("session");
   const stageInstanceId = input.idGenerator.next("stage_instance");
   const configuration = sessionConfigurationSchema.parse(input.configuration);
+  const originalInteraction = originalInteractionSchema.parse(
+    input.originalInteraction,
+  );
   const runtime = runtimeStateSchema.parse({
     stageInstanceId,
     activeOperation: null,
@@ -63,7 +67,7 @@ export function createStage4Session(input: {
       comparison: null,
     }),
     manuscript: manuscriptStateSchema.parse({
-      preciseText: input.preciseText,
+      preciseText: originalInteraction.text,
       preciseRevisionId: input.preciseRevisionId,
       plainText: null,
       plainRevisionId: null,
@@ -82,7 +86,7 @@ export function createStage4Session(input: {
     charlieResponses: [],
     openDissents: [],
     evidenceUsed: [],
-    contentItemsUsed: [],
+    contentItemsUsed: [originalInteraction],
     semanticDrift: null,
     semanticPlacementBatch: null,
     semanticFragments: [],

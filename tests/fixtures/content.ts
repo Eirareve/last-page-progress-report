@@ -35,6 +35,15 @@ export function makeVerifiedContentBundleMaterial(): VerifiedContentBundleMateri
     approvalStatus: "approved",
     checksumAlgorithm: CONTENT_CHECKSUM_ALGORITHM,
     containsPlaceholderContent: false,
+    originalInteraction: {
+      id: "test-original-interaction",
+      contentType: "ORIGINAL_INTERACTION",
+      purpose: "manuscript",
+      text: "Synthetic precise manuscript.",
+      publicDeclaration: "Synthetic original interaction for tests.",
+      attribution: "Test fixture",
+      provenance: "scope_freeze",
+    },
     verifiedFacts: (["round1", "round2", "round3"] as const).map(
       (round, index) => ({
         id: `test-fact-${index + 1}`,
@@ -95,6 +104,12 @@ export function makeVerifiedContentBundleMaterial(): VerifiedContentBundleMateri
         charlieStage,
         publicAssetPath: `/portraits/test-${index + 1}.png`,
         altText: `Synthetic test portrait ${index + 1}`,
+        descriptorOptions: [
+          {
+            id: `test-descriptor-${index + 1}`,
+            label: `Descriptor ${index + 1}`,
+          },
+        ],
         creator: "Test fixture",
         creationMethod: "synthetic_test_asset",
         licenseOrPermission: "test_only",

@@ -15,14 +15,15 @@ import {
   approvedVerifiedFactAuthoringRecordSchema,
   contentSourceLocationSchema,
   evidenceCardAuthoringRecordSchema,
+  originalInteractionContentRecordSchema,
   placeholderEvidenceCardSchema,
   placeholderPortraitSceneConfigSchema,
   publicAssetPathSchema,
 } from "./content.schemas";
 
-export const CONTENT_CONTRACT_VERSION = "0.1.0" as const;
-export const CONTENT_SCHEMA_VERSION = "0.1.0" as const;
-export const CONTENT_BUNDLE_VERSION = "0.1.0" as const;
+export const CONTENT_CONTRACT_VERSION = "0.2.0" as const;
+export const CONTENT_SCHEMA_VERSION = "0.2.0" as const;
+export const CONTENT_BUNDLE_VERSION = "0.2.0" as const;
 
 const nonEmptyTextSchema = z
   .string()
@@ -86,6 +87,23 @@ export const portraitConfigAuthoringRecordSchema = z.strictObject({
   charlieStage: charlieStageSchema,
   publicAssetPath: publicAssetPathSchema,
   altText: nonEmptyTextSchema,
+  descriptorOptions: z
+    .array(
+      z.strictObject({
+        id: nonEmptyTextSchema,
+        label: nonEmptyTextSchema,
+      }),
+    )
+    .min(1)
+    .superRefine((options, context) => {
+      if (new Set(options.map(({ id }) => id)).size !== options.length) {
+        context.addIssue({
+          code: "custom",
+          message: "Portrait descriptor option IDs must be unique within a scene",
+          path: [],
+        });
+      }
+    }),
   creator: nonEmptyTextSchema,
   creationMethod: nonEmptyTextSchema,
   licenseOrPermission: nonEmptyTextSchema,
@@ -108,6 +126,7 @@ const verifiedBundleMaterialShape = {
   approvalStatus: z.literal("approved"),
   checksumAlgorithm: z.literal(CONTENT_CHECKSUM_ALGORITHM),
   containsPlaceholderContent: z.literal(false),
+  originalInteraction: originalInteractionContentRecordSchema,
   verifiedFacts: z.array(approvedVerifiedFactAuthoringRecordSchema).min(1),
   curatorialInterpretations: z.array(
     curatorialInterpretationAuthoringRecordSchema,
@@ -176,6 +195,7 @@ const publicVerifiedBundleMaterialShape = {
   approvalStatus: z.literal("approved"),
   checksumAlgorithm: z.literal(CONTENT_CHECKSUM_ALGORITHM),
   containsPlaceholderContent: z.literal(false),
+  originalInteraction: originalInteractionContentRecordSchema,
   verifiedFacts: z.array(publicVerifiedFactContentRecordSchema).min(1),
   curatorialInterpretations: z.array(
     publicCuratorialInterpretationContentRecordSchema,
@@ -239,6 +259,7 @@ export const verifiedManifestTemplateSchema = z.strictObject({
     ),
     evidenceCards: z.literal("evidence-cards.template.json"),
     portraitConfig: z.literal("portrait-config.template.json"),
+    originalInteraction: z.literal("original-interaction.json"),
   }),
   activationRequirements: z.array(nonEmptyTextSchema).min(5),
 });
@@ -262,6 +283,7 @@ export const placeholderManifestSchema = z.strictObject({
   files: z.strictObject({
     evidenceCards: z.literal("evidence-cards.json"),
     portraitConfig: z.literal("portrait-config.json"),
+    originalInteraction: z.literal("original-interaction.json"),
   }),
   prohibitions: z.array(nonEmptyTextSchema).min(3),
 });
@@ -276,6 +298,7 @@ const placeholderRuntimeContentBundleMaterialShape = {
   approvalStatus: z.literal("placeholder"),
   checksumAlgorithm: z.literal(CONTENT_CHECKSUM_ALGORITHM),
   containsPlaceholderContent: z.literal(true),
+  originalInteraction: originalInteractionContentRecordSchema,
   evidenceCards: z.array(placeholderEvidenceCardSchema).length(3),
   portraits: z.array(placeholderPortraitSceneConfigSchema).length(3),
 } as const;
@@ -310,6 +333,7 @@ function validateVerifiedBundleReferences(
       ...bundle.curatorialInterpretations.map((record) => record.id),
       ...bundle.evidenceCards.map((record) => record.id),
       ...bundle.portraits.map((record) => record.assetId),
+      bundle.originalInteraction.id,
     ],
     context,
   );
@@ -376,6 +400,7 @@ function validatePublicBundleReferences(
       ...bundle.curatorialInterpretations.map((record) => record.id),
       ...bundle.evidenceCards.map((record) => record.id),
       ...bundle.portraits.map((record) => record.assetId),
+      bundle.originalInteraction.id,
     ],
     context,
   );
@@ -431,6 +456,7 @@ function validatePlaceholderBundle(
   bundle: {
     evidenceCards: readonly z.infer<typeof placeholderEvidenceCardSchema>[];
     portraits: readonly z.infer<typeof placeholderPortraitSceneConfigSchema>[];
+    originalInteraction: z.infer<typeof originalInteractionContentRecordSchema>;
   },
   context: z.RefinementCtx,
 ): void {
@@ -438,6 +464,7 @@ function validatePlaceholderBundle(
     [
       ...bundle.evidenceCards.map((record) => record.id),
       ...bundle.portraits.map((record) => record.id),
+      bundle.originalInteraction.id,
     ],
     context,
   );

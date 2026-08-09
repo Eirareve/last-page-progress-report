@@ -1,25 +1,27 @@
 # Content Contract
 
-> `contentContractVersion: 0.1.0`
-> `contentSchemaVersion: 0.1.0`
-> Status: approved non-breaking stage 2 baseline
+> `contentContractVersion: 0.2.0`
+> `contentSchemaVersion: 0.2.0`
+> Status: frozen for Stage 5 implementation
 > DRI: Codex（technical consistency）
 > Final approver: project owner
 > Execution guide: v1.2.5 (`SHA-256 5715711665D2C3D6985602052C9ADB31C28FF59907981F810DAEB2610AF8C020`)
+> Stage 5 approval: project owner, 2026-08-09
 
 ## 1. Authority, compatibility, and scope
 
 This Contract owns content authoring records, private/public projections,
 placeholder fixtures, bundle checksums, content access, and production content
 gating. Product meaning remains in [`scope-freeze.md`](./scope-freeze.md), while
-the existing Domain `0.1.0` Schemas remain the executable source of truth for
+the current Domain Schemas remain the executable source of truth for
 Domain values.
 
-This is a non-breaking addition. It does not modify or widen
-`verifiedFactSchema`, `evidenceCardSchema`, `ContentGateEvaluation`,
-`SessionState`, the Contract version vector, or any stage 1 invariant.
-Content-layer authoring records are deliberately not aliases of the strict
-Domain types.
+Version `0.2.0` is the approved G2/G3/G4 Stage 5 repair. It adds reviewed,
+unique portrait `descriptorOptions`, an attributed `originalInteraction`
+record to both private and public bundles, and the deterministic projection
+used by `FinalEnvelope.contentSnapshot`. It does not widen verified evidence
+or permit UI code to read raw content files. Content-layer authoring records
+remain deliberately distinct from strict Domain types.
 
 If a future content requirement cannot be represented through the projections
 defined here without changing a frozen stage 1 Contract, implementation must
@@ -152,7 +154,7 @@ The executable Schema names are unambiguous:
 The word `public` refers only to the client/runtime representation. A Domain
 projection is named as such and is not a second public bundle Schema.
 
-## 4. Approved projections to Domain `0.1.0`
+## 4. Approved projections to Domain
 
 The content layer may project only fully approved records. The projection is
 deterministic and rejects missing or ambiguous source data.

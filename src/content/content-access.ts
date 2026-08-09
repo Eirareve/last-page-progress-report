@@ -1,8 +1,15 @@
 import type {
   CuratorialInterpretation,
   EvidenceCard,
+  OriginalInteraction,
   VerifiedFact,
 } from "../domain/contracts/evidence";
+import { originalInteractionSchema } from "../domain/schemas/evidence.schema";
+import {
+  finalEnvelopeContentSnapshotSchema,
+  type FinalEnvelopeContentSnapshot,
+} from "../domain";
+import type { TargetEnvironment } from "./contracts";
 import type {
   LoadedContentBundle,
   PlaceholderRuntimeContentBundle,
@@ -24,6 +31,11 @@ export type ContentAccessBinding = Readonly<{
 
 type BaseContentAccess = Readonly<{
   binding: ContentAccessBinding;
+  originalInteraction: Readonly<{
+    item: OriginalInteraction;
+    publicDeclaration: string;
+    attribution: string;
+  }>;
 }>;
 
 export type PlaceholderContentAccess = BaseContentAccess &
@@ -56,11 +68,22 @@ export function createContentAccess(bundle: LoadedContentBundle): ContentAccess 
     contentBundleChecksum: bundle.contentBundleChecksum,
     contentSchemaVersion: bundle.contentSchemaVersion,
   });
+  const originalInteraction = deepFreeze({
+    item: originalInteractionSchema.parse({
+      id: bundle.originalInteraction.id,
+      contentType: bundle.originalInteraction.contentType,
+      purpose: bundle.originalInteraction.purpose,
+      text: bundle.originalInteraction.text,
+    }),
+    publicDeclaration: bundle.originalInteraction.publicDeclaration,
+    attribution: bundle.originalInteraction.attribution,
+  });
 
   if (bundle.contentMode === "placeholder") {
     return deepFreeze({
       contentMode: "placeholder" as const,
       binding,
+      originalInteraction,
       evidenceCards: [...bundle.evidenceCards],
       portraits: [...bundle.portraits],
     });
@@ -69,6 +92,7 @@ export function createContentAccess(bundle: LoadedContentBundle): ContentAccess 
   return deepFreeze({
     contentMode: "verified" as const,
     binding,
+    originalInteraction,
     evidenceCards: [...bundle.evidenceCards],
     portraits: [...bundle.portraits],
     getVerifiedFactsByIds: (factIds: readonly string[]) =>
@@ -81,5 +105,35 @@ export function createContentAccess(bundle: LoadedContentBundle): ContentAccess 
           projectDomainCuratorialInterpretation(bundle, interpretationId),
         ),
       ),
+  });
+}
+
+export function projectFinalEnvelopeContentSnapshot(input: {
+  access: ContentAccess;
+  targetEnvironment: TargetEnvironment;
+}): FinalEnvelopeContentSnapshot {
+  const portraitAssets =
+    input.access.contentMode === "placeholder"
+      ? input.access.portraits.map((portrait) => ({
+          assetId: portrait.id,
+          stage: portrait.stage,
+          assetPath: portrait.assetPath,
+          altText: portrait.altText,
+          provenance: "placeholder" as const,
+        }))
+      : input.access.portraits.map((portrait) => ({
+          assetId: portrait.assetId,
+          stage: portrait.charlieStage,
+          assetPath: portrait.publicAssetPath,
+          altText: portrait.altText,
+          provenance: "verified" as const,
+        }));
+  return finalEnvelopeContentSnapshotSchema.parse({
+    binding: {
+      ...input.access.binding,
+      targetEnvironment: input.targetEnvironment,
+    },
+    portraitAssets,
+    originalInteraction: input.access.originalInteraction,
   });
 }

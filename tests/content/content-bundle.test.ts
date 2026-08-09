@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CONTENT_BUNDLE_VERSION,
+  CONTENT_CONTRACT_VERSION,
+  CONTENT_SCHEMA_VERSION,
   placeholderRuntimeContentBundleMaterialSchema,
   portraitConfigAuthoringRecordSchema,
   publicRuntimeContentBundleSchema,
@@ -215,14 +218,15 @@ describe("ContentLoader and content access", () => {
   it("keeps placeholder access structurally unable to retrieve verified facts", async () => {
     const bundle = await sealPlaceholderContentBundle({
       representation: "placeholder_runtime",
-      contentContractVersion: "0.1.0",
-      contentSchemaVersion: "0.1.0",
+      contentContractVersion: CONTENT_CONTRACT_VERSION,
+      contentSchemaVersion: CONTENT_SCHEMA_VERSION,
       contentMode: "placeholder",
       contentBundleId: "placeholder-test",
-      contentBundleVersion: "0.1.0",
+      contentBundleVersion: CONTENT_BUNDLE_VERSION,
       approvalStatus: "placeholder",
       checksumAlgorithm: CONTENT_CHECKSUM_ALGORITHM,
       containsPlaceholderContent: true,
+      originalInteraction: testOriginalInteraction(),
       evidenceCards: (["round1", "round2", "round3"] as const).map(
         (round, index) => ({
           recordKind: "placeholder_evidence_card" as const,
@@ -258,6 +262,9 @@ describe("ContentLoader and content access", () => {
           stage,
           assetPath: `/placeholders/test-${index + 1}.svg`,
           altText: "Placeholder portrait",
+          descriptorOptions: [
+            { id: `descriptor-${index + 1}`, label: `Descriptor ${index + 1}` },
+          ],
           provenance: "placeholder" as const,
         }),
       ),
@@ -288,14 +295,15 @@ describe("ContentLoader and content access", () => {
   it("rejects duplicate placeholder IDs and incomplete round coverage", async () => {
     const bundle = await sealPlaceholderContentBundle({
       representation: "placeholder_runtime",
-      contentContractVersion: "0.1.0",
-      contentSchemaVersion: "0.1.0",
+      contentContractVersion: CONTENT_CONTRACT_VERSION,
+      contentSchemaVersion: CONTENT_SCHEMA_VERSION,
       contentMode: "placeholder",
       contentBundleId: "placeholder-test",
-      contentBundleVersion: "0.1.0",
+      contentBundleVersion: CONTENT_BUNDLE_VERSION,
       approvalStatus: "placeholder",
       checksumAlgorithm: CONTENT_CHECKSUM_ALGORITHM,
       containsPlaceholderContent: true,
+      originalInteraction: testOriginalInteraction(),
       evidenceCards: (["round1", "round2", "round3"] as const).map(
         (round, index) => ({
           recordKind: "placeholder_evidence_card" as const,
@@ -331,6 +339,9 @@ describe("ContentLoader and content access", () => {
           stage,
           assetPath: `/placeholders/test-${index + 1}.svg`,
           altText: "Placeholder portrait",
+          descriptorOptions: [
+            { id: `descriptor-${index + 1}`, label: `Descriptor ${index + 1}` },
+          ],
           provenance: "placeholder" as const,
         }),
       ),
@@ -343,3 +354,15 @@ describe("ContentLoader and content access", () => {
     ).toBe(false);
   });
 });
+
+function testOriginalInteraction() {
+  return {
+    id: "test-original-interaction",
+    contentType: "ORIGINAL_INTERACTION" as const,
+    purpose: "manuscript" as const,
+    text: "Synthetic manuscript.",
+    publicDeclaration: "Synthetic original interaction declaration.",
+    attribution: "Test fixture",
+    provenance: "scope_freeze" as const,
+  };
+}

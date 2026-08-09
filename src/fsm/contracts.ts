@@ -6,10 +6,12 @@ import type {
   stage4PersistenceSidecarsSchema,
   stage4PrivateInputsSchema,
   stage4SessionStateSchema,
+  stage4FinalEnvelopeSchema,
   stage4UserEventSchema,
 } from "./schemas";
 
 export type Stage4SessionState = z.infer<typeof stage4SessionStateSchema>;
+export type Stage4FinalEnvelope = z.infer<typeof stage4FinalEnvelopeSchema>;
 export type Stage4UserEvent = z.infer<typeof stage4UserEventSchema>;
 export type Stage4OperationResultEvent = z.infer<
   typeof stage4OperationResultEventSchema

@@ -1,5 +1,5 @@
 {
-  "portraitConfigAuthoringCollectionSchemaVersion": "0.1.0",
+  "portraitConfigAuthoringCollectionSchemaVersion": "0.2.0",
   "templateOnly": true,
   "records": [],
   "recordTemplate": {
@@ -7,6 +7,7 @@
     "charlieStage": null,
     "publicAssetPath": null,
     "altText": null,
+    "descriptorOptions": [],
     "creator": null,
     "creationMethod": null,
     "licenseOrPermission": null,

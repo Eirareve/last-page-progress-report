@@ -5,6 +5,7 @@ import {
   finalPortraitChoiceSchema,
   initialPortraitChoiceSchema,
   initialPortraitRecordSchema,
+  portraitDescriptorCollectionSchema,
   portraitDescriptorSchema,
   portraitPreludeSchema,
   portraitShiftComparisonSchema,
@@ -13,6 +14,9 @@ import {
 export type InitialPortraitChoice = z.infer<typeof initialPortraitChoiceSchema>;
 export type FinalPortraitChoice = z.infer<typeof finalPortraitChoiceSchema>;
 export type PortraitDescriptor = z.infer<typeof portraitDescriptorSchema>;
+export type PortraitDescriptorCollection = z.infer<
+  typeof portraitDescriptorCollectionSchema
+>;
 export type InitialPortraitRecord = z.infer<typeof initialPortraitRecordSchema>;
 export type PortraitShiftComparison = z.infer<typeof portraitShiftComparisonSchema>;
 export type PortraitPrelude = z.infer<typeof portraitPreludeSchema>;

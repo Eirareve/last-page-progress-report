@@ -1,9 +1,14 @@
 # Naming Contract
 
-> `namingContractVersion: 0.2.0`
-> Status: draft for final human approval
+> `namingContractVersion: 0.3.0`
+> Status: frozen for Stage 5 implementation
 > DRI: Codex（技术一致性）
 > Final approver: 项目负责人
+> Stage 5 approval: project owner, 2026-08-09
+
+Version `0.3.0` adds no compatibility aliases. It freezes the G2 plural field
+`descriptorOptions`, the G3 `originalInteraction` access surface, and the G4
+`contentSnapshot` envelope field as their sole canonical names.
 
 ## 1. General naming
 
@@ -62,3 +67,7 @@ Version `0.2.0` is breaking for callers that dispatched the removed supplier or
 system-detail names. No alias is accepted. Persisted Session Schema `0.1.0`
 does not contain an event log and therefore needs no data migration; stale
 in-flight results are rejected through the operation/version guard.
+
+Version `0.3.0` freezes `descriptorOptions`, `originalInteraction`, and
+`contentSnapshot`; it adds no compatibility alias. Recovery requires the exact
+current naming owner version.

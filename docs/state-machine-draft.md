@@ -1,9 +1,13 @@
-# State Machine Draft
+# State Machine Contract
 
-> `stateMachineContractVersion: 0.2.0`
-> Status: stage-4 entry Contract repair; canonical event inventory and stage descriptors frozen for implementation
+> `stateMachineContractVersion: 0.3.0`
+> Status: frozen for Stage 5 implementation
 > DRI: Codex（技术一致性）
 > Final approver: 项目负责人
+> Stage 5 approval: project owner, 2026-08-09
+
+Version `0.3.0` accepts the G2 multi-descriptor portrait collection and the G4
+composed FinalEnvelope Schema. No public event or stage literal was added.
 
 ## 1. Canonical event catalogue
 
@@ -119,7 +123,9 @@ For the Plain/Semantic path, receipt of the complete validated bundle may only s
 
 ## 6. Open issues
 
-Stage-4-owned event payloads, executable guards, and machine-library selection remain deferred to stage 4. Stage 3 validated bundle payloads remain unchanged.
+None for the Stage 5 machine surface. Stage-4-owned payloads, executable
+guards, persistence, and entry actions are implemented without adding a
+machine-library dependency.
 
 ## 7. Compatibility and recovery
 
@@ -132,3 +138,7 @@ re-enters a safe transient state or restores the interactive state. A late,
 duplicate, cancelled, pre-repair, or binding-mismatched result cannot reach the
 reducer. COMPLETE snapshots remain read-only under the existing exact-version
 compatibility rules.
+
+State Machine Contract `0.3.0` adds only the approved G2/G4 composed data
+shapes. It adds no event alias or stage literal; editable recovery requires the
+exact current vector.

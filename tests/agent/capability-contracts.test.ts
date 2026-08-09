@@ -60,7 +60,11 @@ const candidates = {
   buildInitialPortraitRecord: {
     ...header("buildInitialPortraitRecord"),
     initialRecord: {
-      descriptors: { early: [], peak: [], futureFacing: [] },
+      descriptors: {
+        early: ["trusting"],
+        peak: ["isolated"],
+        futureFacing: ["reflective"],
+      },
       initialChoice: "early",
       initialReason: "A test reason.",
     },

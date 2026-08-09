@@ -1,5 +1,5 @@
 {
-  "placeholderPortraitConfigSchemaVersion": "0.1.0",
+  "placeholderPortraitConfigSchemaVersion": "0.2.0",
   "contentMode": "placeholder",
   "records": [
     {
@@ -8,6 +8,11 @@
       "stage": "early",
       "assetPath": "/placeholders/early.svg",
       "altText": "[PLACEHOLDER_IMAGE: APPROVED_VISUAL_REQUIRED]",
+      "descriptorOptions": [
+        { "id": "early-warm", "label": "温柔" },
+        { "id": "early-dependent", "label": "依赖" },
+        { "id": "early-hopeful", "label": "期待" }
+      ],
       "provenance": "placeholder"
     },
     {
@@ -16,6 +21,11 @@
       "stage": "peak",
       "assetPath": "/placeholders/peak.svg",
       "altText": "[PLACEHOLDER_IMAGE: APPROVED_VISUAL_REQUIRED]",
+      "descriptorOptions": [
+        { "id": "peak-precise", "label": "精确" },
+        { "id": "peak-assured", "label": "自信" },
+        { "id": "peak-isolated", "label": "孤独" }
+      ],
       "provenance": "placeholder"
     },
     {
@@ -24,6 +34,11 @@
       "stage": "futureFacing",
       "assetPath": "/placeholders/future-facing.svg",
       "altText": "[PLACEHOLDER_IMAGE: APPROVED_VISUAL_REQUIRED]",
+      "descriptorOptions": [
+        { "id": "future-aware", "label": "清醒" },
+        { "id": "future-restrained", "label": "克制" },
+        { "id": "future-facing", "label": "面向未来" }
+      ],
       "provenance": "placeholder"
     }
   ]

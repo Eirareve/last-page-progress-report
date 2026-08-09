@@ -1,9 +1,14 @@
 # Provenance Contract
 
 > `provenanceContractVersion: 0.1.0`
-> Status: draft for final human approval
+> Status: frozen for Stage 5 implementation
 > DRI: Codex（技术一致性）
 > Final approver: 项目负责人
+> Stage 5 approval: project owner, 2026-08-09
+
+The G5 executable vector builder composes every field from its owning exported
+constant. Bootstrap and recovery must use that builder; copied version strings
+are not an accepted production source.
 
 ## 1. CapabilityExecutionReceipt
 

@@ -1,6 +1,6 @@
 {
-  "contentManifestSchemaVersion": "0.1.0",
-  "contentContractVersion": "0.1.0",
+  "contentManifestSchemaVersion": "0.2.0",
+  "contentContractVersion": "0.2.0",
   "manifestStatus": "template_registry",
   "modes": {
     "placeholder": {

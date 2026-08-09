@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   evidenceCardSchema,
+  originalInteractionSchema,
   verifiedFactSchema,
 } from "../domain/schemas/evidence.schema";
 import {
@@ -38,6 +39,34 @@ export const publicAssetPathSchema = nonEmptyTextSchema.refine(
   },
   { message: "Public asset paths must be safe root-relative paths" },
 );
+
+export const portraitDescriptorOptionSchema = z.strictObject({
+  id: nonEmptyTextSchema,
+  label: nonEmptyTextSchema,
+});
+
+const portraitDescriptorOptionsSchema = z
+  .array(portraitDescriptorOptionSchema)
+  .min(1)
+  .superRefine((options, context) => {
+    if (new Set(options.map(({ id }) => id)).size !== options.length) {
+      context.addIssue({
+        code: "custom",
+        message: "Portrait descriptor option IDs must be unique within a scene",
+        path: [],
+      });
+    }
+  });
+
+export const originalInteractionContentRecordSchema = z.strictObject({
+  id: nonEmptyTextSchema,
+  contentType: z.literal("ORIGINAL_INTERACTION"),
+  purpose: z.literal("manuscript"),
+  text: nonEmptyTextSchema,
+  publicDeclaration: nonEmptyTextSchema,
+  attribution: nonEmptyTextSchema,
+  provenance: z.literal("scope_freeze"),
+});
 
 export const contentSourceLocationSchema = z
   .strictObject({
@@ -171,9 +200,13 @@ export const placeholderPortraitSceneConfigSchema = z
     stage: charlieStageSchema,
     assetPath: publicAssetPathSchema,
     altText: nonEmptyTextSchema,
+    descriptorOptions: portraitDescriptorOptionsSchema,
     provenance: z.literal("placeholder"),
   })
   .refine((scene) => placeholderStageById[scene.id] === scene.stage, {
     message: "Placeholder portrait ID must match its frozen Charlie stage",
     path: ["stage"],
   });
+
+// Compile-time anchor: content projection remains compatible with the Domain item.
+void originalInteractionSchema;

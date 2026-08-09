@@ -18,6 +18,7 @@ import {
   STAGE4_DIGEST_A,
   STAGE4_LATER,
   makeNewStage4Session,
+  makeStage4FinalEnvelopeContentSnapshot,
   makeStage4Ports,
 } from "../fixtures/stage4";
 
@@ -249,6 +250,9 @@ describe("Stage 4 reducer", () => {
     });
     const envelope = await buildStage4FinalEnvelope({
       state: finalizing.state,
+      contentSnapshot: makeStage4FinalEnvelopeContentSnapshot(
+        finalizing.state,
+      ),
       ...makeStage4Ports(STAGE4_LATER),
     });
     expect(await verifyStage4FinalEnvelopeIntegrity(envelope)).toBe(true);

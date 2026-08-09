@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-import { contentItemSchema, dissentRecordSchema, evidenceCardSchema } from "./evidence.schema";
+import {
+  contentItemSchema,
+  dissentRecordSchema,
+  evidenceCardSchema,
+  originalInteractionSchema,
+} from "./evidence.schema";
+import { charlieStageSchema } from "./experience.schema";
 import { revisionEntrySchema } from "./manuscript.schema";
 import {
   finalPortraitChoiceSchema,
@@ -21,12 +27,47 @@ import {
 } from "./signature.schema";
 import { sha256DigestSchema } from "../text/stable-text-anchor.schema";
 import { FINAL_ENVELOPE_SCHEMA_VERSION } from "../versions";
+import { sessionContentBindingSchema } from "./session.schema";
+
+export const finalEnvelopePortraitAssetSchema = z.strictObject({
+  assetId: z.string().min(1),
+  stage: charlieStageSchema,
+  assetPath: z.string().startsWith("/"),
+  altText: z.string().min(1),
+  provenance: z.enum(["placeholder", "verified"]),
+});
+
+export const finalEnvelopeContentSnapshotSchema = z.strictObject({
+  binding: sessionContentBindingSchema,
+  portraitAssets: z
+    .array(finalEnvelopePortraitAssetSchema)
+    .length(3)
+    .superRefine((assets, context) => {
+      if (
+        new Set(assets.map(({ assetId }) => assetId)).size !== assets.length ||
+        new Set(assets.map(({ stage }) => stage)).size !== 3
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "FinalEnvelope portrait assets require unique IDs and full stage coverage",
+          path: [],
+        });
+      }
+    }),
+  originalInteraction: z.strictObject({
+    item: originalInteractionSchema,
+    publicDeclaration: z.string().min(1),
+    attribution: z.string().min(1),
+  }),
+});
 
 export const finalEnvelopeSchema = z.strictObject({
   finalEnvelopeId: z.string().min(1),
   finalEnvelopeSchemaVersion: z.literal(FINAL_ENVELOPE_SCHEMA_VERSION),
   sessionId: z.string().min(1),
   generatedAt: z.iso.datetime(),
+  contentSnapshot: finalEnvelopeContentSnapshotSchema,
+  sessionConfiguration: z.unknown(),
   manuscript: z.strictObject({
     preciseText: z.string().min(1),
     preciseRevisionId: z.string().min(1),

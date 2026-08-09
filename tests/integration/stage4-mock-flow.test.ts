@@ -18,6 +18,7 @@ import {
   buildPlainSemanticInputMaterials,
   buildPortraitSummaryInputMaterials,
   buildRoundAnalysisSemanticMaterials,
+  buildStage4ContractVersionVector,
   computeStage3RequestFingerprint,
   deriveStage3EntityId,
   orchestratePlainSemanticReview,
@@ -54,7 +55,7 @@ import {
   makeApplicationRequestContext,
   makeSequenceClock,
 } from "../fixtures/application";
-import { makeContractVersionVector } from "../fixtures/finalization";
+import { makeStage4FinalEnvelopeContentSnapshot } from "../fixtures/stage4";
 import type {
   ActiveOperation,
   Clock,
@@ -336,7 +337,12 @@ async function runCompleteMockFlow() {
       ports,
     ));
     expect(state.stage).toBe("FINALIZING");
-    const envelope = await buildStage4FinalEnvelope({ state, clock: ports.clock, idGenerator: ports.idGenerator });
+    const envelope = await buildStage4FinalEnvelope({
+      state,
+      contentSnapshot: makeStage4FinalEnvelopeContentSnapshot(state),
+      clock: ports.clock,
+      idGenerator: ports.idGenerator,
+    });
     ({ state, sidecars } = await dispatch(
       state,
       sidecars,
@@ -363,10 +369,15 @@ function createIntegrationSession(ports: ReturnType<typeof inspectablePorts>) {
   return createStage4Session({
     contentBinding: {
       ...AGENT_TEST_CONTENT_BINDING,
-      contentSchemaVersion: "0.1.0",
+      contentSchemaVersion: "0.2.0",
       targetEnvironment: "development",
     },
-    preciseText: "Precise test text.",
+    originalInteraction: {
+      id: "integration-original-interaction",
+      contentType: "ORIGINAL_INTERACTION",
+      purpose: "manuscript",
+      text: "Precise test text.",
+    },
     preciseRevisionId: "precise-r1",
     portraitDescriptors: [
       { id: "early", stage: "early", label: "Early" },
@@ -375,11 +386,7 @@ function createIntegrationSession(ports: ReturnType<typeof inspectablePorts>) {
     ],
     configuration: { requestedAgentMode: "mock" },
     provenance: {
-      contractVersionVector: makeContractVersionVector({
-        domainContractVersion: "0.2.0",
-        namingContractVersion: "0.2.0",
-        stateMachineContractVersion: "0.2.0",
-      }),
+      contractVersionVector: buildStage4ContractVersionVector(),
       capabilityExecutionReceipts: [],
     },
     clock: ports.clock,

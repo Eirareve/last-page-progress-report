@@ -8,6 +8,7 @@ import {
   STAGE4_DIGEST_A,
   STAGE4_LATER,
   makeNewStage4Session,
+  makeStage4FinalEnvelopeContentSnapshot,
   makeStage4Ports,
   withStage4State,
 } from "../fixtures/stage4";
@@ -36,6 +37,7 @@ describe("Stage 4 recovery", () => {
       sidecars,
       integrityValid: true,
       expectedContentBinding: state.contentBinding,
+      expectedContractVersionVector: state.provenance.contractVersionVector,
       now: STAGE4_LATER,
       idGenerator: makeStage4Ports().idGenerator,
     });
@@ -72,6 +74,7 @@ describe("Stage 4 recovery", () => {
       sidecars,
       integrityValid: true,
       expectedContentBinding: state.contentBinding,
+      expectedContractVersionVector: state.provenance.contractVersionVector,
       now: STAGE4_LATER,
       idGenerator: makeStage4Ports().idGenerator,
     });
@@ -97,6 +100,7 @@ describe("Stage 4 recovery", () => {
       sidecars,
       integrityValid: true,
       expectedContentBinding: state.contentBinding,
+      expectedContractVersionVector: state.provenance.contractVersionVector,
       now: STAGE4_LATER,
       idGenerator: makeStage4Ports().idGenerator,
     });
@@ -114,6 +118,7 @@ describe("Stage 4 recovery", () => {
       persistedState: state,
       sidecars,
       expectedContentBinding: state.contentBinding,
+      expectedContractVersionVector: state.provenance.contractVersionVector,
       now: STAGE4_LATER,
       idGenerator: makeStage4Ports().idGenerator,
     };
@@ -155,6 +160,7 @@ describe("Stage 4 recovery", () => {
     });
     const envelope = await buildStage4FinalEnvelope({
       state: base,
+      contentSnapshot: makeStage4FinalEnvelopeContentSnapshot(base),
       ...makeStage4Ports(STAGE4_LATER),
     });
     const complete = stage4SessionStateSchema.parse({
@@ -169,6 +175,8 @@ describe("Stage 4 recovery", () => {
       sidecars: makeNewStage4Session().sidecars,
       integrityValid: true,
       expectedContentBinding: complete.contentBinding,
+      expectedContractVersionVector:
+        complete.provenance.contractVersionVector,
       now: STAGE4_LATER,
       idGenerator: makeStage4Ports().idGenerator,
     });

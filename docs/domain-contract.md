@@ -1,9 +1,21 @@
 # Domain Contract
 
-> `domainContractVersion: 0.2.0`
-> Status: draft for final human approval
+> `domainContractVersion: 0.3.0`
+> Status: frozen for Stage 5 implementation
 > DRI: Codex（技术一致性）
 > Final approver: 项目负责人
+> Stage 5 approval: project owner, 2026-08-09
+
+## 0. Stage 5 Contract repair
+
+Version `0.3.0` is the approved G2/G4 repair. A portrait stage now stores one
+or more unique descriptor labels, while the descriptor collection must still
+cover exactly the three frozen Charlie stages. `FinalEnvelope` now carries a
+validated `contentSnapshot` and the concrete Session configuration so the
+COMPLETE projection can use the envelope as its sole data source. The snapshot
+binds the content identity, three portrait assets, and the attributed original
+interaction record. These additions are persisted Schema changes and therefore
+must be rejected by recovery when the current Contract vector does not match.
 
 ## 1. Authority and dependency boundary
 
@@ -148,8 +160,9 @@ Accepting `RETURN_TO_MANUSCRIPT_REVIEW` and entering `MANUSCRIPT_REVISION` atomi
 
 ## 11. Open issues
 
-- The `proposalHash` canonical payload above is proposed as part of this draft and awaits final human approval.
-- Later Agent/Final Review service payloads remain intentionally unfrozen until stage 3.
+None for the Stage 5 Domain surface. The `proposalHash` canonical payload above
+is frozen; Agent and Final Review service payloads are owned by their approved
+Stage 3 Contracts.
 
 ## 12. Stage-4 entry compatibility
 
@@ -164,3 +177,7 @@ unchanged because Session snapshots do not persist an event queue. A recovered
 in-flight operation is invalidated under the Runtime Contract; a late event
 using the pre-repair vocabulary or Application Orchestration Contract `0.1.0`
 is rejected as stale/incompatible rather than migrated.
+
+Domain Contract `0.3.0` is the approved G2/G4 persisted-data repair. Recovery
+requires an exact current ContractVersionVector; older editable snapshots are
+rejected rather than silently widening descriptor or envelope data.

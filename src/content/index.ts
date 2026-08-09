@@ -9,6 +9,11 @@ export type {
   PlaceholderContentAccess,
   VerifiedContentAccess,
 } from "./content-access";
+export {
+  createContentAccess,
+  projectFinalEnvelopeContentSnapshot,
+} from "./content-access";
+export { createBundledContentLoader } from "./bundled-content-source";
 export type {
   LoadedContentBundle,
   PlaceholderRuntimeContentBundle,

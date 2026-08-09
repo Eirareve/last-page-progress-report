@@ -18,7 +18,7 @@ import {
   sessionConfigurationSchema,
 } from "../runtime/schemas";
 
-export const FINALIZATION_CONTRACT_VERSION = "0.1.0" as const;
+export const FINALIZATION_CONTRACT_VERSION = "0.2.0" as const;
 export const FINAL_ENVELOPE_ATTESTATION_SCHEMA_VERSION = "0.1.0" as const;
 
 export const finalizationBlockerCodeSchema = z.enum([
