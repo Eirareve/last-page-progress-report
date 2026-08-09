@@ -11,5 +11,8 @@ export default async function HomePage({
     typeof rawSession === "string" && rawSession.trim().length > 0
       ? rawSession
       : null;
-  return <ExperienceClient sessionId={sessionId} />;
+  const requestedMode = process.env.AGENT_MODE === "live" ? "live" : "mock";
+  return (
+    <ExperienceClient sessionId={sessionId} requestedMode={requestedMode} />
+  );
 }

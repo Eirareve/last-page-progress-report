@@ -7,6 +7,7 @@ import {
   MOCK_AGENT_ADAPTER_VERSION,
   PLAIN_SEMANTIC_BUNDLE_SCHEMA_VERSION,
   ROUND_ANALYSIS_BUNDLE_SCHEMA_VERSION,
+  ZERO_AGENT_EXECUTION_OBSERVATION,
   roundAnalysisCandidateBundleSchema,
   type AgentEvidenceContext,
   type AgentSafetyPolicy,
@@ -26,7 +27,10 @@ import {
   orchestratePlainSemanticReview,
   orchestratePortraitShiftSummary,
   orchestrateRoundAnalysis,
+  type ExplicitCandidateFallback,
   type RoundAnalysisFallbackPlan,
+  type Stage3TerminalArtifact,
+  type OrchestrationOperationBoundary,
 } from "../application";
 import {
   createBundledContentLoader,
@@ -49,9 +53,15 @@ import {
   DeterministicMockFinalReviewService,
   FINAL_REVIEW_SCHEMA_VERSION,
   MOCK_FINAL_REVIEW_ADAPTER_VERSION,
+  ZERO_FINAL_REVIEW_EXECUTION_OBSERVATION,
   charlieSignatureReviewInputSchema,
   charlieSignatureReviewRequestContextSchema,
+  charlieSignatureReviewServiceOutcomeSchema,
+  createCharlieSignatureReviewError,
+  createGatedFinalReviewEvidenceResolver,
   resolvedFinalReviewEvidenceContextSchema,
+  type CharlieSignatureReviewInput,
+  type FinalReviewService,
 } from "../final-review";
 import { evaluateFinalization } from "../finalization";
 import {
@@ -78,6 +88,17 @@ import {
   type RequestContext,
   type RuntimeSha256Digest,
 } from "../runtime";
+import {
+  DEEPSEEK_OPENAI_ADAPTER_VERSION,
+  STAGE6_PROMPT_VERSION,
+  STAGE6_TRANSPORT_VERSION,
+  Stage6StaticSafetyTemplateAdapter,
+  Stage6LiveHttpClient,
+  Stage6LiveHttpError,
+  stage6LiveRequestSchema,
+  type Stage6LiveApplicationClient,
+  type Stage6LiveRequest,
+} from "../stage6";
 import {
   browserClock,
   createBrowserIdGenerator,
@@ -107,6 +128,18 @@ const UNAVAILABLE = Object.freeze({
 } as const);
 
 type Listener = () => void;
+type Stage5LoadedContent = Awaited<
+  ReturnType<ReturnType<typeof createBundledContentLoader>["load"]>
+>;
+
+export type Stage5ExperienceFacadeOptions = Readonly<{
+  requestedMode?: "mock" | "live";
+  liveClient?: Stage6LiveApplicationClient;
+  localFallbackPort?: ProviderNeutralAgentPort;
+  loadContent?: (
+    mode: "placeholder" | "verified",
+  ) => Promise<Stage5LoadedContent>;
+}>;
 
 export class Stage5ExperienceFacade implements Stage5Commands {
   private readonly listeners = new Set<Listener>();
@@ -126,10 +159,26 @@ export class Stage5ExperienceFacade implements Stage5Commands {
   private access: ContentAccess | null = null;
   private gate: ContentGateEvaluation | null = null;
   private requestedSessionId: string | null;
+  private readonly requestedMode: "mock" | "live";
+  private readonly liveClient: Stage6LiveApplicationClient;
+  private readonly localFallbackPort: ProviderNeutralAgentPort;
+  private readonly loadContent: Stage5ExperienceFacadeOptions["loadContent"];
   private inFlight: Promise<void> | null = null;
+  private liveAbortController: AbortController | null = null;
+  private liveExecutionGeneration = 0;
 
-  constructor(sessionId: string | null) {
+  constructor(
+    sessionId: string | null,
+    options: Stage5ExperienceFacadeOptions = {},
+  ) {
     this.requestedSessionId = sessionId;
+    this.requestedMode = options.requestedMode ?? "mock";
+    this.liveClient = options.liveClient ?? new Stage6LiveHttpClient();
+    this.localFallbackPort =
+      options.localFallbackPort ?? new DeterministicMockAgentAdapter();
+    this.loadContent =
+      options.loadContent ??
+      ((mode) => createBundledContentLoader().load(mode));
   }
 
   subscribe = (listener: Listener): (() => void) => {
@@ -138,6 +187,13 @@ export class Stage5ExperienceFacade implements Stage5Commands {
   };
 
   getSnapshot = (): Stage5Snapshot => this.snapshot;
+
+  dispose = (): void => {
+    this.liveExecutionGeneration += 1;
+    this.liveAbortController?.abort();
+    this.liveAbortController = null;
+    this.listeners.clear();
+  };
 
   async initialize(): Promise<void> {
     this.setSnapshot({
@@ -149,14 +205,16 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       view: null,
     });
     try {
-      const loaded = await createBundledContentLoader().load("placeholder");
+      const loaded = await this.loadContent!(
+        this.requestedMode === "live" ? "verified" : "placeholder",
+      );
       const evaluatedAt = browserClock.now();
       const gate = evaluateContentGate({
         evaluationId: this.idGenerator.next("transition"),
         evaluatedAt,
         targetEnvironment: TARGET_ENVIRONMENT,
         contentMode: loaded.bundle.contentMode,
-        agentMode: "mock",
+        agentMode: this.requestedMode,
         contentBundleId: loaded.bundle.contentBundleId,
         contentBundleVersion: loaded.bundle.contentBundleVersion,
         contentSchemaVersion: loaded.bundle.contentSchemaVersion,
@@ -275,13 +333,57 @@ export class Stage5ExperienceFacade implements Stage5Commands {
           operation: setup.boundary.activeOperation,
         });
       }
-      const outcome = await orchestrateRoundAnalysis({
-        ...setup,
-        port:
-          roundId === "round1"
-            ? await createFirstRoundDiffPort(setup.portInput)
-            : new DeterministicMockAgentAdapter(),
-      });
+      let outcome: Stage3TerminalArtifact | Awaited<
+        ReturnType<typeof orchestrateRoundAnalysis>
+      >;
+      if (this.requestedMode === "live") {
+        const { evidenceContext: _evidenceContext, ...generateCharlieResponse } =
+          setup.portInput.generateCharlieResponse;
+        void _evidenceContext;
+        const liveRequest = stage6LiveRequestSchema.parse({
+          stage6TransportVersion: STAGE6_TRANSPORT_VERSION,
+          executionKind: "round_analysis",
+          sessionId: this.requireState().sessionId,
+          priorBudgetUsage: setup.boundary.budget.priorUsage,
+          operationContext: clientOperationContext(
+            setup.boundary.operationContext,
+          ),
+          input: {
+            ...setup.portInput,
+            generateCharlieResponse,
+          },
+        });
+        try {
+          outcome = await this.executeLiveRequest(liveRequest);
+        } catch (error) {
+          if (!ordinaryLiveFallbackAllowed(error)) throw error;
+          const fallbackAdapterVersion = this.localFallbackPort.adapterVersion;
+          outcome = await orchestrateRoundAnalysis({
+            ...setup,
+            boundary: mockFallbackBoundary(
+              setup.boundary,
+              fallbackAdapterVersion,
+            ),
+            capabilityContexts: mapMockFallbackContexts(
+              setup.capabilityContexts,
+              fallbackAdapterVersion,
+            ),
+            port: this.localFallbackPort,
+            fallbacks: await staticRoundFallbacks(
+              setup.portInput,
+              setup.capabilityContexts,
+            ),
+          });
+        }
+      } else {
+        outcome = await orchestrateRoundAnalysis({
+          ...setup,
+          port:
+            roundId === "round1"
+              ? await createFirstRoundDiffPort(setup.portInput)
+              : new DeterministicMockAgentAdapter(),
+        });
+      }
       if (outcome.outcomeKind === "preflight_rejected") {
         throw new Error(`Mock 编排预检失败：${outcome.detail}`);
       }
@@ -498,7 +600,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       originalInteraction: access.originalInteraction.item,
       preciseRevisionId: this.idGenerator.next("revision"),
       portraitDescriptors: descriptors,
-      configuration: { requestedAgentMode: "mock" },
+      configuration: { requestedAgentMode: this.requestedMode },
       provenance: {
         contractVersionVector: buildStage4ContractVersionVector(),
         capabilityExecutionReceipts: [],
@@ -536,6 +638,13 @@ export class Stage5ExperienceFacade implements Stage5Commands {
         view: null,
       });
       return;
+    }
+    if (
+      existing.state.configuration.requestedAgentMode !== this.requestedMode
+    ) {
+      throw new Error(
+        "Session 的 Agent mode 与当前应用模式不一致，不能混合恢复。",
+      );
     }
     const recovered = recoverStage4Session({
       persistedState: existing.state,
@@ -616,7 +725,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     const sidecars = this.requireCurrent().sidecars;
     const content = this.requireAccess();
     const privateRound = sidecars.privateInputs.rounds.find((item) => item.roundId === roundId);
-    const allowedEvidenceIds: string[] = [];
+    let allowedEvidenceIds: string[] = [];
     let evidenceContext: AgentEvidenceContext;
     let prohibitedClaims: readonly string[];
     if (content.contentMode === "placeholder") {
@@ -637,6 +746,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       if (verifiedCard === undefined) throw new Error("当前轮次的内容卡缺失。");
       prohibitedClaims = verifiedCard.prohibitedClaims;
       const factIds = [...verifiedCard.factIds];
+      allowedEvidenceIds = factIds;
       evidenceContext = {
             contentMode: "verified",
             verifiedFacts: [...content.getVerifiedFactsByIds(factIds)],
@@ -679,6 +789,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     const materials = buildRoundAnalysisSemanticMaterials({ portInput, safetyPolicy });
     const identity = newOperationIdentity(this.idGenerator);
     const operationContext = await createAgentRequestContext({
+      ...this.agentContextIdentity(),
       state,
       capability: "executeRoundAnalysis",
       identity,
@@ -691,6 +802,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
           async (capability) => [
             capability,
             await createAgentRequestContext({
+              ...this.agentContextIdentity(),
               state,
               capability,
               identity,
@@ -707,6 +819,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
         slot: roundId === "round1" ? "round_1" : roundId === "round2" ? "round_2" : "round_3",
         sidecars,
         clock: browserClock,
+        availability: this.executionAvailability(),
       }),
       portInput,
       validationContext: { safetyPolicy },
@@ -733,6 +846,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     const safetyPolicy = this.agentSafetyPolicy();
     const materials = buildPlainSemanticInputMaterials({ portInput, safetyPolicy });
     const operationContext = await createAgentRequestContext({
+      ...this.agentContextIdentity(),
       state,
       capability: "executePlainSemanticReview",
       identity,
@@ -741,6 +855,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       plainRevisionId: targetPlainRevisionId,
     });
     const capabilityContext = await createAgentRequestContext({
+      ...this.agentContextIdentity(),
       state,
       capability: "compareSemanticDrift",
       identity,
@@ -753,6 +868,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       slot: "plain_semantic",
       sidecars,
       clock: browserClock,
+      availability: this.executionAvailability(),
     });
     await this.activateSystemOperation(boundary.activeOperation, "plain-semantic");
     const port = new DeterministicMockAgentAdapter({
@@ -763,14 +879,49 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       semanticFragmentConsequence: "读者可能把这句话理解为一般性的未来授权。",
       semanticRestorationReplacementText: "（仍以现在的意愿为准）",
     });
-    const outcome = await orchestratePlainSemanticReview({
-      boundary,
-      port,
-      portInput,
-      validationContext: { safetyPolicy },
-      capabilityContext,
-      fallback: UNAVAILABLE,
-    });
+    let outcome: Stage3TerminalArtifact | Awaited<
+      ReturnType<typeof orchestratePlainSemanticReview>
+    >;
+    if (this.requestedMode === "live") {
+      const liveRequest = stage6LiveRequestSchema.parse({
+        stage6TransportVersion: STAGE6_TRANSPORT_VERSION,
+        executionKind: "plain_semantic_review",
+        sessionId: state.sessionId,
+        priorBudgetUsage: sidecars.budgetUsage,
+        operationContext: clientOperationContext(operationContext),
+        input: portInput,
+      });
+      try {
+        outcome = await this.executeLiveRequest(liveRequest);
+      } catch (error) {
+        if (!ordinaryLiveFallbackAllowed(error)) throw error;
+        const fallbackAdapterVersion = this.localFallbackPort.adapterVersion;
+        outcome = await orchestratePlainSemanticReview({
+          boundary: mockFallbackBoundary(boundary, fallbackAdapterVersion),
+          port: this.localFallbackPort,
+          portInput,
+          validationContext: { safetyPolicy },
+          capabilityContext: mockFallbackContext(
+            capabilityContext,
+            fallbackAdapterVersion,
+          ),
+          fallback: await staticCandidateFallback(
+            "plain_semantic_review",
+            portInput,
+            capabilityContext,
+          ),
+        });
+      }
+    } else {
+      outcome = await orchestratePlainSemanticReview({
+        boundary,
+        port,
+        portInput,
+        validationContext: { safetyPolicy },
+        capabilityContext,
+        fallback: UNAVAILABLE,
+      });
+    }
     if (outcome.outcomeKind === "preflight_rejected") {
       throw new Error(`朴素版本预检失败：${outcome.detail}`);
     }
@@ -806,6 +957,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     const safetyPolicy = this.agentSafetyPolicy();
     const materials = buildPortraitSummaryInputMaterials({ summaryInput, evidenceContext, safetyPolicy });
     const operationContext = await createAgentRequestContext({
+      ...this.agentContextIdentity(),
       state,
       capability: "executePortraitShiftSummary",
       identity,
@@ -813,6 +965,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       resultSchemaVersion: AGENT_RESULT_SCHEMA_VERSIONS.summarizePortraitShift,
     });
     const capabilityContext = await createAgentRequestContext({
+      ...this.agentContextIdentity(),
       state,
       capability: "summarizePortraitShift",
       identity,
@@ -824,17 +977,54 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       slot: "portrait_shift_summary",
       sidecars,
       clock: browserClock,
+      availability: this.executionAvailability(),
     });
     await this.activateSystemOperation(boundary.activeOperation, "portrait-summary");
-    const outcome = await orchestratePortraitShiftSummary({
-      boundary,
-      port: new DeterministicMockAgentAdapter(),
-      summaryInput,
-      validationContext: { safetyPolicy },
-      evidenceContext,
-      capabilityContext,
-      fallback: UNAVAILABLE,
-    });
+    let outcome: Stage3TerminalArtifact | Awaited<
+      ReturnType<typeof orchestratePortraitShiftSummary>
+    >;
+    if (this.requestedMode === "live") {
+      const liveRequest = stage6LiveRequestSchema.parse({
+        stage6TransportVersion: STAGE6_TRANSPORT_VERSION,
+        executionKind: "portrait_shift_summary",
+        sessionId: state.sessionId,
+        priorBudgetUsage: sidecars.budgetUsage,
+        operationContext: clientOperationContext(operationContext),
+        input: summaryInput,
+      });
+      try {
+        outcome = await this.executeLiveRequest(liveRequest);
+      } catch (error) {
+        if (!ordinaryLiveFallbackAllowed(error)) throw error;
+        const fallbackAdapterVersion = this.localFallbackPort.adapterVersion;
+        outcome = await orchestratePortraitShiftSummary({
+          boundary: mockFallbackBoundary(boundary, fallbackAdapterVersion),
+          port: this.localFallbackPort,
+          summaryInput,
+          validationContext: { safetyPolicy },
+          evidenceContext,
+          capabilityContext: mockFallbackContext(
+            capabilityContext,
+            fallbackAdapterVersion,
+          ),
+          fallback: await staticCandidateFallback(
+            "portrait_shift_summary",
+            summaryInput,
+            capabilityContext,
+          ),
+        });
+      }
+    } else {
+      outcome = await orchestratePortraitShiftSummary({
+        boundary,
+        port: new DeterministicMockAgentAdapter(),
+        summaryInput,
+        validationContext: { safetyPolicy },
+        evidenceContext,
+        capabilityContext,
+        fallback: UNAVAILABLE,
+      });
+    }
     if (outcome.outcomeKind === "preflight_rejected") {
       throw new Error(`肖像摘要预检失败：${outcome.detail}`);
     }
@@ -880,14 +1070,17 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       contentBundleChecksum: state.contentBinding.contentBundleChecksum,
       finalReviewSchemaVersion: FINAL_REVIEW_SCHEMA_VERSION,
     });
-    const evidenceContext = resolvedFinalReviewEvidenceContextSchema.parse({
-      evidenceMode: "placeholder",
-      contentBundleId: state.contentBinding.contentBundleId,
-      contentBundleVersion: state.contentBinding.contentBundleVersion,
-      contentBundleChecksum: state.contentBinding.contentBundleChecksum,
-      placeholderEvidenceIds: [],
-      evidenceItems: [],
-    });
+    const evidenceContext =
+      this.requestedMode === "live"
+        ? await this.resolveLiveFinalReviewEvidence(reviewInput)
+        : resolvedFinalReviewEvidenceContextSchema.parse({
+            evidenceMode: "placeholder",
+            contentBundleId: state.contentBinding.contentBundleId,
+            contentBundleVersion: state.contentBinding.contentBundleVersion,
+            contentBundleChecksum: state.contentBinding.contentBundleChecksum,
+            placeholderEvidenceIds: [],
+            evidenceItems: [],
+          });
     const safetyPolicy = DEFAULT_CHARLIE_SIGNATURE_REVIEW_SAFETY_POLICY;
     const materials = buildFinalReviewInputMaterials({ reviewInput, evidenceContext, safetyPolicy });
     const identity = newOperationIdentity(this.idGenerator);
@@ -902,10 +1095,11 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       slot: "signature_review",
       sidecars: this.requireCurrent().sidecars,
       clock: browserClock,
+      availability: this.executionAvailability(false),
     });
     const fingerprintMaterial = signatureReviewFingerprintMaterialSchema.parse({
       capability: "reviewCharlieSignature",
-      requestedMode: "mock",
+      requestedMode: this.requestedMode,
       bindings: {
         revisions: {
           preciseRevisionId: state.manuscript.preciseRevisionId,
@@ -917,41 +1111,74 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       semanticInputDigest: reviewContext.inputFingerprint,
     });
     await this.dispatch({
-      eventType: "REQUEST_CHARLIE_SIGNATURE_REVIEW",
+      eventType:
+        state.currentCharlieSignatureStatus === "unavailable"
+          ? "RETRY_CHARLIE_SIGNATURE_REVIEW"
+          : "REQUEST_CHARLIE_SIGNATURE_REVIEW",
       fingerprintMaterial,
       operation: boundary.activeOperation,
     });
-    const reviewedStatus = status === "declined" ? "declined" : "signed";
-    const service = new DeterministicMockFinalReviewService({
-      fixture: {
-        fixtureId: `stage5-${status}`,
-        candidate: {
-          status: reviewedStatus,
-          finalReviewSchemaVersion: FINAL_REVIEW_SCHEMA_VERSION,
-          reason:
-            reviewedStatus === "signed"
-              ? "两种文本保留了当前意愿的边界，我愿意为这次呈现签名。"
-              : "这次呈现仍未保留我认为必要的边界，我明确拒绝签名。",
-          evidenceIds: status === "unavailable" ? ["untrusted-missing-evidence"] : [],
+    let outcome: Stage3TerminalArtifact | Awaited<
+      ReturnType<typeof orchestrateCharlieSignatureReview>
+    >;
+    if (this.requestedMode === "live") {
+      const liveRequest = stage6LiveRequestSchema.parse({
+        stage6TransportVersion: STAGE6_TRANSPORT_VERSION,
+        executionKind: "charlie_signature_review",
+        sessionId: state.sessionId,
+        priorBudgetUsage: this.requireCurrent().sidecars.budgetUsage,
+        operationContext: clientOperationContext(operationContext),
+        input: reviewInput,
+      });
+      try {
+        outcome = await this.executeLiveRequest(liveRequest);
+      } catch (error) {
+        if (!ordinaryLiveFallbackAllowed(error)) throw error;
+        outcome = await orchestrateCharlieSignatureReview({
+          boundary,
+          service: unavailableLiveFinalReviewService(),
+          reviewInput,
+          reviewContext,
+          evidenceContext,
+          safetyPolicy,
+        });
+      }
+    } else {
+      const reviewedStatus = status === "declined" ? "declined" : "signed";
+      const service = new DeterministicMockFinalReviewService({
+        fixture: {
+          fixtureId: `stage5-${status}`,
+          candidate: {
+            status: reviewedStatus,
+            finalReviewSchemaVersion: FINAL_REVIEW_SCHEMA_VERSION,
+            reason:
+              reviewedStatus === "signed"
+                ? "两种文本保留了当前意愿的边界，我愿意为这次呈现签名。"
+                : "这次呈现仍未保留我认为必要的边界，我明确拒绝签名。",
+            evidenceIds:
+              status === "unavailable" ? ["untrusted-missing-evidence"] : [],
+          },
         },
-      },
-    });
-    const outcome = await orchestrateCharlieSignatureReview({
-      boundary,
-      service,
-      reviewInput,
-      reviewContext,
-      evidenceContext,
-      safetyPolicy,
-    });
+      });
+      outcome = await orchestrateCharlieSignatureReview({
+        boundary,
+        service,
+        reviewInput,
+        reviewContext,
+        evidenceContext,
+        safetyPolicy,
+      });
+    }
     if (outcome.outcomeKind === "preflight_rejected") {
       throw new Error(`签名审阅预检失败：${outcome.detail}`);
     }
     await this.dispatch(
       outcome.event,
-      status === "unavailable"
-        ? "Mock 签名审阅模拟了技术上未完成；这不是角色拒绝。"
-        : `Mock 签名审阅结果：${status}。`,
+      this.requestedMode === "live"
+        ? "Live 签名审阅已完成；技术失败只会记录为 unavailable。"
+        : status === "unavailable"
+          ? "Mock 签名审阅模拟了技术上未完成；这不是角色拒绝。"
+          : `Mock 签名审阅结果：${status}。`,
       outcome.budgetUsage,
     );
   }
@@ -1121,12 +1348,16 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     return serializableRequestContextSchema.parse({
       operationId: identity.operationId,
       requestId: identity.requestId,
-      requestedMode: "mock",
+      requestedMode: this.requestedMode,
       capability,
       attempt: 1,
       inputFingerprint: `sha256:${"0".repeat(64)}`,
-      promptVersion: null,
-      adapterVersion: MOCK_FINAL_REVIEW_ADAPTER_VERSION,
+      promptVersion:
+        this.requestedMode === "live" ? STAGE6_PROMPT_VERSION : null,
+      adapterVersion:
+        this.requestedMode === "live"
+          ? DEEPSEEK_OPENAI_ADAPTER_VERSION
+          : MOCK_FINAL_REVIEW_ADAPTER_VERSION,
       stage: state.stage,
       stageInstanceId: state.stageInstanceId,
       bindings: {
@@ -1159,6 +1390,44 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     };
   }
 
+  private async resolveLiveFinalReviewEvidence(
+    reviewInput: CharlieSignatureReviewInput,
+  ) {
+    const resolution = await createGatedFinalReviewEvidenceResolver({
+      evaluation: this.requireGate(),
+      access: this.requireAccess(),
+    }).resolveEvidence(reviewInput);
+    if (
+      resolution.resolutionKind === "error" ||
+      resolution.evidenceContext.evidenceMode !== "verified"
+    ) {
+      throw new Error(
+        "Live 签名审阅需要与当前内容绑定一致的 verified evidence。",
+      );
+    }
+    return resolution.evidenceContext;
+  }
+
+  private agentContextIdentity() {
+    return this.requestedMode === "live"
+      ? {
+          requestedMode: "live" as const,
+          adapterVersion: DEEPSEEK_OPENAI_ADAPTER_VERSION,
+          promptVersion: STAGE6_PROMPT_VERSION,
+        }
+      : {
+          requestedMode: "mock" as const,
+          adapterVersion: MOCK_AGENT_ADAPTER_VERSION,
+          promptVersion: null,
+        };
+  }
+
+  private executionAvailability(mock = true) {
+    return this.requestedMode === "live"
+      ? { live: true, mock }
+      : { live: false, mock: true };
+  }
+
   private finalizationBlockers(): readonly string[] {
     if (
       this.current === null ||
@@ -1184,6 +1453,34 @@ export class Stage5ExperienceFacade implements Stage5Commands {
 
   private async fingerprint(value: unknown): Promise<RuntimeSha256Digest> {
     return sha256NfcUtf8(canonicalizeJson(value));
+  }
+
+  private async executeLiveRequest(
+    request: Stage6LiveRequest,
+  ): Promise<Stage3TerminalArtifact> {
+    this.liveAbortController?.abort();
+    const controller = new AbortController();
+    const generation = this.liveExecutionGeneration + 1;
+    this.liveExecutionGeneration = generation;
+    this.liveAbortController = controller;
+    try {
+      const artifact = await this.liveClient.execute(request, controller.signal);
+      if (
+        controller.signal.aborted ||
+        generation !== this.liveExecutionGeneration
+      ) {
+        throw new Stage6LiveHttpError({
+          code: "request_cancelled",
+          message: "Live operation was cancelled before application commit",
+          retryable: false,
+        });
+      }
+      return artifact;
+    } finally {
+      if (this.liveAbortController === controller) {
+        this.liveAbortController = null;
+      }
+    }
   }
 
   private async runCommand(command: () => Promise<void>): Promise<void> {
@@ -1343,6 +1640,205 @@ function roundFallbacks(): RoundAnalysisFallbackPlan {
     generateCharlieResponse: UNAVAILABLE,
     proposeDocumentDiff: UNAVAILABLE,
   };
+}
+
+function clientOperationContext(context: RequestContext) {
+  const {
+    promptVersion: _promptVersion,
+    adapterVersion: _adapterVersion,
+    abortSignal: _abortSignal,
+    ...clientContext
+  } = context;
+  void _promptVersion;
+  void _adapterVersion;
+  void _abortSignal;
+  return { ...clientContext, requestedMode: "live" as const };
+}
+
+function mockFallbackContext(
+  context: RequestContext,
+  adapterVersion: string = MOCK_AGENT_ADAPTER_VERSION,
+): RequestContext {
+  return {
+    ...context,
+    adapterVersion,
+    promptVersion: null,
+  };
+}
+
+function mockFallbackBoundary(
+  boundary: OrchestrationOperationBoundary,
+  adapterVersion: string = MOCK_AGENT_ADAPTER_VERSION,
+): OrchestrationOperationBoundary {
+  return {
+    ...boundary,
+    operationContext: mockFallbackContext(
+      boundary.operationContext,
+      adapterVersion,
+    ),
+    availability: { live: false, mock: true },
+  };
+}
+
+function mapMockFallbackContexts<
+  T extends Record<string, RequestContext>,
+>(contexts: T, adapterVersion: string = MOCK_AGENT_ADAPTER_VERSION): T {
+  return Object.fromEntries(
+    Object.entries(contexts).map(([key, context]) => [
+      key,
+      mockFallbackContext(context, adapterVersion),
+    ]),
+  ) as T;
+}
+
+async function staticRoundFallbacks(
+  portInput: RoundAnalysisPortInput,
+  contexts: Record<
+    | "extractUserPrinciple"
+    | "detectTension"
+    | "generateCharlieResponse"
+    | "proposeDocumentDiff",
+    RequestContext
+  >,
+): Promise<RoundAnalysisFallbackPlan> {
+  const adapter = new Stage6StaticSafetyTemplateAdapter();
+  try {
+    const envelope = await adapter.executeRoundAnalysis(
+      portInput,
+      contexts.extractUserPrinciple,
+    );
+    const bundle =
+      envelope.outcomeKind === "candidate"
+        ? roundAnalysisCandidateBundleSchema.safeParse(envelope.candidate)
+        : null;
+    if (bundle === null || !bundle.success) return roundFallbacks();
+    const roundId = portInput.extractUserPrinciple.roundId;
+    return {
+      extractUserPrinciple: staticRoundCandidate(
+        bundle.data.principle,
+        contexts.extractUserPrinciple,
+        roundId,
+        adapter.adapterVersion,
+      ),
+      detectTension: staticRoundCandidate(
+        bundle.data.tension,
+        contexts.detectTension,
+        roundId,
+        adapter.adapterVersion,
+      ),
+      generateCharlieResponse: staticRoundCandidate(
+        bundle.data.charlieResponse,
+        contexts.generateCharlieResponse,
+        roundId,
+        adapter.adapterVersion,
+      ),
+      proposeDocumentDiff: staticRoundCandidate(
+        bundle.data.documentDiff,
+        contexts.proposeDocumentDiff,
+        roundId,
+        adapter.adapterVersion,
+      ),
+    };
+  } catch {
+    return roundFallbacks();
+  }
+}
+
+async function staticCandidateFallback(
+  kind: "plain_semantic_review" | "portrait_shift_summary",
+  input: PlainSemanticReviewPortInput | Parameters<
+    ProviderNeutralAgentPort["summarizePortraitShift"]
+  >[0],
+  context: RequestContext,
+): Promise<ExplicitCandidateFallback> {
+  const adapter = new Stage6StaticSafetyTemplateAdapter();
+  try {
+    const envelope =
+      kind === "plain_semantic_review"
+        ? await adapter.executePlainSemanticReview(
+            input as PlainSemanticReviewPortInput,
+            context,
+          )
+        : await adapter.summarizePortraitShift(
+            input as Parameters<
+              ProviderNeutralAgentPort["summarizePortraitShift"]
+            >[0],
+            context,
+          );
+    if (envelope.outcomeKind !== "candidate") return UNAVAILABLE;
+    return staticCandidate(
+      envelope.candidate,
+      context,
+      adapter.adapterVersion,
+    );
+  } catch {
+    return UNAVAILABLE;
+  }
+}
+
+function staticCandidate(
+  candidate: unknown,
+  context: RequestContext,
+  adapterVersion: string,
+): Extract<ExplicitCandidateFallback, { kind: "candidate" }> {
+  return {
+    kind: "candidate",
+    candidate,
+    binding: {
+      inputFingerprint: context.inputFingerprint,
+      bindings: context.bindings,
+    },
+    observation: ZERO_AGENT_EXECUTION_OBSERVATION,
+    executionIdentity: { adapterVersion, promptVersion: null },
+    resolvedMode: "static_template",
+    fallbackReason: "mock_fallback_failed_static_template",
+  };
+}
+
+function staticRoundCandidate(
+  candidate: unknown,
+  context: RequestContext,
+  roundId: string,
+  adapterVersion: string,
+) {
+  return {
+    ...staticCandidate(candidate, context, adapterVersion),
+    binding: {
+      inputFingerprint: context.inputFingerprint,
+      bindings: context.bindings,
+      roundId,
+    },
+  };
+}
+
+function unavailableLiveFinalReviewService(): FinalReviewService {
+  return {
+    executionMode: "live",
+    adapterVersion: DEEPSEEK_OPENAI_ADAPTER_VERSION,
+    async reviewCharlieSignature() {
+      return charlieSignatureReviewServiceOutcomeSchema.parse({
+        outcomeKind: "unavailable",
+        error: createCharlieSignatureReviewError(
+          "execution_unavailable",
+          "The live Final Review route was unavailable",
+        ),
+        observation: ZERO_FINAL_REVIEW_EXECUTION_OBSERVATION,
+      });
+    },
+  };
+}
+
+function ordinaryLiveFallbackAllowed(error: unknown): boolean {
+  if (!(error instanceof Stage6LiveHttpError)) return true;
+  return new Set<Stage6LiveHttpError["code"]>([
+    "network_error",
+    "invalid_response",
+    "live_api_gate_closed",
+    "rate_limited",
+    "concurrency_limited",
+    "invalid_terminal_artifact",
+    "internal_error",
+  ]).has(error.code);
 }
 
 function currentRoundId(stage: string): "round1" | "round2" | "round3" | null {

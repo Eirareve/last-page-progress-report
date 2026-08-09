@@ -59,6 +59,17 @@ code, dd { overflow-wrap: anywhere; }
 .progress-track span { display: block; height: 100%; background: var(--accent); transition: width .25s ease-out; }
 
 main { width: min(100%, 90rem); margin: 0 auto; padding: clamp(1.3rem, 4vw, 4rem); }
+.execution-status {
+  margin: 0 0 1.25rem;
+  padding: .8rem 1rem;
+  border: 1px solid #9bb1b8;
+  border-left: 4px solid var(--blue);
+  background: #edf5f6;
+  color: #203f49;
+  font-family: system-ui, sans-serif;
+  font-size: .88rem;
+  line-height: 1.55;
+}
 .stage-shell { min-height: calc(100vh - 11rem); animation: reveal .22s ease-out; }
 .stage-shell > h1, .welcome-copy h1 { max-width: 20ch; margin: .2rem 0 1rem; font-size: clamp(2rem, 5vw, 4.25rem); font-weight: 650; line-height: 1.14; letter-spacing: -.025em; }
 .stage-intro, .lede { max-width: 60ch; color: #544f47; font-size: clamp(1.02rem, 2vw, 1.28rem); line-height: 1.8; }

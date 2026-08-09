@@ -113,7 +113,7 @@ describe("stage 3 architecture boundaries", () => {
     }
   });
 
-  it("does not add a real model SDK, an Agent route, or logging of untrusted input", () => {
+  it("keeps Stage 3 services free of model SDKs and logging of untrusted input", () => {
     const packageJson = JSON.parse(
       readFileSync(resolve(PROJECT_ROOT, "package.json"), "utf8"),
     ) as { dependencies?: Record<string, string>; devDependencies?: Record<string, string> };
@@ -131,7 +131,9 @@ describe("stage 3 architecture boundaries", () => {
       expect(installedPackages.has(forbiddenPackage)).toBe(false);
     }
 
-    expect(existsSync(resolve(SOURCE_ROOT, "app", "api", "agent"))).toBe(false);
+    const stage6Route = resolve(SOURCE_ROOT, "app", "api", "agent", "route.ts");
+    expect(existsSync(stage6Route)).toBe(true);
+    expect(readFileSync(stage6Route, "utf8")).toMatch(/stage6\/server/);
 
     for (const filePath of ["agent", "application", "final-review"].flatMap(
       (directory) => sourceFiles(resolve(SOURCE_ROOT, directory)),

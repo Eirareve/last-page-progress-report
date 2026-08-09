@@ -16,8 +16,16 @@ import {
   type Stage5Snapshot,
 } from ".";
 
-export function ExperienceClient({ sessionId }: { sessionId: string | null }) {
-  const [facade] = useState(() => new Stage5ExperienceFacade(sessionId));
+export function ExperienceClient({
+  sessionId,
+  requestedMode,
+}: {
+  sessionId: string | null;
+  requestedMode: "mock" | "live";
+}) {
+  const [facade] = useState(
+    () => new Stage5ExperienceFacade(sessionId, { requestedMode }),
+  );
   const snapshot = useSyncExternalStore(
     facade.subscribe,
     facade.getSnapshot,
@@ -25,6 +33,7 @@ export function ExperienceClient({ sessionId }: { sessionId: string | null }) {
   );
   useEffect(() => {
     void facade.initialize();
+    return () => facade.dispose();
   }, [facade]);
 
   return (
@@ -32,7 +41,7 @@ export function ExperienceClient({ sessionId }: { sessionId: string | null }) {
       <a className="skip-link" href="#main-content">
         跳到主内容
       </a>
-      <ExperienceHeader snapshot={snapshot} />
+      <ExperienceHeader snapshot={snapshot} requestedMode={requestedMode} />
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {snapshot.announcement}
       </div>
@@ -48,17 +57,40 @@ export function ExperienceClient({ sessionId }: { sessionId: string | null }) {
           <BlockedView snapshot={snapshot} commands={facade} />
         ) : null}
         {snapshot.status === "ready" && snapshot.view ? (
-          <StageProjection view={snapshot.view} snapshot={snapshot} commands={facade} />
+          <>
+            {requestedMode === "live" ? (
+              <LiveExecutionStatus
+                view={snapshot.view}
+                busy={
+                  snapshot.persistence === "saving" || snapshot.view.busy
+                }
+              />
+            ) : null}
+            <StageProjection
+              view={snapshot.view}
+              snapshot={snapshot}
+              commands={facade}
+              requestedMode={requestedMode}
+            />
+          </>
         ) : null}
       </main>
       <footer className="site-footer">
-        <p>原创互动草案 · 本地 Mock 体验 · 未使用 Live Agent</p>
+        <p>
+          原创互动草案 · {requestedMode === "live" ? "Live Agent" : "本地 Mock 体验"}
+        </p>
       </footer>
     </>
   );
 }
 
-function ExperienceHeader({ snapshot }: { snapshot: Stage5Snapshot }) {
+function ExperienceHeader({
+  snapshot,
+  requestedMode,
+}: {
+  snapshot: Stage5Snapshot;
+  requestedMode: "mock" | "live";
+}) {
   const stage = snapshot.view?.stage ?? null;
   const position = stage ? stagePosition(stage) : 0;
   return (
@@ -68,7 +100,9 @@ function ExperienceHeader({ snapshot }: { snapshot: Stage5Snapshot }) {
         <p className="product-title">最后一页进步报告</p>
       </div>
       <div className="header-status">
-        <span className="mode-badge">Mock only</span>
+        <span className="mode-badge">
+          {requestedMode === "live" ? "Live + safe fallback" : "Mock only"}
+        </span>
         <span data-testid="persistence-status">
           {persistenceLabel(snapshot.persistence)}
         </span>
@@ -84,10 +118,12 @@ function StageProjection({
   view,
   snapshot,
   commands,
+  requestedMode,
 }: {
   view: Stage5PresentationView;
   snapshot: Stage5Snapshot;
   commands: Stage5Commands;
+  requestedMode: "mock" | "live";
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -102,7 +138,15 @@ function StageProjection({
 
   switch (view.stage) {
     case "WELCOME":
-      return <WelcomeView heading={heading} view={view} commands={commands} busy={busy} />;
+      return (
+        <WelcomeView
+          heading={heading}
+          view={view}
+          commands={commands}
+          busy={busy}
+          requestedMode={requestedMode}
+        />
+      );
     case "PORTRAIT_PRELUDE":
       return <PortraitPreludeView heading={heading} view={view} commands={commands} busy={busy} />;
     case "PORTRAIT_CHOICE":
@@ -120,7 +164,15 @@ function StageProjection({
     case "PORTRAIT_REASSEMBLY":
       return <PortraitReassemblyView heading={heading} view={view} commands={commands} busy={busy} />;
     case "FINAL_SIGNATURE":
-      return <FinalSignatureView heading={heading} view={view} commands={commands} busy={busy} />;
+      return (
+        <FinalSignatureView
+          heading={heading}
+          view={view}
+          commands={commands}
+          busy={busy}
+          requestedMode={requestedMode}
+        />
+      );
     case "MANUSCRIPT_REVISION":
       return <ManuscriptRevisionView heading={heading} view={view} commands={commands} busy={busy} />;
     case "FINAL_DISPOSITION":
@@ -144,7 +196,8 @@ function WelcomeView({
   view,
   commands,
   busy,
-}: StageProps) {
+  requestedMode,
+}: StageProps & { requestedMode: "mock" | "live" }) {
   return (
     <section className="stage-shell welcome-stage">
       <div className="welcome-copy">
@@ -160,7 +213,11 @@ function WelcomeView({
         </div>
         <ul className="fact-list">
           <li>预计 18–20 分钟</li>
-          <li>本阶段只使用可复现的 Mock 输出</li>
+          <li>
+            {requestedMode === "live"
+              ? "普通分析优先使用 Live Agent，并按安全策略降级；签名审阅不会由 Mock 代签"
+              : "本阶段只使用可复现的 Mock 输出"}
+          </li>
           <li>进度仅保存在这台浏览器的本地存储中，未完成体验 24 小时后过期</li>
         </ul>
         <button className="primary-action" disabled={busy} onClick={() => void commands.start()}>
@@ -169,6 +226,48 @@ function WelcomeView({
       </div>
       <blockquote className="manuscript-teaser">“{view.preciseText}”</blockquote>
     </section>
+  );
+}
+
+function LiveExecutionStatus({
+  view,
+  busy,
+}: {
+  view: Stage5PresentationView;
+  busy: boolean;
+}) {
+  let message =
+    "Live Agent 已启用；普通分析支持安全降级，Final Review 不会由 Mock 代签。";
+  if (busy) {
+    message = "Live Agent 正在处理。本步骤完成前请留在此页。";
+  } else if (view.executionStatus?.requestedMode === "live") {
+    switch (view.executionStatus.resolvedMode) {
+      case "live":
+        message = "上一步由 Live Agent 完成。";
+        break;
+      case "deterministic":
+        message = "上一步由本地确定性规则完成，没有调用模型。";
+        break;
+      case "mock":
+        message = "Live Agent 未完成；上一步已使用本地安全 Mock，并保留实际来源记录。";
+        break;
+      case "static_template":
+        message = "Live Agent 与 Mock 均未完成；上一步已使用静态安全模板。";
+        break;
+      case "unavailable":
+        message = "Live 执行未完成；本步骤没有生成替代角色决定。";
+        break;
+    }
+  }
+  return (
+    <div
+      className="execution-status"
+      role="status"
+      aria-live="polite"
+      data-testid="live-execution-status"
+    >
+      {message}
+    </div>
   );
 }
 
@@ -486,11 +585,19 @@ function PortraitReassemblyView({ heading, view, commands, busy }: StageProps) {
   );
 }
 
-function FinalSignatureView({ heading, view, commands, busy }: StageProps) {
+function FinalSignatureView({
+  heading,
+  view,
+  commands,
+  busy,
+  requestedMode,
+}: StageProps & { requestedMode: "mock" | "live" }) {
   const unavailable = view.signatureStatus === "unavailable";
   return (
     <section className="stage-shell">
-      <p className="section-kicker">独立 Final Review 服务 · Mock</p>
+      <p className="section-kicker">
+        独立 Final Review 服务 · {requestedMode === "live" ? "Live" : "Mock"}
+      </p>
       {heading}
       <div className="review-grid">
         <div><ManuscriptDocuments view={view} /></div>
@@ -498,9 +605,19 @@ function FinalSignatureView({ heading, view, commands, busy }: StageProps) {
           <h2>当前状态：{signatureLabel(view.signatureStatus)}</h2>
           <p>“拒绝签名”是角色判断；“未请求”与“技术上未完成”是不同状态。</p>
           <div className="action-stack">
-            {!unavailable ? <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>请求 Mock 审阅（签名夹具）</button> : null}
-            {!unavailable ? <button className="secondary-action" disabled={busy} onClick={() => void commands.requestSignature("declined")}>请求 Mock 审阅（拒绝夹具）</button> : null}
-            {!unavailable ? <button className="secondary-action" disabled={busy} onClick={() => void commands.requestSignature("unavailable")}>模拟技术上未完成</button> : null}
+            {!unavailable && requestedMode === "live" ? (
+              <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>
+                请求 Live 查理签名审阅
+              </button>
+            ) : null}
+            {unavailable && requestedMode === "live" && view.signatureRetryAvailable ? (
+              <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>
+                重试 Live 查理签名审阅（最后一次）
+              </button>
+            ) : null}
+            {!unavailable && requestedMode === "mock" ? <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>请求 Mock 审阅（签名夹具）</button> : null}
+            {!unavailable && requestedMode === "mock" ? <button className="secondary-action" disabled={busy} onClick={() => void commands.requestSignature("declined")}>请求 Mock 审阅（拒绝夹具）</button> : null}
+            {!unavailable && requestedMode === "mock" ? <button className="secondary-action" disabled={busy} onClick={() => void commands.requestSignature("unavailable")}>模拟技术上未完成</button> : null}
             <button className="text-action" disabled={busy} onClick={() => void commands.skipSignature()}>{unavailable ? "保留技术未完成状态并继续" : "不请求签名，继续"}</button>
             <button className="text-action" disabled={busy} onClick={() => void commands.returnToManuscript()}>返回修改手稿</button>
           </div>

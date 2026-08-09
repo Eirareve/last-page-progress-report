@@ -1,4 +1,5 @@
 import type { ContentAccess } from "../content";
+import { canManuallyRetrySignatureReview } from "../domain";
 import type { Stage4PersistenceSidecars, Stage4SessionState } from "../fsm";
 import type {
   Stage5EnvelopeView,
@@ -52,6 +53,7 @@ export function projectStage5View(input: {
   ) ?? null;
   const pending = state.manuscript.pendingDiff;
   const envelope = state.finalEnvelope === null ? null : projectEnvelope(state.finalEnvelope);
+  const latestReceipt = state.provenance.capabilityExecutionReceipts.at(-1);
 
   return Object.freeze({
     sessionId: state.sessionId,
@@ -96,9 +98,23 @@ export function projectStage5View(input: {
         : state.currentCharlieSignatureReview?.snapshotKind === "unavailable"
           ? state.currentCharlieSignatureReview.summary
           : null,
+    signatureRetryAvailable: canManuallyRetrySignatureReview({
+      currentCharlieSignatureStatus: state.currentCharlieSignatureStatus,
+      currentCharlieSignatureReview: state.currentCharlieSignatureReview,
+      signatureReviewAttemptState: state.signatureReviewAttemptState,
+    }),
     finalDisposition: state.finalDisposition,
     blockers: [...(input.blockers ?? [])],
     envelope,
+    executionStatus:
+      latestReceipt === undefined
+        ? null
+        : {
+            capability: latestReceipt.capability,
+            requestedMode: latestReceipt.requestedMode,
+            resolvedMode: latestReceipt.resolvedMode,
+            outcome: latestReceipt.outcome,
+          },
     busy: state.runtime.activeOperation !== null || state.stage === "FINALIZING",
   });
 }

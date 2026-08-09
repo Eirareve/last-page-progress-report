@@ -39,16 +39,21 @@ export async function createAgentRequestContext(input: {
   semanticMaterial: unknown;
   resultSchemaVersion: string;
   plainRevisionId?: string | null;
+  requestedMode?: "mock" | "live";
+  adapterVersion?: string;
+  promptVersion?: string | null;
 }): Promise<RequestContext> {
+  const requestedMode = input.requestedMode ?? "mock";
   const base = serializableRequestContextSchema.parse({
     operationId: input.identity.operationId,
     requestId: input.identity.requestId,
-    requestedMode: "mock",
+    requestedMode,
     capability: input.capability,
     attempt: 1,
     inputFingerprint: `sha256:${"0".repeat(64)}`,
-    promptVersion: null,
-    adapterVersion: MOCK_AGENT_ADAPTER_VERSION,
+    promptVersion:
+      input.promptVersion === undefined ? null : input.promptVersion,
+    adapterVersion: input.adapterVersion ?? MOCK_AGENT_ADAPTER_VERSION,
     stage: input.state.stage,
     stageInstanceId: input.state.stageInstanceId,
     bindings: {
@@ -76,6 +81,7 @@ export function createOperationBoundary(input: {
   slot: Stage3BudgetSlot;
   sidecars: Stage4PersistenceSidecars;
   clock: Clock;
+  availability?: OrchestrationOperationBoundary["availability"];
 }): OrchestrationOperationBoundary {
   const startedAt = input.clock.now();
   const priorCall = input.sidecars.budgetUsage.logicalCalls.find(
@@ -112,7 +118,7 @@ export function createOperationBoundary(input: {
         estimatedCostUsdMicros: priorCall?.estimatedCostUsdMicros ?? 0,
       }),
     },
-    availability: { live: false, mock: true },
+    availability: input.availability ?? { live: false, mock: true },
     clock: input.clock,
   };
 }

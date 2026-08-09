@@ -71,6 +71,18 @@ export type Stage5EnvelopeView = Readonly<{
   integrityChecksum: string;
 }>;
 
+export type Stage5ExecutionStatus = Readonly<{
+  capability: string;
+  requestedMode: "mock" | "live";
+  resolvedMode:
+    | "mock"
+    | "live"
+    | "deterministic"
+    | "static_template"
+    | "unavailable";
+  outcome: "succeeded" | "failed" | "skipped";
+}>;
+
 export type Stage5PresentationView = Readonly<{
   sessionId: string;
   stage: string;
@@ -98,9 +110,11 @@ export type Stage5PresentationView = Readonly<{
   placementChecking: boolean;
   signatureStatus: string;
   signatureSummary: string | null;
+  signatureRetryAvailable: boolean;
   finalDisposition: string | null;
   blockers: readonly string[];
   envelope: Stage5EnvelopeView | null;
+  executionStatus: Stage5ExecutionStatus | null;
   busy: boolean;
 }>;
 

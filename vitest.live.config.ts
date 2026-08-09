@@ -5,14 +5,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "server-only": fileURLToPath(
-        new URL("./tests/stubs/server-only.ts", import.meta.url),
-      ),
     },
   },
   test: {
-    dir: "./tests",
     environment: "node",
-    include: ["**/*.test.ts"],
+    include: ["tests/live/**/*.live.ts"],
+    maxConcurrency: 1,
+    fileParallelism: false,
+    disableConsoleIntercept: true,
   },
 });
