@@ -1,0 +1,12 @@
+# Package file SHA-256
+
+> 这些 hash 仅用于本次审核包文件传输完整性，不是 ContentBundle checksum。
+
+73eafb572a87fa13671992975db5c4c9e92ba67b5efd048250932d6f1a3ed5b8  01-edition-record.draft.json
+e8d70280593eea8c9add12b3e74ee18b667f49329dbcac0ece5212956cac8c20  02-verified-facts.draft.json
+8093eea5d85cc1a4a9ea0cb3693e29059a52f38da229e866a8e5bf83225cec11  03-curatorial-interpretations.draft.json
+48d3d7c0f4c94a9a0d768c052da07166e69999634528de75b0ac13970efe12ae  04-evidence-cards.draft.json
+301126a2c2efe46044c6fe82279fe03124794e120169aeb13d9f1067e3cf5a86  05-CONTENT_INPUT_MANIFEST.draft.json
+aa0302e3db7ca0d949fa7886890c810624b189c9a0e07f7cd3b85650a3325927  06-approval-record.draft.md
+956a19c80455c9e8e55554379ab6a89a9b5dcb046b716f6c8e5cbad5266d4325  README.md
+06c210720bd52bcddbe25de80ba59ed340952a86ac29edf9386210c34013ed83  STAGE7_CONTENT_REVIEW_PACKAGE_COMBINED.md

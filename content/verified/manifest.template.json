@@ -1,0 +1,32 @@
+{
+  "verifiedManifestSchemaVersion": "0.2.0",
+  "contentContractVersion": "0.2.0",
+  "contentSchemaVersion": "0.2.0",
+  "contentMode": "verified",
+  "manifestStatus": "template_only",
+  "templateOnly": true,
+  "productionEligible": false,
+  "contentBundleId": null,
+  "contentBundleVersion": null,
+  "editionId": null,
+  "verifiedBy": null,
+  "verifiedAt": null,
+  "checksumAlgorithm": "rfc8785-sha256-nfc-v1",
+  "internalContentBundleChecksum": null,
+  "contentBundleChecksum": null,
+  "files": {
+    "bookVersion": "book-version.template.json",
+    "verifiedFacts": "verified-facts.template.json",
+    "curatorialInterpretations": "curatorial-interpretations.template.json",
+    "evidenceCards": "evidence-cards.template.json",
+    "portraitConfig": "portrait-config.template.json",
+    "originalInteraction": "original-interaction.json"
+  },
+  "activationRequirements": [
+    "replace_all_null_authoring_fields",
+    "human_approval_complete",
+    "all_references_resolve",
+    "private_public_projection_validated",
+    "both_checksums_generated"
+  ]
+}

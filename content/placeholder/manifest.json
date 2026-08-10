@@ -1,0 +1,27 @@
+{
+  "placeholderManifestSchemaVersion": "0.2.0",
+  "contentContractVersion": "0.2.0",
+  "contentSchemaVersion": "0.2.0",
+  "contentMode": "placeholder",
+  "contentBundleId": "last-page-placeholder",
+  "contentBundleVersion": "0.2.0",
+  "templateOnly": false,
+  "productionEligible": false,
+  "verificationStatus": "not_applicable_placeholder",
+  "editionId": null,
+  "verifiedBy": null,
+  "verifiedAt": null,
+  "checksumAlgorithm": "rfc8785-sha256-nfc-v1",
+  "internalContentBundleChecksum": null,
+  "contentBundleChecksum": "sha256:2a620ed7d86146fd8d709759fda765ccabd412fc9cd07f3dd413f6a6bf6566c1",
+  "files": {
+    "evidenceCards": "evidence-cards.json",
+    "portraitConfig": "portrait-config.json",
+    "originalInteraction": "original-interaction.json"
+  },
+  "prohibitions": [
+    "not_a_verified_bundle",
+    "not_for_production",
+    "not_for_retrieve_verified_evidence"
+  ]
+}

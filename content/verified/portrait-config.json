@@ -1,0 +1,58 @@
+{
+  "records": [
+    {
+      "assetId": "charlie-early-candidate-v2",
+      "charlieStage": "early",
+      "publicAssetPath": "/portraits/charlie-original-v2/early.png",
+      "altText": "同一位查理身处面包房工作区，姿态放松，神情温和而信任周围的人。",
+      "descriptorOptions": [
+        { "id": "early-warm", "label": "温柔" },
+        { "id": "early-dependent", "label": "依赖" },
+        { "id": "early-hopeful", "label": "期待" }
+      ],
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_using_selected_master_B_identity_reference",
+      "licenseOrPermission": "project-owner approved for project public use under applicable Agnes service terms",
+      "approvedForPublicUse": true,
+      "characterDesignVersion": "charlie-original-v2",
+      "fallbackAssetId": "charlie-early-candidate-v2",
+      "evidenceRole": "not_evidence"
+    },
+    {
+      "assetId": "charlie-peak-candidate-v2",
+      "charlieStage": "peak",
+      "publicAssetPath": "/portraits/charlie-original-v2/peak.png",
+      "altText": "同一位查理处于安静研究环境，神情敏锐、自持，并与周围保持轻微距离。",
+      "descriptorOptions": [
+        { "id": "peak-precise", "label": "精确" },
+        { "id": "peak-assured", "label": "自信" },
+        { "id": "peak-isolated", "label": "孤独" }
+      ],
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_using_selected_master_B_identity_reference",
+      "licenseOrPermission": "project-owner approved for project public use under applicable Agnes service terms",
+      "approvedForPublicUse": true,
+      "characterDesignVersion": "charlie-original-v2",
+      "fallbackAssetId": "charlie-peak-candidate-v2",
+      "evidenceRole": "not_evidence"
+    },
+    {
+      "assetId": "charlie-future-facing-candidate-v2",
+      "charlieStage": "futureFacing",
+      "publicAssetPath": "/portraits/charlie-original-v2/future-facing.png",
+      "altText": "同一位查理在傍晚光线中与书写和时间留下的痕迹相伴，情绪清醒而克制。",
+      "descriptorOptions": [
+        { "id": "future-aware", "label": "清醒" },
+        { "id": "future-restrained", "label": "克制" },
+        { "id": "future-facing", "label": "面向未来" }
+      ],
+      "creator": "Agnes AI under project-directed specification",
+      "creationMethod": "agnes_image_to_image_using_selected_master_B_identity_reference",
+      "licenseOrPermission": "project-owner approved for project public use under applicable Agnes service terms",
+      "approvedForPublicUse": true,
+      "characterDesignVersion": "charlie-original-v2",
+      "fallbackAssetId": "charlie-future-facing-candidate-v2",
+      "evidenceRole": "not_evidence"
+    }
+  ]
+}

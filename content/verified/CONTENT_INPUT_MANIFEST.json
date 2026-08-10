@@ -1,0 +1,183 @@
+{
+  "contentInputManifestVersion": "stage7-content-input-1.0.0",
+  "manifestStatus": "approved",
+  "purpose": "Stage 7 external input audit manifest; not Domain, SessionState, or ContentBundle Contract",
+  "checksumAlgorithm": "rfc8785-sha256-nfc-v1",
+  "inputChecksumScope": "Each inputChecksum hashes the exact approved mapped target record with the repository canonical JSON checksum implementation; package transport SHA-256 values are excluded.",
+  "approvedBy": "project-owner",
+  "approvedAt": "2026-08-09T18:13:12.028Z",
+  "entries": [
+    {
+      "inputId": "CONTENT-001",
+      "sourceRef": "stage7-input/content/01-edition-record.draft.json plus project-owner bibliographic clarification",
+      "intendedTarget": "content/verified/book-version.json",
+      "inputChecksum": "sha256:0ed60756cc91d7193d78127ff94547a81e77b9f734f195d155a076bfcc593bae",
+      "approvalStatus": "approved",
+      "classification": "EDITION_METADATA",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "project-owner",
+      "verifiedAt": "2026-08-09T18:13:12.028Z",
+      "auditMetadata": {
+        "cipPublicationDate": "2015.5",
+        "editionAndPrintingStatement": "2015年4月第1版；2015年4月第1次印刷",
+        "pageCount": 288,
+        "publicationMonthInterpretation": "CIP date only; not the edition or printing month"
+      }
+    },
+    {
+      "inputId": "CONTENT-002",
+      "sourceRef": "用户上传 进步报告-8",
+      "intendedTarget": "content/verified/verified-facts.json#VF-R1-001",
+      "inputChecksum": "sha256:7957f9a3ad34e66f12d706cc427996fe32dc44b7b4a4fd318b929e8f027bf421",
+      "approvalStatus": "approved",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "project-owner",
+      "verifiedAt": "2026-08-09T18:13:12.028Z",
+      "internalEvidenceRef": "用户上传《进步报告-8》文本；不把正文长引文写入 public bundle",
+      "copyrightHandling": "public_summary_only; internalExcerpt remains private"
+    },
+    {
+      "inputId": "CONTENT-003",
+      "sourceRef": "用户上传 进步报告-9",
+      "intendedTarget": "content/verified/verified-facts.json#VF-R1-002",
+      "inputChecksum": "sha256:96038387e57cd33da3922f7ff24717c12d3912f70a2a94265138a123dab54406",
+      "approvalStatus": "approved",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "project-owner",
+      "verifiedAt": "2026-08-09T18:13:12.028Z",
+      "internalEvidenceRef": "用户上传《进步报告-9》文本；不把正文长引文写入 public bundle",
+      "copyrightHandling": "public_summary_only; internalExcerpt remains private"
+    },
+    {
+      "inputId": "CONTENT-004",
+      "sourceRef": "用户上传 进步报告-15",
+      "intendedTarget": "content/verified/verified-facts.json#VF-R2-001",
+      "inputChecksum": "sha256:ea0f899b727afec402d23416f891ddc8a80de317d091883660ac0f0cdb767092",
+      "approvalStatus": "approved",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "project-owner",
+      "verifiedAt": "2026-08-09T18:13:12.028Z",
+      "internalEvidenceRef": "用户上传《进步报告-15》文本；不把正文长引文写入 public bundle",
+      "copyrightHandling": "public_summary_only; internalExcerpt remains private"
+    },
+    {
+      "inputId": "CONTENT-005",
+      "sourceRef": "用户上传 进步报告-16",
+      "intendedTarget": "content/verified/verified-facts.json#VF-R2-002",
+      "inputChecksum": "sha256:b010dbe6fb04f385445506fcd65f4b61331cd00578b477d65b7203a8df568308",
+      "approvalStatus": "approved",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "project-owner",
+      "verifiedAt": "2026-08-09T18:13:12.028Z",
+      "internalEvidenceRef": "用户上传《进步报告-16》文本；不把正文长引文写入 public bundle",
+      "copyrightHandling": "public_summary_only; internalExcerpt remains private"
+    },
+    {
+      "inputId": "CONTENT-006",
+      "sourceRef": "用户上传 进步报告-17",
+      "intendedTarget": "content/verified/verified-facts.json#VF-R3-001",
+      "inputChecksum": "sha256:7260373950ffef386eea73e618344892390114ce6e8f4ba576a99734a565ac1d",
+      "approvalStatus": "approved",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "project-owner",
+      "verifiedAt": "2026-08-09T18:13:12.028Z",
+      "internalEvidenceRef": "用户上传《进步报告-17》文本；不把正文长引文写入 public bundle",
+      "copyrightHandling": "public_summary_only; internalExcerpt remains private"
+    },
+    {
+      "inputId": "CONTENT-007",
+      "sourceRef": "用户上传 进步报告-17",
+      "intendedTarget": "content/verified/verified-facts.json#VF-R3-002",
+      "inputChecksum": "sha256:75003efeb46e101984f9e1ca7aebc9ac1f42733d3239ecfd50c784bbc19e5842",
+      "approvalStatus": "approved",
+      "classification": "VERIFIED_FACT",
+      "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+      "verifiedBy": "project-owner",
+      "verifiedAt": "2026-08-09T18:13:12.028Z",
+      "internalEvidenceRef": "用户上传《进步报告-17》文本；不把正文长引文写入 public bundle",
+      "copyrightHandling": "public_summary_only; internalExcerpt remains private"
+    },
+    {
+      "inputId": "CONTENT-008",
+      "sourceRef": "stage7-input/content/03-curatorial-interpretations.draft.json#CI-R1-001",
+      "intendedTarget": "content/verified/curatorial-interpretations.json#CI-R1-001",
+      "inputChecksum": "sha256:9d26b6bfd120554870953e63e5f69dd30cf9c58525574eedeaa088c0815514e6",
+      "approvalStatus": "approved",
+      "classification": "CURATORIAL_INTERPRETATION",
+      "editionId": null,
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z"
+    },
+    {
+      "inputId": "CONTENT-009",
+      "sourceRef": "stage7-input/content/03-curatorial-interpretations.draft.json#CI-R2-001",
+      "intendedTarget": "content/verified/curatorial-interpretations.json#CI-R2-001",
+      "inputChecksum": "sha256:78f8c45e0cca7867beb1d6509187b8948c8d1ccbbb26d319bbe5c29314334f4f",
+      "approvalStatus": "approved",
+      "classification": "CURATORIAL_INTERPRETATION",
+      "editionId": null,
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z"
+    },
+    {
+      "inputId": "CONTENT-010",
+      "sourceRef": "stage7-input/content/03-curatorial-interpretations.draft.json#CI-R3-001",
+      "intendedTarget": "content/verified/curatorial-interpretations.json#CI-R3-001",
+      "inputChecksum": "sha256:914e631b9554fe5a1f045064035680b093288af066eba62c1e3abcf2e222ecd2",
+      "approvalStatus": "approved",
+      "classification": "CURATORIAL_INTERPRETATION",
+      "editionId": null,
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z"
+    },
+    {
+      "inputId": "CONTENT-011",
+      "sourceRef": "stage7-input/content/04-evidence-cards.draft.json#EC-R1-PAST-SELF plus approved Stage 7 title",
+      "intendedTarget": "content/verified/evidence-cards.json#EC-R1-PAST-SELF",
+      "inputChecksum": "sha256:73eb6be18ae3e9baba6ebde67dfcb909bb380ccb15fa66071dc50815ba8e60dc",
+      "approvalStatus": "approved",
+      "classification": "EVIDENCE_CARD",
+      "editionId": null,
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z"
+    },
+    {
+      "inputId": "CONTENT-012",
+      "sourceRef": "stage7-input/content/04-evidence-cards.draft.json#EC-R2-FUTURE-PREDICTION plus approved Stage 7 title",
+      "intendedTarget": "content/verified/evidence-cards.json#EC-R2-FUTURE-PREDICTION",
+      "inputChecksum": "sha256:7409d4762f211856f42edbaf87eab7d8a418c2cae2bab399efd8c5f5d4778862",
+      "approvalStatus": "approved",
+      "classification": "EVIDENCE_CARD",
+      "editionId": null,
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z"
+    },
+    {
+      "inputId": "CONTENT-013",
+      "sourceRef": "stage7-input/content/04-evidence-cards.draft.json#EC-R3-FUTURE-RELATIONSHIPS plus approved Stage 7 title",
+      "intendedTarget": "content/verified/evidence-cards.json#EC-R3-FUTURE-RELATIONSHIPS",
+      "inputChecksum": "sha256:9779d78922b5130f09a454f0a8b0b720fcc8e152928eb728fb11429098378037",
+      "approvalStatus": "approved",
+      "classification": "EVIDENCE_CARD",
+      "editionId": null,
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z"
+    },
+    {
+      "inputId": "CONTENT-014",
+      "sourceRef": "content/verified/original-interaction.json; exact text and declaration match docs/scope-freeze.md",
+      "intendedTarget": "content/verified/original-interaction.json",
+      "inputChecksum": "sha256:c0ed0823a6b8e38b56e085749ff7af64c1e3661bae023358fdcf2f6b0bdd720b",
+      "approvalStatus": "approved",
+      "classification": "ORIGINAL_INTERACTION",
+      "editionId": null,
+      "approvedBy": "project-owner",
+      "approvedAt": "2026-08-09T18:13:12.028Z"
+    }
+  ]
+}

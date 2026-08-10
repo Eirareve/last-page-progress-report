@@ -10,7 +10,10 @@ import {
 } from "./evidence.schema";
 import { experienceStageSchema, roundStateSchema } from "./experience.schema";
 import { manuscriptStateSchema } from "./manuscript.schema";
-import { portraitDescriptorSchema, portraitPreludeSchema } from "./portrait.schema";
+import {
+  portraitDescriptorCollectionSchema,
+  portraitPreludeSchema,
+} from "./portrait.schema";
 import {
   bouquetEntrySchema,
   semanticDriftSchema,
@@ -59,7 +62,7 @@ export const sessionStateSchema = z
     configuration: z.unknown(),
     runtime: z.unknown(),
     provenance: z.unknown(),
-    portraitDescriptors: z.array(portraitDescriptorSchema).length(3),
+    portraitDescriptors: portraitDescriptorCollectionSchema,
     portraits: portraitPreludeSchema,
     manuscript: manuscriptStateSchema,
     rounds: z.strictObject({

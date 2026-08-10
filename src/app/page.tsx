@@ -1,8 +1,18 @@
-export default function HomePage() {
+import { ExperienceClient } from "../stage5/experience-client";
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const rawSession = params.session;
+  const sessionId =
+    typeof rawSession === "string" && rawSession.trim().length > 0
+      ? rawSession
+      : null;
+  const requestedMode = process.env.AGENT_MODE === "live" ? "live" : "mock";
   return (
-    <main>
-      <h1>最后一页进步报告</h1>
-      <p>阶段 1 工程骨架。本页面尚未实现互动体验。</p>
-    </main>
+    <ExperienceClient sessionId={sessionId} requestedMode={requestedMode} />
   );
 }

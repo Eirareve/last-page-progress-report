@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" role="img" aria-labelledby="t d">
+  <title id="t">面向未来的查理肖像占位图</title><desc id="d">等待经人工批准的正式视觉资产</desc>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#c8b795"/><stop offset="1" stop-color="#6d8178"/></linearGradient></defs>
+  <rect width="720" height="900" fill="url(#g)"/><circle cx="360" cy="315" r="145" fill="#e1cfb4" opacity=".86"/><path d="M125 900c30-240 126-365 235-365s205 125 235 365" fill="#596962"/><path d="M290 345c22 12 46 18 70 18s48-6 70-18" fill="none" stroke="#5b5043" stroke-width="9"/><path d="M525 130v260" stroke="#edf0df" stroke-width="4" opacity=".55"/><text x="48" y="74" fill="#fffdf2" font-size="26" font-family="serif">FUTURE-FACING · PLACEHOLDER</text>
+</svg>

@@ -77,9 +77,52 @@ describe("session and boundary contracts", () => {
   it("does not permit a fabricated Session-level resolved execution mode in FinalEnvelope", () => {
     const candidate = {
       finalEnvelopeId: "envelope-1",
-      finalEnvelopeSchemaVersion: "0.1.0",
+      finalEnvelopeSchemaVersion: "0.2.0",
       sessionId: "session-1",
       generatedAt: "2026-08-06T00:00:00.000Z",
+      contentSnapshot: {
+        binding: {
+          contentBundleId: "content-1",
+          contentBundleVersion: "0.2.0",
+          contentBundleChecksum: `sha256:${"a".repeat(64)}`,
+          contentSchemaVersion: "0.2.0",
+          targetEnvironment: "test",
+        },
+        portraitAssets: [
+          {
+            assetId: "asset-early",
+            stage: "early",
+            assetPath: "/portraits/early.svg",
+            altText: "Early portrait",
+            provenance: "placeholder",
+          },
+          {
+            assetId: "asset-peak",
+            stage: "peak",
+            assetPath: "/portraits/peak.svg",
+            altText: "Peak portrait",
+            provenance: "placeholder",
+          },
+          {
+            assetId: "asset-future",
+            stage: "futureFacing",
+            assetPath: "/portraits/future.svg",
+            altText: "Future portrait",
+            provenance: "placeholder",
+          },
+        ],
+        originalInteraction: {
+          item: {
+            id: "original-1",
+            text: "Original manuscript.",
+            contentType: "ORIGINAL_INTERACTION",
+            purpose: "manuscript",
+          },
+          publicDeclaration: "Original interaction declaration.",
+          attribution: "Test fixture",
+        },
+      },
+      sessionConfiguration: { requestedAgentMode: "mock" },
       manuscript: {
         preciseText: "precise",
         preciseRevisionId: "precise-1",

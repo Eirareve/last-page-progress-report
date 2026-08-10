@@ -1,0 +1,19 @@
+{
+  "portraitConfigAuthoringCollectionSchemaVersion": "0.2.0",
+  "templateOnly": true,
+  "records": [],
+  "recordTemplate": {
+    "assetId": null,
+    "charlieStage": null,
+    "publicAssetPath": null,
+    "altText": null,
+    "descriptorOptions": [],
+    "creator": null,
+    "creationMethod": null,
+    "licenseOrPermission": null,
+    "approvedForPublicUse": false,
+    "characterDesignVersion": null,
+    "fallbackAssetId": null,
+    "evidenceRole": "not_evidence"
+  }
+}

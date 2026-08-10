@@ -1,0 +1,30 @@
+{
+  "verifiedFactAuthoringCollectionSchemaVersion": "0.1.0",
+  "templateOnly": true,
+  "records": [],
+  "recordTemplate": {
+    "id": null,
+    "contentType": "VERIFIED_FACT",
+    "theme": null,
+    "round": null,
+    "verifiedFact": null,
+    "sourceLocation": {
+      "editionId": null,
+      "sectionType": null,
+      "sectionLabel": null,
+      "pageStart": null,
+      "pageEnd": null,
+      "locatorNote": null
+    },
+    "internalExcerpt": null,
+    "publicSummary": null,
+    "publicPresentationMode": null,
+    "allowedInterpretations": [],
+    "prohibitedInferences": [],
+    "copyrightStatus": null,
+    "verifiedBy": null,
+    "verifiedAt": null,
+    "verificationStatus": null,
+    "editionId": null
+  }
+}

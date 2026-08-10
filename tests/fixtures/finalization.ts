@@ -261,7 +261,14 @@ export function makeFinalizableState(): FinalizationSessionState {
     charlieResponses: [],
     openDissents: [],
     evidenceUsed: [],
-    contentItemsUsed: [],
+    contentItemsUsed: [
+      {
+        id: "finalization-original-interaction",
+        contentType: "ORIGINAL_INTERACTION",
+        purpose: "manuscript",
+        text: "Past and future both matter.",
+      },
+    ],
     semanticDrift,
     semanticPlacementBatch: null,
     semanticFragments: [],

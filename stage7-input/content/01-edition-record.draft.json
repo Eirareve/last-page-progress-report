@@ -1,0 +1,97 @@
+{
+  "recordStatus": "DRAFT_PENDING_HUMAN_APPROVAL",
+  "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+  "title": "献给阿尔吉侬的花束",
+  "originalTitle": "Flowers for Algernon",
+  "author": "Daniel Keyes（丹尼尔·凯斯）",
+  "translator": "陈澄和",
+  "language": "zh-CN",
+  "publisher": "广西师范大学出版社",
+  "publicationYear": 2015,
+  "publicationMonth": 5,
+  "editionLabel": "2015年4月第1版；2015年4月第1次印刷",
+  "isbn": "978-7-5495-6511-5",
+  "pageCount": 288,
+  "pageCountEvidence": "用户根据购物软件再次确认；版权页截图未显示总页数",
+  "copyrightNotes": [
+    "Flowers for Algernon by Daniel Keyes; © 1966, 1959 by Daniel Keyes",
+    "Simplified Chinese character translation copyright © 2015 by Beijing Imaginist Time Culture Co., Ltd.",
+    "中文简体版相关权利信息以用户提供的版权页截图为内部审核依据"
+  ],
+  "verification": {
+    "verifiedBy": "__HUMAN_TO_FILL__",
+    "verifiedAt": "__HUMAN_TO_FILL__",
+    "verificationStatus": "pending_human_approval"
+  },
+  "chapterStarts": [
+    {
+      "sectionLabel": "近步抱告-1",
+      "pageStart": 1
+    },
+    {
+      "sectionLabel": "近步抱告-2",
+      "pageStart": 2
+    },
+    {
+      "sectionLabel": "近步抱告-3",
+      "pageStart": 4
+    },
+    {
+      "sectionLabel": "近步抱告-4",
+      "pageStart": 6
+    },
+    {
+      "sectionLabel": "近步抱告-5",
+      "pageStart": 10
+    },
+    {
+      "sectionLabel": "近步抱告-6",
+      "pageStart": 13
+    },
+    {
+      "sectionLabel": "进步报告-7",
+      "pageStart": 15
+    },
+    {
+      "sectionLabel": "进步报告-8",
+      "pageStart": 20
+    },
+    {
+      "sectionLabel": "进步报告-9",
+      "pageStart": 35
+    },
+    {
+      "sectionLabel": "进步报告-10",
+      "pageStart": 58
+    },
+    {
+      "sectionLabel": "进步报告-11",
+      "pageStart": 73
+    },
+    {
+      "sectionLabel": "进步报告-12",
+      "pageStart": 107
+    },
+    {
+      "sectionLabel": "进步报告-13",
+      "pageStart": 124
+    },
+    {
+      "sectionLabel": "进步报告-14",
+      "pageStart": 154
+    },
+    {
+      "sectionLabel": "进步报告-15",
+      "pageStart": 199
+    },
+    {
+      "sectionLabel": "进步报告-16",
+      "pageStart": 205
+    },
+    {
+      "sectionLabel": "进步报告-17",
+      "pageStart": 256
+    }
+  ],
+  "sourceRangePolicy": "Stage 7 draft uses whole-report page ranges plus date/event locatorNote. Exact sentence-level pages are intentionally not asserted. Codex must map to the frozen sourceLocation schema without changing Contract."
+}

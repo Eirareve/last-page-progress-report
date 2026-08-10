@@ -1,0 +1,54 @@
+{
+  "placeholderEvidenceCardSchemaVersion": "0.2.0",
+  "contentMode": "placeholder",
+  "records": [
+    {
+      "id": "past-self-placeholder",
+      "recordKind": "placeholder_evidence_card",
+      "round": "round1",
+      "title": "[PLACEHOLDER_EVIDENCE_CARD]",
+      "publicText": "[PLACEHOLDER: HUMAN_VERIFIED_CONTENT_REQUIRED]",
+      "question": "[PLACEHOLDER: ORIGINAL_INTERACTION_NOT_AUTHORED]",
+      "allowedFollowUps": [],
+      "prohibitedClaims": [
+        "novel_fact",
+        "novel_quotation",
+        "charlie_dialogue"
+      ],
+      "attribution": "placeholder",
+      "provenance": "placeholder"
+    },
+    {
+      "id": "future-forecast-placeholder",
+      "recordKind": "placeholder_evidence_card",
+      "round": "round2",
+      "title": "[PLACEHOLDER_EVIDENCE_CARD]",
+      "publicText": "[PLACEHOLDER: HUMAN_VERIFIED_CONTENT_REQUIRED]",
+      "question": "[PLACEHOLDER: ORIGINAL_INTERACTION_NOT_AUTHORED]",
+      "allowedFollowUps": [],
+      "prohibitedClaims": [
+        "novel_fact",
+        "novel_quotation",
+        "charlie_dialogue"
+      ],
+      "attribution": "placeholder",
+      "provenance": "placeholder"
+    },
+    {
+      "id": "relationship-placeholder",
+      "recordKind": "placeholder_evidence_card",
+      "round": "round3",
+      "title": "[PLACEHOLDER_EVIDENCE_CARD]",
+      "publicText": "[PLACEHOLDER: HUMAN_VERIFIED_CONTENT_REQUIRED]",
+      "question": "[PLACEHOLDER: ORIGINAL_INTERACTION_NOT_AUTHORED]",
+      "allowedFollowUps": [],
+      "prohibitedClaims": [
+        "novel_fact",
+        "novel_quotation",
+        "charlie_dialogue"
+      ],
+      "attribution": "placeholder",
+      "provenance": "placeholder"
+    }
+  ]
+}

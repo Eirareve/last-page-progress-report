@@ -1,0 +1,16 @@
+{
+  "bookEditionAuthoringSchemaVersion": "0.1.0",
+  "templateOnly": true,
+  "recordTemplate": {
+    "editionId": null,
+    "title": null,
+    "language": null,
+    "publisher": null,
+    "publicationYear": null,
+    "isbn": null,
+    "editionLabel": null,
+    "verifiedBy": null,
+    "verifiedAt": null,
+    "verificationStatus": null
+  }
+}

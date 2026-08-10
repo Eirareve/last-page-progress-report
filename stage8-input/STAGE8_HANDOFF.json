@@ -1,0 +1,116 @@
+{
+  "handoffVersion": "stage8-input-1.0.0",
+  "status": "READY_FOR_STAGE_8",
+  "frozenAt": "2026-08-09T19:58:32.7522680Z",
+  "frozenBy": "codex-with-project-owner-approvals",
+  "contractBoundary": {
+    "contentContractVersion": "0.2.0",
+    "contentSchemaVersion": "0.2.0",
+    "contentBundleVersion": "0.2.0",
+    "modifiedFrozenContracts": false,
+    "preserved": [
+      "ContentBundle and Content Schema",
+      "ContentLoader",
+      "canonicalization and checksum",
+      "public/private projection",
+      "evaluateContentGate",
+      "Domain, Runtime, and Provenance",
+      "Agent and Final Review",
+      "FSM and Finalization"
+    ]
+  },
+  "contentBundle": {
+    "contentBundleId": "last-page-verified-stage7",
+    "contentBundleVersion": "0.2.0",
+    "contentMode": "verified",
+    "approvalStatus": "approved",
+    "containsPlaceholderContent": false,
+    "checksumAlgorithm": "rfc8785-sha256-nfc-v1",
+    "internalContentBundleChecksum": "sha256:f2cc2f727dc94428bbac7006ee55963f941516ade11f13f002d4fad3bf0f962f",
+    "contentBundleChecksum": "sha256:d2431aaf6b42103accd549c8562d11dfe656ba1788e790c9c3f5e6c3e29bb53e",
+    "verifiedBy": "project-owner",
+    "verifiedAt": "2026-08-09T19:42:24.0561146Z"
+  },
+  "approvedContent": {
+    "contentApprovedAt": "2026-08-09T18:13:12.028Z",
+    "editionRecords": 1,
+    "verifiedFacts": 6,
+    "curatorialInterpretations": 3,
+    "evidenceCards": 3,
+    "originalInteractions": 1,
+    "internalExcerptBoundary": "private_authoring_and_human_verification_only"
+  },
+  "fixedPortraits": {
+    "approvalStatus": "approved",
+    "approvedBy": "project-owner",
+    "approvedAt": "2026-08-09T19:42:24.0561146Z",
+    "characterDesignVersion": "charlie-original-v2",
+    "masterSelection": {
+      "assetId": "charlie-master-b-candidate-v2",
+      "selectedAt": "2026-08-09T19:18:59.646Z",
+      "approvedForPublicUse": false,
+      "purpose": "identity_reference_only"
+    },
+    "assets": [
+      {
+        "assetId": "charlie-early-candidate-v2",
+        "charlieStage": "early",
+        "publicAssetPath": "/portraits/charlie-original-v2/early.png",
+        "sha256": "f5677da75c26a3e4eaac2499b459b946886b7838e3c0a6b84cb4e7b61f82bc40",
+        "fallbackAssetId": "charlie-early-candidate-v2",
+        "approvedForPublicUse": true
+      },
+      {
+        "assetId": "charlie-peak-candidate-v2",
+        "charlieStage": "peak",
+        "publicAssetPath": "/portraits/charlie-original-v2/peak.png",
+        "sha256": "86020d6dc25716362f311c63c3b5408bc044cc1310b507359ae760f67a71e836",
+        "fallbackAssetId": "charlie-peak-candidate-v2",
+        "approvedForPublicUse": true
+      },
+      {
+        "assetId": "charlie-future-facing-candidate-v2",
+        "charlieStage": "futureFacing",
+        "publicAssetPath": "/portraits/charlie-original-v2/future-facing.png",
+        "sha256": "cb2067a0d367ca9e0e729e65a36b68c0fc8d4cac73d56cc66cc48207fc7d02fb",
+        "fallbackAssetId": "charlie-future-facing-candidate-v2",
+        "approvedForPublicUse": true
+      }
+    ],
+    "fallbackApprovalStatus": "approved",
+    "assetInputManifest": "content/verified/ASSET_INPUT_MANIFEST.json"
+  },
+  "productionGate": {
+    "status": "passed",
+    "evaluationId": "content-gate:build_time:last-page-verified-stage7:0.2.0",
+    "evaluatedAt": "2026-08-09T19:58:32.7522680Z",
+    "evaluator": "evaluateContentGate",
+    "failureCodes": []
+  },
+  "optionalDynamicPortrait": {
+    "status": "implemented_and_verified",
+    "productionGateRequired": false,
+    "experiencePhase": "COMPLETE",
+    "maximumPrimaryGenerationsPerSession": 1,
+    "publicSafeProjectionFields": [
+      "finalPortraitChoice",
+      "signatureStatus",
+      "finalDisposition"
+    ],
+    "promptDeterminism": "stable_for_identical_visual_projection",
+    "referenceWorkflow": "approved_fixed_portrait_image_edit",
+    "failureBehavior": "return_approved_fixed_portrait",
+    "fsmControl": false,
+    "finalizationControl": false,
+    "completeControl": false,
+    "agentCapability": false,
+    "evidenceRole": "not_evidence"
+  },
+  "auditRecords": {
+    "approvedContentManifest": "content/verified/CONTENT_INPUT_MANIFEST.json",
+    "approvedAssetManifest": "content/verified/ASSET_INPUT_MANIFEST.json",
+    "approvedCandidateManifest": "stage7-review/assets/ASSET_INPUT_MANIFEST.v2.draft.json",
+    "rejectedV1Manifest": "stage7-review/assets/ASSET_INPUT_MANIFEST.draft.json",
+    "rejectedAndExcludedAssetsPreserved": true
+  }
+}

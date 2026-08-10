@@ -1,10 +1,11 @@
 # 《最后一页进步报告》Scope Freeze
 
 > `scopeContractVersion: 0.1.0`
-> Status: draft pending final human approval
+> Status: frozen for Stage 5 implementation
 > DRI: 项目负责人
 > Final approver: 项目负责人
 > Technical consistency: Codex（不能代替人工最终审批）
+> Stage 5 approval: project owner, 2026-08-09 (G1–G5 repair and Mock-only implementation)
 > Source: 《最后一页进步报告》Codex 协作开发指南 v1.2.4，并纳入最终审批人确认的阶段 1 冲突裁决
 
 ## 1. Authority
