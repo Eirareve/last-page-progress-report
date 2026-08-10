@@ -1,4 +1,5 @@
 import type {
+  AgentExecutionObservation,
   AgentExecutionEnvelope,
   PlainSemanticReviewPortInput,
   ProviderNeutralAgentPort,
@@ -7,8 +8,6 @@ import type {
 } from "../../agent";
 import {
   agentCapabilityError,
-  plainSemanticReviewCandidateBundleSchema,
-  roundAnalysisCandidateBundleSchema,
   summarizePortraitShiftCandidateSchema,
 } from "../../agent";
 import type { RequestContext } from "../../runtime";
@@ -23,6 +22,12 @@ import {
 } from "../provider-execution";
 import { DEEPSEEK_OPENAI_ADAPTER_VERSION, STAGE6_PROMPT_VERSION } from "../versions";
 import type { DeepSeekServerConfig } from "./config";
+import {
+  deepSeekPlainSemanticCandidateSchema,
+  deepSeekRoundSemanticCandidateSchema,
+  projectPlainSemanticCandidate,
+  projectRoundSemanticCandidate,
+} from "./provider-projection";
 import type { DeepSeekOpenAICompatibleTransport } from "./transport";
 
 export class DeepSeekLiveAgentAdapter implements ProviderNeutralAgentPort {
@@ -45,16 +50,33 @@ export class DeepSeekLiveAgentAdapter implements ProviderNeutralAgentPort {
   ): Promise<AgentExecutionEnvelope> {
     const invalid = validateContext(context, this.adapterVersion);
     if (invalid !== null) return agentError("extractUserPrinciple", invalid);
-    return mapOutcome(
-      await executeStage6StructuredCall({
-        transport: this.#transport,
-        prompt: buildRoundAnalysisPrompt(input),
-        candidateSchema: roundAnalysisCandidateBundleSchema,
-        timeoutMs: this.#config.requestTimeoutMs,
-        abortSignal: context.abortSignal,
-      }),
-      "extractUserPrinciple",
-    );
+    const outcome = await executeStage6StructuredCall({
+      transport: this.#transport,
+      prompt: buildRoundAnalysisPrompt(input),
+      candidateSchema: deepSeekRoundSemanticCandidateSchema,
+      timeoutMs: this.#config.requestTimeoutMs,
+      abortSignal: context.abortSignal,
+    });
+    if (outcome.outcomeKind !== "candidate") {
+      return mapOutcome(outcome, "extractUserPrinciple");
+    }
+    try {
+      return {
+        outcomeKind: "candidate",
+        candidate: await projectRoundSemanticCandidate({
+          providerCandidate: outcome.candidate,
+          portInput: input,
+          operationId: context.operationId,
+        }),
+        observation: outcome.observation,
+      };
+    } catch {
+      return projectionError(
+        "extractUserPrinciple",
+        outcome.observation,
+        "Provider semantic document operation could not be bound to the trusted baseline",
+      );
+    }
   }
 
   async executePlainSemanticReview(
@@ -63,16 +85,33 @@ export class DeepSeekLiveAgentAdapter implements ProviderNeutralAgentPort {
   ): Promise<AgentExecutionEnvelope> {
     const invalid = validateContext(context, this.adapterVersion);
     if (invalid !== null) return agentError("compareSemanticDrift", invalid);
-    return mapOutcome(
-      await executeStage6StructuredCall({
-        transport: this.#transport,
-        prompt: buildPlainSemanticPrompt(input),
-        candidateSchema: plainSemanticReviewCandidateBundleSchema,
-        timeoutMs: this.#config.requestTimeoutMs,
-        abortSignal: context.abortSignal,
-      }),
-      "compareSemanticDrift",
-    );
+    const outcome = await executeStage6StructuredCall({
+      transport: this.#transport,
+      prompt: buildPlainSemanticPrompt(input),
+      candidateSchema: deepSeekPlainSemanticCandidateSchema,
+      timeoutMs: this.#config.requestTimeoutMs,
+      abortSignal: context.abortSignal,
+    });
+    if (outcome.outcomeKind !== "candidate") {
+      return mapOutcome(outcome, "compareSemanticDrift");
+    }
+    try {
+      return {
+        outcomeKind: "candidate",
+        candidate: await projectPlainSemanticCandidate({
+          providerCandidate: outcome.candidate,
+          portInput: input,
+          operationId: context.operationId,
+        }),
+        observation: outcome.observation,
+      };
+    } catch {
+      return projectionError(
+        "compareSemanticDrift",
+        outcome.observation,
+        "Provider semantic review could not be projected into the frozen Candidate schema",
+      );
+    }
   }
 
   async summarizePortraitShift(
@@ -118,6 +157,18 @@ function mapOutcome(
         error: agentCapabilityError(capability, outcome.code, outcome.summary),
         observation: outcome.observation,
       };
+}
+
+function projectionError(
+  capability: "extractUserPrinciple" | "compareSemanticDrift",
+  observation: AgentExecutionObservation,
+  summary: string,
+): AgentExecutionEnvelope {
+  return {
+    outcomeKind: "error",
+    error: agentCapabilityError(capability, "schema_validation_failed", summary),
+    observation,
+  };
 }
 
 function agentError(

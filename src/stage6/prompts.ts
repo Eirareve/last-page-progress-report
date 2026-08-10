@@ -51,6 +51,7 @@ export function buildRoundAnalysisPrompt(
       SHARED_SYSTEM_BOUNDARY,
       "Extract the current principle, detect only supported tensions, generate one controlled Charlie response with exactly one answerable question, and propose at most one local document operation.",
       "All evidence identifiers must remain inside the supplied allowlists.",
+      "Use only the exact current baseline and target supplied in this request. Select the supporting excerpt by Unicode code-point start/end positions in the current user submission. Return semantic operation intent and Unicode code-point positions only; quoted source text, trusted identifiers, revisions, anchors, and hashes are bound and computed locally.",
     ].join(" "),
     trustedData: {
       contentBinding: input.contentBinding,
@@ -73,6 +74,7 @@ export function buildPlainSemanticPrompt(
       SHARED_SYSTEM_BOUNDARY,
       "Produce one plain-text candidate and a complete semantic comparison for the bound precise revision.",
       "Every semantic fragment must be a continuous NFC-normalized span of the supplied precise text, and every fragment must have exactly one restoration proposal or typed unavailable outcome.",
+      "Return semantic content and Unicode code-point restoration positions only; trusted identifiers, revisions, anchors, previews, and hashes are bound and computed locally. Use a typed unavailable outcome whenever an exact restoration target is uncertain.",
     ].join(" "),
     trustedData: {
       contentBinding: input.contentBinding,

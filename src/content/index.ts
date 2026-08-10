@@ -13,7 +13,7 @@ export {
   createContentAccess,
   projectFinalEnvelopeContentSnapshot,
 } from "./content-access";
-export { createBundledContentLoader } from "./bundled-content-source";
+export { createBundledContentLoader } from "#content-bundled-source";
 export type {
   LoadedContentBundle,
   PlaceholderRuntimeContentBundle,

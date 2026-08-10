@@ -1,5 +1,5 @@
 import type { ContentGateEvaluation } from "./contracts";
-import { createBundledContentLoader } from "./bundled-content-source";
+import { createBundledContentLoader } from "#content-bundled-source";
 import { computePublicContentBundleChecksum } from "./checksum";
 import type { ContentAccess } from "./content-access";
 import { deepFreeze } from "./deep-freeze";
