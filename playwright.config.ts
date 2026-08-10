@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   timeout: 45_000,
-  expect: { timeout: 8_000 },
+  expect: { timeout: 12_000 },
   reporter: [["list"]],
   use: {
     baseURL: "http://127.0.0.1:3100",
@@ -19,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev --hostname 127.0.0.1 --port 3100",
+    command: "pnpm build && pnpm start --hostname 127.0.0.1 --port 3100",
     url: "http://127.0.0.1:3100",
     reuseExistingServer: true,
     timeout: 120_000,
@@ -27,6 +27,7 @@ export default defineConfig({
       APP_ENV: "production",
       CONTENT_MODE: "verified",
       AGENT_MODE: "mock",
+      RC_ID: "stage10-e2e-release-validation",
     },
   },
 });

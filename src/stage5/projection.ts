@@ -61,6 +61,8 @@ export function projectStage5View(input: {
     stageTitle: STAGE_TITLES[state.stage] ?? state.stage,
     stateRevision: state.stateRevision,
     contentMode: content.contentMode,
+    contentBundleVersion: content.binding.contentBundleVersion,
+    contentSchemaVersion: content.binding.contentSchemaVersion,
     originalDeclaration: content.originalInteraction.publicDeclaration,
     originalAttribution: content.originalInteraction.attribution,
     portraits,

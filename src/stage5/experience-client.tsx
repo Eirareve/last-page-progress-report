@@ -15,6 +15,17 @@ import {
   type Stage5PresentationView,
   type Stage5Snapshot,
 } from ".";
+import {
+  deleteResearchData,
+  exportResearchRecord,
+  pruneExpiredResearchData,
+  readResearchConsent,
+  recordResearchEvent,
+  setResearchConsent,
+  STAGE9_AGENT_VERSION_VECTOR,
+  STAGE9_RESEARCH_RETENTION_DAYS,
+  type ResearchConsent,
+} from "../stage9";
 
 export function ExperienceClient({
   sessionId,
@@ -44,6 +55,49 @@ export function ExperienceClient({
     void facade.initialize();
     return () => facade.dispose();
   }, [facade]);
+  const activeSessionId = snapshot.view?.sessionId ?? null;
+  const [researchConsent, setResearchConsentState] =
+    useState<ResearchConsent>("pending");
+  useEffect(() => {
+    if (activeSessionId === null) return;
+    pruneExpiredResearchData(window.localStorage);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setResearchConsentState(
+          readResearchConsent(window.localStorage, activeSessionId),
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSessionId]);
+  useResearchTracking(snapshot.view, researchConsent);
+
+  const chooseResearchConsent = (consent: Exclude<ResearchConsent, "pending">) => {
+    if (activeSessionId === null) return;
+    setResearchConsent(window.localStorage, activeSessionId, consent);
+    setResearchConsentState(consent);
+  };
+  const removeResearchData = () => {
+    if (activeSessionId === null) return;
+    deleteResearchData(window.localStorage, activeSessionId);
+    setResearchConsentState("pending");
+  };
+  const downloadResearchData = () => {
+    if (activeSessionId === null) return;
+    const exported = exportResearchRecord(window.localStorage, activeSessionId);
+    if (exported === null) return;
+    const url = URL.createObjectURL(
+      new Blob([exported], { type: "application/json;charset=utf-8" }),
+    );
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `last-page-research-${activeSessionId}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <>
@@ -77,6 +131,10 @@ export function ExperienceClient({
               snapshot={snapshot}
               commands={facade}
               requestedMode={requestedMode}
+              researchConsent={researchConsent}
+              onResearchConsent={chooseResearchConsent}
+              onResearchDelete={removeResearchData}
+              onResearchDownload={downloadResearchData}
             />
           </>
         ) : null}
@@ -85,9 +143,156 @@ export function ExperienceClient({
         <p>
           原创互动草案 · AI 协作式阅读体验
         </p>
+        {snapshot.status === "ready" && snapshot.view ? (
+          <button
+            type="button"
+            className="text-action"
+            onClick={() => {
+              if (!window.confirm("删除当前浏览器中的本次体验进度和研究记录？此操作无法撤销。")) {
+                return;
+              }
+              removeResearchData();
+              void facade.deleteCurrentSession();
+            }}
+          >
+            删除当前体验的本地数据
+          </button>
+        ) : null}
       </footer>
     </>
   );
+}
+
+function useResearchTracking(
+  view: Stage5PresentationView | null,
+  consent: ResearchConsent,
+) {
+  const tracked = useRef<{
+    view: Stage5PresentationView;
+    stageEnteredAt: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (view === null || consent !== "accepted") {
+      tracked.current = null;
+      return;
+    }
+    const now = Date.now();
+    const previous = tracked.current;
+    const record = (event: Parameters<typeof recordResearchEvent>[2]) => {
+      recordResearchEvent(window.localStorage, view.sessionId, event, now);
+    };
+
+    if (previous === null || previous.view.sessionId !== view.sessionId) {
+      record({
+        dedupeKey: `versions:${view.sessionId}`,
+        eventType: "version_snapshot",
+        ...STAGE9_AGENT_VERSION_VECTOR,
+        contentBundleVersion: view.contentBundleVersion,
+      });
+      record({
+        dedupeKey: `stage:${view.stateRevision}:${view.stage}`,
+        eventType: "stage_entered",
+        stage: view.stage,
+      });
+      tracked.current = { view, stageEnteredAt: now };
+      return;
+    }
+
+    const prior = previous.view;
+    if (prior.stage !== view.stage) {
+      record({
+        dedupeKey: `duration:${prior.stateRevision}:${prior.stage}`,
+        eventType: "stage_duration",
+        stage: prior.stage,
+        durationMs: Math.max(0, now - previous.stageEnteredAt),
+      });
+      record({
+        dedupeKey: `stage:${view.stateRevision}:${view.stage}`,
+        eventType: "stage_entered",
+        stage: view.stage,
+      });
+    }
+    if (prior.initialChoice !== view.initialChoice && view.initialChoice !== null) {
+      record({
+        dedupeKey: `initial-portrait:${view.stateRevision}`,
+        eventType: "initial_portrait_selected",
+        portraitChoice: view.initialChoice,
+      });
+    }
+    if (prior.pendingDiff !== null && view.pendingDiff === null) {
+      record({
+        dedupeKey: `diff:${prior.pendingDiff.id}`,
+        eventType: "diff_decision",
+        round: roundFromStage(prior.stage),
+        decision: view.revisionCount > prior.revisionCount ? "accept" : "reject",
+      });
+    }
+    for (const fragment of view.semanticFragments) {
+      const before = prior.semanticFragments.find((item) => item.id === fragment.id);
+      if (fragment.placement !== null && before?.placement !== fragment.placement) {
+        record({
+          dedupeKey: `placement:${fragment.id}:${fragment.placement}`,
+          eventType: "semantic_fragment_placed",
+          placement: fragment.placement,
+        });
+      }
+    }
+    for (const round of view.rounds) {
+      const before = prior.rounds.find((item) => item.roundId === round.roundId);
+      if (round.completed && !before?.completed && round.dissent !== null) {
+        record({
+          dedupeKey: `dissent:${round.roundId}`,
+          eventType: "dissent_retained",
+          round: round.roundId,
+          retained: true,
+        });
+      }
+    }
+    if (prior.finalChoice !== view.finalChoice && view.finalChoice !== null) {
+      record({
+        dedupeKey: `final-portrait:${view.stateRevision}`,
+        eventType: "final_portrait_selected",
+        portraitChoice: normalizePortraitChoice(view.finalChoice),
+      });
+    }
+    if (
+      prior.finalDisposition !== view.finalDisposition &&
+      view.finalDisposition !== null
+    ) {
+      record({
+        dedupeKey: `disposition:${view.stateRevision}`,
+        eventType: "manuscript_disposition_selected",
+        disposition: view.finalDisposition,
+      });
+    }
+    if (
+      view.executionStatus?.requestedMode === "live" &&
+      view.executionStatus.resolvedMode !== "live" &&
+      (prior.executionStatus?.capability !== view.executionStatus.capability ||
+        prior.executionStatus?.resolvedMode !== view.executionStatus.resolvedMode ||
+        prior.executionStatus?.outcome !== view.executionStatus.outcome)
+    ) {
+      record({
+        dedupeKey: `fallback:${view.stateRevision}:${view.executionStatus.capability}:${view.executionStatus.resolvedMode}`,
+        eventType: "fallback_triggered",
+        capability: view.executionStatus.capability,
+        resolvedMode: view.executionStatus.resolvedMode,
+      });
+    }
+    if (prior.stage !== "COMPLETE" && view.stage === "COMPLETE") {
+      record({
+        dedupeKey: `complete:${view.sessionId}`,
+        eventType: "experience_completed",
+        completed: true,
+      });
+    }
+    tracked.current = {
+      view,
+      stageEnteredAt:
+        prior.stage === view.stage ? previous.stageEnteredAt : now,
+    };
+  }, [consent, view]);
 }
 
 function ExperienceHeader({
@@ -125,11 +330,19 @@ function StageProjection({
   snapshot,
   commands,
   requestedMode,
+  researchConsent,
+  onResearchConsent,
+  onResearchDelete,
+  onResearchDownload,
 }: {
   view: Stage5PresentationView;
   snapshot: Stage5Snapshot;
   commands: Stage5Commands;
   requestedMode: "mock" | "live";
+  researchConsent: ResearchConsent;
+  onResearchConsent: (consent: Exclude<ResearchConsent, "pending">) => void;
+  onResearchDelete: () => void;
+  onResearchDownload: () => void;
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -151,6 +364,9 @@ function StageProjection({
           commands={commands}
           busy={busy}
           requestedMode={requestedMode}
+          researchConsent={researchConsent}
+          onResearchConsent={onResearchConsent}
+          onResearchDelete={onResearchDelete}
         />
       );
     case "PORTRAIT_PRELUDE":
@@ -186,7 +402,17 @@ function StageProjection({
     case "FINALIZING":
       return <FinalizingView heading={heading} />;
     case "COMPLETE":
-      return <CompleteView heading={heading} view={view} commands={commands} busy={false} />;
+      return (
+        <CompleteView
+          heading={heading}
+          view={view}
+          commands={commands}
+          busy={false}
+          researchConsent={researchConsent}
+          onResearchDelete={onResearchDelete}
+          onResearchDownload={onResearchDownload}
+        />
+      );
     default:
       return (
         <section className="stage-shell">
@@ -203,7 +429,15 @@ function WelcomeView({
   commands,
   busy,
   requestedMode,
-}: StageProps & { requestedMode: "mock" | "live" }) {
+  researchConsent,
+  onResearchConsent,
+  onResearchDelete,
+}: StageProps & {
+  requestedMode: "mock" | "live";
+  researchConsent: ResearchConsent;
+  onResearchConsent: (consent: Exclude<ResearchConsent, "pending">) => void;
+  onResearchDelete: () => void;
+}) {
   return (
     <section className="stage-shell welcome-stage">
       <div className="welcome-copy">
@@ -219,18 +453,93 @@ function WelcomeView({
         </div>
         <ul className="fact-list">
           <li>预计 18–20 分钟</li>
-          <li>
-            {requestedMode === "live"
-              ? "普通分析优先使用真实模型，并按安全策略降级；签名审阅不会由演示结果代替"
-              : "本次体验使用可复现的本地演示结果，不会调用 DeepSeek"}
-          </li>
+          {requestedMode === "live" ? (
+            <li>普通分析优先使用真实模型，并按安全策略降级；签名审阅不会由演示结果代替</li>
+          ) : null}
           <li>进度仅保存在这台浏览器的本地存储中，未完成体验 24 小时后过期</li>
         </ul>
-        <button className="primary-action" disabled={busy} onClick={() => void commands.start()}>
+        <ResearchConsentPanel
+          consent={researchConsent}
+          requestedMode={requestedMode}
+          onChoose={onResearchConsent}
+          onDelete={onResearchDelete}
+        />
+        <button
+          className="primary-action"
+          disabled={busy || researchConsent === "pending"}
+          onClick={() => void commands.start()}
+        >
           开始体验
         </button>
       </div>
       <blockquote className="manuscript-teaser">“{view.preciseText}”</blockquote>
+    </section>
+  );
+}
+
+function ResearchConsentPanel({
+  consent,
+  requestedMode,
+  onChoose,
+  onDelete,
+}: {
+  consent: ResearchConsent;
+  requestedMode: "mock" | "live";
+  onChoose: (consent: Exclude<ResearchConsent, "pending">) => void;
+  onDelete: () => void;
+}) {
+  return (
+    <section className="research-consent" aria-labelledby="research-consent-title">
+      <h2 id="research-consent-title">用户测试数据说明</h2>
+      <p>
+        用途是了解流程是否容易完成和理解。你可以拒绝记录并继续全部体验。
+        选择同意后，只在这台浏览器保存随机会话编号、阶段与停留时间、结构化选择、
+        是否完成、是否发生安全降级及版本号；不会保存你的完整回答、原话、模型完整输入、
+        身份信息、人格标签、心理判断或 API 密钥。
+      </p>
+      <p>
+        数据不会自动上传服务器，最多保留 {STAGE9_RESEARCH_RETENTION_DAYS} 天，
+        与其他演示环境隔离。你可以随时删除本会话的研究数据。
+      </p>
+      <p>
+        为支持刷新恢复，回答、选择、手稿和流程状态会另存于浏览器 IndexedDB；
+        未完成体验 24 小时后过期，完成档案会保留到你点击页面底部“删除当前体验的本地数据”
+        或清除本站浏览器数据。该进度不会作为 analytics 自动上传。
+      </p>
+      {requestedMode === "live" ? (
+        <p>
+          真实模型模式会把当前步骤所需的回答和上下文发送给 DeepSeek API 生成候选，
+          但不会把它们写入研究 analytics。请不要输入姓名、联系方式或其他敏感信息。
+        </p>
+      ) : null}
+      <div className="action-row" role="group" aria-label="用户测试数据选择">
+        <button
+          type="button"
+          className={consent === "accepted" ? "primary-action" : "secondary-action"}
+          aria-pressed={consent === "accepted"}
+          onClick={() => onChoose("accepted")}
+        >
+          同意记录匿名事件
+        </button>
+        <button
+          type="button"
+          className={consent === "declined" ? "primary-action" : "secondary-action"}
+          aria-pressed={consent === "declined"}
+          onClick={() => onChoose("declined")}
+        >
+          不同意记录，继续体验
+        </button>
+      </div>
+      {consent !== "pending" ? (
+        <p className="consent-status" role="status">
+          当前选择：{consent === "accepted" ? "同意本地记录" : "不同意记录"}。
+          <button type="button" className="text-action" onClick={onDelete}>
+            删除本会话研究数据并重新选择
+          </button>
+        </p>
+      ) : (
+        <p className="consent-status">请选择一项后开始体验。</p>
+      )}
     </section>
   );
 }
@@ -245,16 +554,7 @@ function ExecutionStatus({
   requestedMode: "mock" | "live";
 }) {
   if (requestedMode === "mock") {
-    return (
-      <div
-        className="execution-status"
-        role="status"
-        aria-live="polite"
-        data-testid="execution-status"
-      >
-        本次使用本地可复现的演示 Agent；不会调用 DeepSeek。
-      </div>
-    );
+    return null;
   }
   let message =
     "真实模型已启用；普通分析支持安全降级，签名审阅不会由演示结果代替。";
@@ -691,7 +991,18 @@ function FinalizingView({ heading }: { heading: React.ReactNode }) {
   return <section className="stage-shell finalizing-stage" aria-busy="true">{heading}<div className="seal-mark" aria-hidden="true">封</div><p>正在生成校验和并原子保存完整封套。请不要关闭这个页面。</p></section>;
 }
 
-function CompleteView({ heading, view, commands }: StageProps) {
+function CompleteView({
+  heading,
+  view,
+  commands,
+  researchConsent,
+  onResearchDelete,
+  onResearchDownload,
+}: StageProps & {
+  researchConsent: ResearchConsent;
+  onResearchDelete: () => void;
+  onResearchDownload: () => void;
+}) {
   const envelope = view.envelope;
   if (!envelope) return <section className="stage-shell">{heading}<p>封套数据缺失。</p></section>;
   return (
@@ -703,53 +1014,41 @@ function CompleteView({ heading, view, commands }: StageProps) {
         <section><h2>那句被留下的话</h2><p>{envelope.preciseText}</p></section>
         <section><h2>朴素版本</h2><p>{envelope.plainText}</p></section>
         <section><h2>三次看见之后</h2><p>{envelope.portraitShiftSummary}</p><p>最终选择：{portraitChoiceLabel(envelope.finalPortraitChoice)}</p></section>
-        <DynamicFinalPortrait view={view} />
+        <FixedFinalPortrait view={view} />
         <section><h2>仍然没有消失的分歧</h2>{envelope.openDissents.length ? <ul>{envelope.openDissents.map((item) => <li key={item}>{item}</li>)}</ul> : <p>没有开放分歧。</p>}</section>
         <section><h2>签名与归宿</h2><p>{signatureLabel(envelope.signatureStatus)} · {dispositionLabel(envelope.finalDisposition)}</p></section>
         <aside className="declaration-card"><strong>原创互动声明</strong><p>{envelope.originalDeclaration}</p><small>{envelope.attribution}</small></aside>
       </div>
       <p className="revision-meta">完成档案已通过本地完整性校验。</p>
+      <section className="research-export" aria-labelledby="research-export-title">
+        <h2 id="research-export-title">用户测试记录</h2>
+        {researchConsent === "accepted" ? (
+          <>
+            <p>匿名事件只保存在当前浏览器。你可以下载后交给研究主持人，或立即删除。</p>
+            <div className="action-row">
+              <button type="button" className="secondary-action" onClick={onResearchDownload}>
+                下载匿名测试记录
+              </button>
+              <button type="button" className="text-action" onClick={onResearchDelete}>
+                删除本会话研究数据
+              </button>
+            </div>
+          </>
+        ) : (
+          <p>你选择了不记录匿名事件；本次体验没有可导出的研究数据。</p>
+        )}
+      </section>
       <button className="primary-action" onClick={() => void commands.startNewSession()}>开始新的体验</button>
     </section>
   );
 }
 
-function DynamicFinalPortrait({ view }: { view: Stage5PresentationView }) {
+function FixedFinalPortrait({ view }: { view: Stage5PresentationView }) {
   const envelope = view.envelope!;
-  const fallbackAssetPath = fixedFallbackForChoice(
-    envelope.finalPortraitChoice,
-  );
-  const [imageUrl, setImageUrl] = useState(fallbackAssetPath);
-  const [generated, setGenerated] = useState(false);
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetch("/api/dynamic-portrait", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId: view.sessionId,
-        experiencePhase: "COMPLETE",
-        visualProjection: {
-          finalPortraitChoice: envelope.finalPortraitChoice,
-          signatureStatus: envelope.signatureStatus,
-          finalDisposition: envelope.finalDisposition,
-        },
-      }),
-      signal: controller.signal,
-    })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((result: { status?: unknown; imageUrl?: unknown } | null) => {
-        if (result?.status === "generated" && typeof result.imageUrl === "string") {
-          setImageUrl(result.imageUrl);
-          setGenerated(true);
-        }
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, [envelope, view.sessionId]);
+  const imageUrl = fixedFallbackForChoice(envelope.finalPortraitChoice);
 
   return (
-    <section className="dynamic-portrait-card">
+    <section className="dynamic-portrait-card" data-testid="fixed-final-portrait">
       <h2>面向这一刻的肖像</h2>
       <Image
         src={imageUrl}
@@ -757,16 +1056,10 @@ function DynamicFinalPortrait({ view }: { view: Stage5PresentationView }) {
         width={720}
         height={900}
         unoptimized
-        onError={() => {
-          setImageUrl(fallbackAssetPath);
-          setGenerated(false);
-        }}
       />
       <p>
-        {generated
-          ? "本次肖像由图像模型生成"
-          : "本次使用已批准固定肖像（图像生成未启用或未完成）"}
-        ；仅作氛围呈现，不作为事实证据。
+        本次使用已审核的固定肖像；Agnes 动态图片生成暂未启用。图片仅作氛围呈现，
+        不作为事实证据。
       </p>
     </section>
   );
@@ -776,6 +1069,21 @@ function fixedFallbackForChoice(choice: string): string {
   if (choice === "early") return "/portraits/charlie-original-v2/early.png";
   if (choice === "peak") return "/portraits/charlie-original-v2/peak.png";
   return "/portraits/charlie-original-v2/future-facing.png";
+}
+
+function roundFromStage(stage: string): "round1" | "round2" | "round3" {
+  if (stage.startsWith("ROUND_2")) return "round2";
+  if (stage.startsWith("ROUND_3")) return "round3";
+  return "round1";
+}
+
+function normalizePortraitChoice(
+  choice: string,
+): "early" | "peak" | "futureFacing" | "mixed" {
+  if (choice === "early" || choice === "peak" || choice === "futureFacing") {
+    return choice;
+  }
+  return "mixed";
 }
 
 function PortraitImage({ portrait }: { portrait: Stage5PresentationView["portraits"][number] }) {
