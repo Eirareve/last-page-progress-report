@@ -24,8 +24,8 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 120_000,
     env: {
-      APP_ENV: "development",
-      CONTENT_MODE: "placeholder",
+      APP_ENV: "production",
+      CONTENT_MODE: "verified",
       AGENT_MODE: "mock",
     },
   },

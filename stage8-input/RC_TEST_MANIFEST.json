@@ -1,0 +1,436 @@
+{
+  "manifestVersion": "stage8-rc-test-manifest-1.0.0",
+  "status": "blocked_stage8",
+  "stage8Decision": "BLOCKED",
+  "rcId": "stage8-r10-23ab608b09a5c1dd",
+  "rcRevision": 10,
+  "identitySha256": "sha256:23ab608b09a5c1ddb926e3b19b4a3493d9e1d1df422a097fb3f6c3cd49fae845",
+  "identityMaterial": {
+    "rcRevision": 10,
+    "gitCommit": "6d02e76dbde1417ef4e0631e4cd32aca844fc0a6",
+    "gitTree": "47a43d1b9db467dacaadc7535ac4a8fb64787775",
+    "sourceSnapshotSha256": "sha256:bc5cc8b8672a258bd3aeabeafc275adf0e2c148e8848cd930b6d9a2ce7163b8a",
+    "packageLockSha256": "sha256:522690f11e3fa0e18450f37791a1b36e4c1fd6929df52f006c2e26f7a5bb3d61",
+    "promptVersion": "0.3.0",
+    "adapterVersion": "0.3.0",
+    "providerProjectionSchemaVersion": "0.2.0",
+    "model": "deepseek-v4-pro",
+    "contentBundleChecksum": "sha256:d2431aaf6b42103accd549c8562d11dfe656ba1788e790c9c3f5e6c3e29bb53e",
+    "assetManifestSha256": "sha256:2b88b0883d70c12bb06c8290fa7fc663d799ccfc98ac4ffd51746b031ea9d68f"
+  },
+  "frozenAt": "2026-08-10T09:25:16.5564777Z",
+  "gitBranch": "codex/stages-3-6",
+  "gitCommit": "6d02e76dbde1417ef4e0631e4cd32aca844fc0a6",
+  "gitTree": "47a43d1b9db467dacaadc7535ac4a8fb64787775",
+  "workingTreeStatus": {
+    "applicationSource": "head_plus_frozen_working_tree_snapshot",
+    "sourceSnapshotSha256": "sha256:bc5cc8b8672a258bd3aeabeafc275adf0e2c148e8848cd930b6d9a2ce7163b8a",
+    "sourceSnapshotFileCount": 332,
+    "baseGitCommit": "6d02e76dbde1417ef4e0631e4cd32aca844fc0a6",
+    "reproducibility": "Every tracked and non-ignored untracked file except this RC manifest, stage8-results/**, and the separately hashed Stage 8 guide is sorted by ordinal repository-relative path and bound as UTF-8 path + NUL + exact file bytes by the source snapshot digest.",
+    "untrackedExecutionGuide": "docs/最后一页进步报告_Codex协作开发指南_v1.2.7-draft_阶段8review修补版.md",
+    "untrackedExecutionGuideSha256": "sha256:c483bfffe328c8c92fe23536204be5cca9bc278dc248ed445f140c7f98fd8409",
+    "qaArtifactsExcludedFromApplicationBuild": [
+      "stage8-input/RC_TEST_MANIFEST.json",
+      "stage8-results/**"
+    ]
+  },
+  "buildId": "next:stage8-r10-23ab608b09a5c1dd+source:bc5cc8b8672a258b+pnpm-lock:522690f11e3f+node:24.15.0+pnpm:11.11.0",
+  "packageLockSha256": "sha256:522690f11e3fa0e18450f37791a1b36e4c1fd6929df52f006c2e26f7a5bb3d61",
+  "stage8Guide": {
+    "version": "v1.2.7-draft-stage8-review-patch",
+    "path": "docs/最后一页进步报告_Codex协作开发指南_v1.2.7-draft_阶段8review修补版.md",
+    "sha256": "sha256:c483bfffe328c8c92fe23536204be5cca9bc278dc248ed445f140c7f98fd8409"
+  },
+  "stage7Handoff": {
+    "path": "stage8-input/STAGE8_HANDOFF.json",
+    "handoffVersion": "stage8-input-1.0.0",
+    "sha256": "sha256:b503253b381531f27c3d075ee5ff0f13eca17ad3119b4c539ee81f898a6d9075"
+  },
+  "stopAudit": [
+    {
+      "id": "S8-STOP-001",
+      "status": "resolved",
+      "evidence": "The complete Stage 8 guide is readable and its independently computed SHA-256 exactly matches the user-supplied digest."
+    },
+    {
+      "id": "S8-CONTRACT-GAP-001",
+      "status": "resolved_as_implementation_bug",
+      "evidence": "The frozen Agent Contract already required trusted application projection. The live adapter now replaces provider-selected fragment identifiers with operation-derived trusted identifiers before independent validation; no Contract, Prompt, Schema, event, or version changed."
+    }
+  ],
+  "contractVersionVector": {
+    "scopeContractVersion": "0.1.0",
+    "domainContractVersion": "0.3.0",
+    "runtimeContractVersion": "0.1.0",
+    "provenanceContractVersion": "0.1.0",
+    "namingContractVersion": "0.3.0",
+    "finalizationContractVersion": "0.2.0",
+    "stateMachineContractVersion": "0.3.0",
+    "sessionSchemaVersion": "0.1.0",
+    "stableTextAnchorSchemaVersion": "0.1.0",
+    "contentSchemaVersion": "0.2.0",
+    "agentContractVersion": "0.2.0",
+    "finalReviewSchemaVersion": "0.1.0",
+    "finalEnvelopeSchemaVersion": "0.2.0"
+  },
+  "resultSchemaVersionVector": {
+    "retrieveVerifiedEvidence": "0.1.0",
+    "buildInitialPortraitRecord": "0.1.0",
+    "extractUserPrinciple": "0.1.0",
+    "detectTension": "0.1.0",
+    "generateCharlieResponse": "0.1.0",
+    "proposeDocumentDiff": "0.1.0",
+    "compareSemanticDrift": "0.2.0",
+    "buildDissentRecord": "0.1.0",
+    "summarizePortraitShift": "0.1.0",
+    "roundAnalysisBundle": "0.1.0",
+    "plainSemanticBundle": "0.2.0",
+    "charlieSignatureReview": "0.1.0"
+  },
+  "promptVersionVector": {
+    "roundAnalysis": "0.3.0",
+    "plainSemanticReview": "0.3.0",
+    "portraitShiftSummary": "0.3.0",
+    "finalReview": "0.3.0"
+  },
+  "adapterVersionVector": {
+    "deepseekOpenAiCompatible": "0.3.0",
+    "deepseekProviderProjectionSchema": "0.2.0",
+    "mockAgent": "0.2.0",
+    "mockFinalReview": "0.1.0",
+    "staticTemplate": "0.1.0",
+    "stage6Transport": "0.1.0"
+  },
+  "content": {
+    "contentBundleId": "last-page-verified-stage7",
+    "contentBundleVersion": "0.2.0",
+    "contentBundleChecksum": "sha256:d2431aaf6b42103accd549c8562d11dfe656ba1788e790c9c3f5e6c3e29bb53e",
+    "internalContentBundleChecksum": "sha256:f2cc2f727dc94428bbac7006ee55963f941516ade11f13f002d4fad3bf0f962f",
+    "editionId": "flowers-algernon-zh-cn-gxnu-2015-9787549565115",
+    "evidenceCardIds": [
+      "EC-R1-PAST-SELF",
+      "EC-R2-FUTURE-PREDICTION",
+      "EC-R3-FUTURE-RELATIONSHIPS"
+    ],
+    "contentInputManifestVersion": "stage7-content-input-1.0.0",
+    "contentInputManifestSha256": "sha256:94d30dc3d6e603c99be05600c3f71add57304d5259dbd4bb04ac80063501bef3"
+  },
+  "assets": {
+    "assetManifestVersion": "stage7-assets-v2.0.0",
+    "assetManifestSha256": "sha256:2b88b0883d70c12bb06c8290fa7fc663d799ccfc98ac4ffd51746b031ea9d68f",
+    "characterDesignVersion": "charlie-original-v2",
+    "portraitAssetIds": [
+      "charlie-early-candidate-v2",
+      "charlie-peak-candidate-v2",
+      "charlie-future-facing-candidate-v2"
+    ],
+    "fallbackAssetIds": [
+      "charlie-early-candidate-v2",
+      "charlie-peak-candidate-v2",
+      "charlie-future-facing-candidate-v2"
+    ]
+  },
+  "targetRuntimeMatrix": {
+    "node": "24.15.0",
+    "packageManager": "pnpm@11.11.0",
+    "applicationFramework": "next@16.2.12",
+    "contentMode": "verified",
+    "requestedAgentModes": [
+      "mock",
+      "live"
+    ],
+    "profiles": [
+      {
+        "profileId": "production-like-verified-mock",
+        "appEnv": "production",
+        "contentMode": "verified",
+        "requestedAgentMode": "mock",
+        "networkExpectation": "no_provider_network"
+      },
+      {
+        "profileId": "verified-live-provider-smoke",
+        "appEnv": "development",
+        "contentMode": "verified",
+        "requestedAgentMode": "live",
+        "networkExpectation": "real_provider_smoke_only"
+      }
+    ],
+    "liveProvider": {
+      "provider": "deepseek",
+      "baseUrl": "https://api.deepseek.com",
+      "model": "deepseek-v4-pro",
+      "requestTimeoutMs": 20000,
+      "providerPolicyAccepted": true,
+      "baselineLiveGateEnabled": false,
+      "smokeOverrideRequired": true
+    },
+    "browsers": [
+      {
+        "engine": "chromium",
+        "profile": "Desktop Chrome"
+      },
+      {
+        "engine": "chromium",
+        "profile": "mobile-narrow",
+        "viewport": "320x720"
+      }
+    ]
+  },
+  "testStartedAt": "2026-08-10T09:25:16.5564777Z",
+  "finalTestOutcome": {
+    "recordedAt": "2026-08-10T09:31:09.0366184Z",
+    "typecheck": "passed",
+    "lint": "passed",
+    "vitest": "437_passed_52_files",
+    "controlledIntegration": "256_passed_24_files",
+    "productionBuild": "passed_build_id_matches_rc_id",
+    "productionArtifactScan": "passed_169_files_0_violations",
+    "playwright": "11_passed",
+    "liveProviderSmoke": "passed_3_of_3_single_formal_matrix_run",
+    "manualFullFlow": "not_run"
+  },
+  "liveProviderSmokeEvidence": {
+    "formalCommandInvocations": 1,
+    "matrixOutcome": "3_of_3_passed",
+    "aggregate": {
+      "providerInvocations": 3,
+      "networkRetries": 0,
+      "structuredRepairs": 0,
+      "inputTokens": 3740,
+      "outputTokens": 524,
+      "latencyMs": 21725,
+      "estimatedCostUsdMicros": 2084,
+      "budgetAssessment": "below_stage3_base_resource_budget"
+    },
+    "paths": [
+      {
+        "capability": "round_analysis",
+        "outcome": "validated_result",
+        "providerInvocations": 1,
+        "networkRetries": 0,
+        "structuredRepairs": 0,
+        "inputTokens": 1744,
+        "outputTokens": 346,
+        "latencyMs": 14355,
+        "estimatedCostUsdMicros": 1060,
+        "provider": "deepseek",
+        "model": "deepseek-v4-pro",
+        "promptVersion": "0.3.0",
+        "adapterVersion": "0.3.0",
+        "resultSchemaVersion": "0.1.0",
+        "providerProjectionSchemaVersion": "0.2.0",
+        "rcId": "stage8-r10-23ab608b09a5c1dd",
+        "failureCode": null
+      },
+      {
+        "capability": "plain_semantic_review",
+        "outcome": "validated_result",
+        "providerInvocations": 1,
+        "networkRetries": 0,
+        "structuredRepairs": 0,
+        "inputTokens": 875,
+        "outputTokens": 46,
+        "latencyMs": 1940,
+        "estimatedCostUsdMicros": 421,
+        "provider": "deepseek",
+        "model": "deepseek-v4-pro",
+        "promptVersion": "0.3.0",
+        "adapterVersion": "0.3.0",
+        "resultSchemaVersion": "0.2.0",
+        "providerProjectionSchemaVersion": "0.2.0",
+        "rcId": "stage8-r10-23ab608b09a5c1dd",
+        "failureCode": null
+      },
+      {
+        "capability": "charlie_signature_review",
+        "outcome": "final_review_result",
+        "providerInvocations": 1,
+        "networkRetries": 0,
+        "structuredRepairs": 0,
+        "inputTokens": 1121,
+        "outputTokens": 132,
+        "latencyMs": 5430,
+        "estimatedCostUsdMicros": 603,
+        "provider": "deepseek",
+        "model": "deepseek-v4-pro",
+        "promptVersion": "0.3.0",
+        "adapterVersion": "0.3.0",
+        "resultSchemaVersion": "0.1.0",
+        "providerProjectionSchemaVersion": "0.2.0",
+        "rcId": "stage8-r10-23ab608b09a5c1dd",
+        "failureCode": null
+      }
+    ]
+  },
+  "assistedUiVerification": {
+    "status": "prior_observations_invalidated_by_r10_prompt_adapter_change",
+    "desktopCompleteFlow": "not_run_on_r10",
+    "productionVerifiedPortraits": "not_run_on_r10",
+    "signatureAndComplete": "not_run_on_r10",
+    "refreshResume": "not_run_on_r10",
+    "copiedSessionUrlSecondTab": "not_run_on_r10",
+    "viewport320Layout": "not_run_on_r10",
+    "keyboardFullFlow": "not_completed_as_independent_manual_run",
+    "imageFailureFallback": "not_completed_as_independent_manual_run"
+  },
+  "blockingIssues": [
+    {
+      "id": "S8-LIVE-SMOKE-001",
+      "severity": "RC_BLOCKER",
+      "status": "closed_in_r10",
+      "scope": [
+        "round_analysis_live_path",
+        "plain_semantic_live_path",
+        "live_provider_structured_output_compatibility"
+      ],
+      "evidence": [
+        "RoundAnalysis Candidate reached local validation but was rejected as stale_revision because the proposed diff anchor had baseline_mismatch.",
+        "Plain/Semantic did not return a schema-accepted Candidate in the formal R5 smoke.",
+        "FinalReview completed as a valid reviewed outcome, so authentication and the provider transport itself were available."
+      ],
+      "requiredResolution": "Resolved. The single formal R10 live matrix passed RoundAnalysis, Plain/Semantic, and FinalReview with one provider invocation each and no retry or repair."
+    },
+    {
+      "id": "S8-MANUAL-001",
+      "severity": "RC_BLOCKER",
+      "status": "open",
+      "scope": [
+        "independent_manual_full_flow",
+        "desktop_chromium",
+        "mobile_320_chromium",
+        "keyboard_primary_flow",
+        "image_failure_fallback",
+        "refresh_resume",
+        "signature_complete",
+        "cross_tab_read_only_copied_session_path"
+      ],
+      "evidence": [
+        "The project owner completed a broad R7 experience and reported no functional problem, but found exposed engineering strings and unclear model feedback.",
+        "Those findings caused the R8 presentation change; R9 updated the E2E selectors, and R10 changes the live Prompt/Adapter projection.",
+        "No independent human-executed checklist with actual results has been supplied for R10."
+      ],
+      "requiredResolution": "Execute the Stage 8 manual checklist against exactly stage8-r10-23ab608b09a5c1dd without changing source/config/content/assets, record each item as PASS/FAIL with evidence, and rerun only if the RC inputs remain identical."
+    },
+    {
+      "id": "S8-UI-COPY-001",
+      "severity": "RC_BLOCKER",
+      "status": "automated_pass_manual_confirmation_pending",
+      "scope": [
+        "user_visible_engineering_strings",
+        "agent_execution_feedback",
+        "dynamic_portrait_feedback"
+      ],
+      "evidence": [
+        "The project owner reported strange English or identifier-like strings and unclear response/model feedback during R7 manual use.",
+        "R10 retains the removal of visible revision IDs and raw enum/checksum fields, localized engineering labels, and explicit DeepSeek/local mode feedback.",
+        "R10 distinguishes a generated final portrait from the approved fixed fallback in ordinary Chinese copy."
+      ],
+      "requiredResolution": "Pass R10 type/lint/unit/E2E and repeat the exact manual UI checks on R10."
+    }
+  ],
+  "explicitlyExcludedOptionalCapabilities": [
+    {
+      "capability": "runtime_dynamic_portrait_generation",
+      "provider": "agnes",
+      "reason": "Stage 7 handoff defines this as an optional non-blocking enhancement outside FSM, finalization, COMPLETE, evidence, and Agent capability boundaries; approved fixed portraits remain the RC fallback."
+    }
+  ],
+  "secretMaterialIncluded": false,
+  "revisionReason": "R9 passed controlled/build/E2E but its single formal live matrix failed RoundAnalysis because the provider-generated supportingExcerpt was not an exact span of the current user submission; Plain/Semantic and FinalReview passed. R10 changes the internal provider projection to return supporting-excerpt code-point positions and constructs the exact quoted span locally, with Prompt/Adapter/internal projection versions bumped. Frozen Candidate/result/Domain/Runtime/FinalReview/FSM/Finalization/ContentBundle Contracts, validators, content, assets, and model configuration remain unchanged.",
+  "priorRevisions": [
+    {
+      "rcId": "stage8-r1-741f0385619727a5",
+      "rcRevision": 1,
+      "status": "invalidated",
+      "reasonCodes": [
+        "S8-RC-001",
+        "S8-RC-002"
+      ],
+      "formalResultsRemainAttributableToThisRc": false
+    },
+    {
+      "rcId": "stage8-r2-32eee9d15a817052",
+      "rcRevision": 2,
+      "status": "invalidated",
+      "reasonCodes": [
+        "S8-RC-003"
+      ],
+      "formalResultsRemainAttributableToThisRc": false
+    },
+    {
+      "rcId": "stage8-r3-5b504841f2759751",
+      "rcRevision": 3,
+      "status": "invalidated",
+      "reasonCodes": [
+        "S8-RC-004"
+      ],
+      "formalResultsRemainAttributableToThisRc": false
+    },
+    {
+      "rcId": "stage8-r4-0397d26a31ba7f46",
+      "rcRevision": 4,
+      "status": "invalidated",
+      "reasonCodes": [
+        "S8-LIVE-SMOKE-001"
+      ],
+      "formalResultsRemainAttributableToThisRc": false
+    },
+    {
+      "rcId": "stage8-r5-b0a4adc8ce7937c2",
+      "rcRevision": 5,
+      "status": "historical_blocked",
+      "reasonCodes": [
+        "S8-LIVE-SMOKE-001"
+      ],
+      "formalResultsRemainAttributableToThisRc": true,
+      "eligibleForStage9": false,
+      "formalOutcome": "controlled/build/E2E passed; live provider smoke 1/3 passed"
+    },
+    {
+      "rcId": "stage8-r6-52e5e94d523aefb6",
+      "rcRevision": 6,
+      "status": "invalidated_before_formal_testing",
+      "reasonCodes": [
+        "S8-RC-005"
+      ],
+      "formalResultsRemainAttributableToThisRc": false,
+      "eligibleForStage9": false,
+      "reason": "The RC manifest-version binding test was extended after the initial freeze to cover the new provider projection schema version. No formal R6 test was executed."
+    },
+    {
+      "rcId": "stage8-r7-dfd7ceb4a4ef0404",
+      "rcRevision": 7,
+      "status": "historical_blocked",
+      "reasonCodes": [
+        "S8-MANUAL-001",
+        "S8-UI-COPY-001"
+      ],
+      "formalResultsRemainAttributableToThisRc": true,
+      "eligibleForStage9": false,
+      "formalOutcome": "All automated checks and live provider smoke 3/3 passed; manual gate remained open and the subsequent UI feedback invalidated R7 as a final candidate."
+    },
+    {
+      "rcId": "stage8-r8-2b175a5deb0eec86",
+      "rcRevision": 8,
+      "status": "invalidated_after_failed_e2e",
+      "reasonCodes": [
+        "S8-RC-006"
+      ],
+      "formalResultsRemainAttributableToThisRc": true,
+      "eligibleForStage9": false,
+      "formalOutcome": "Typecheck, lint, 437 full tests, 256 controlled tests, build and production scan passed; E2E failed 3 selector assertions against intentionally removed engineering copy, so live smoke was not run on R8."
+    },
+    {
+      "rcId": "stage8-r9-0a41a3766a2ed5c6",
+      "rcRevision": 9,
+      "status": "historical_blocked",
+      "reasonCodes": [
+        "S8-LIVE-SMOKE-002"
+      ],
+      "formalResultsRemainAttributableToThisRc": true,
+      "eligibleForStage9": false,
+      "formalOutcome": "Typecheck, lint, 437 full tests, 256 controlled tests, build, production scan and E2E 11/11 passed; the one formal live matrix passed Plain/Semantic and FinalReview but RoundAnalysis failed strict safety validation because supportingExcerpt was not an exact current-user-input span."
+    }
+  ]
+}

@@ -19,12 +19,21 @@ import {
 export function ExperienceClient({
   sessionId,
   requestedMode,
+  contentMode,
+  targetEnvironment,
 }: {
   sessionId: string | null;
   requestedMode: "mock" | "live";
+  contentMode: "placeholder" | "verified";
+  targetEnvironment: "development" | "test" | "production";
 }) {
   const [facade] = useState(
-    () => new Stage5ExperienceFacade(sessionId, { requestedMode }),
+    () =>
+      new Stage5ExperienceFacade(sessionId, {
+        requestedMode,
+        contentMode,
+        targetEnvironment,
+      }),
   );
   const snapshot = useSyncExternalStore(
     facade.subscribe,
@@ -58,14 +67,11 @@ export function ExperienceClient({
         ) : null}
         {snapshot.status === "ready" && snapshot.view ? (
           <>
-            {requestedMode === "live" ? (
-              <LiveExecutionStatus
-                view={snapshot.view}
-                busy={
-                  snapshot.persistence === "saving" || snapshot.view.busy
-                }
-              />
-            ) : null}
+            <ExecutionStatus
+              view={snapshot.view}
+              busy={snapshot.persistence === "saving" || snapshot.view.busy}
+              requestedMode={requestedMode}
+            />
             <StageProjection
               view={snapshot.view}
               snapshot={snapshot}
@@ -77,7 +83,7 @@ export function ExperienceClient({
       </main>
       <footer className="site-footer">
         <p>
-          原创互动草案 · {requestedMode === "live" ? "Live Agent" : "本地 Mock 体验"}
+          原创互动草案 · AI 协作式阅读体验
         </p>
       </footer>
     </>
@@ -96,12 +102,12 @@ function ExperienceHeader({
   return (
     <header className="experience-header">
       <div>
-        <p className="eyebrow">AI Agent 互动阅读体验</p>
+        <p className="eyebrow">AI 协作式互动阅读体验</p>
         <p className="product-title">最后一页进步报告</p>
       </div>
       <div className="header-status">
         <span className="mode-badge">
-          {requestedMode === "live" ? "Live + safe fallback" : "Mock only"}
+          {requestedMode === "live" ? "真实模型模式" : "本地演示模式"}
         </span>
         <span data-testid="persistence-status">
           {persistenceLabel(snapshot.persistence)}
@@ -215,8 +221,8 @@ function WelcomeView({
           <li>预计 18–20 分钟</li>
           <li>
             {requestedMode === "live"
-              ? "普通分析优先使用 Live Agent，并按安全策略降级；签名审阅不会由 Mock 代签"
-              : "本阶段只使用可复现的 Mock 输出"}
+              ? "普通分析优先使用真实模型，并按安全策略降级；签名审阅不会由演示结果代替"
+              : "本次体验使用可复现的本地演示结果，不会调用 DeepSeek"}
           </li>
           <li>进度仅保存在这台浏览器的本地存储中，未完成体验 24 小时后过期</li>
         </ul>
@@ -229,33 +235,47 @@ function WelcomeView({
   );
 }
 
-function LiveExecutionStatus({
+function ExecutionStatus({
   view,
   busy,
+  requestedMode,
 }: {
   view: Stage5PresentationView;
   busy: boolean;
+  requestedMode: "mock" | "live";
 }) {
+  if (requestedMode === "mock") {
+    return (
+      <div
+        className="execution-status"
+        role="status"
+        aria-live="polite"
+        data-testid="execution-status"
+      >
+        本次使用本地可复现的演示 Agent；不会调用 DeepSeek。
+      </div>
+    );
+  }
   let message =
-    "Live Agent 已启用；普通分析支持安全降级，Final Review 不会由 Mock 代签。";
+    "真实模型已启用；普通分析支持安全降级，签名审阅不会由演示结果代替。";
   if (busy) {
-    message = "Live Agent 正在处理。本步骤完成前请留在此页。";
+    message = "AI 正在处理。本步骤完成前请留在此页。";
   } else if (view.executionStatus?.requestedMode === "live") {
     switch (view.executionStatus.resolvedMode) {
       case "live":
-        message = "上一步由 Live Agent 完成。";
+        message = "上一步由真实模型完成。";
         break;
       case "deterministic":
         message = "上一步由本地确定性规则完成，没有调用模型。";
         break;
       case "mock":
-        message = "Live Agent 未完成；上一步已使用本地安全 Mock，并保留实际来源记录。";
+        message = "真实模型未完成；上一步已使用本地安全演示结果，并保留实际来源记录。";
         break;
       case "static_template":
-        message = "Live Agent 与 Mock 均未完成；上一步已使用静态安全模板。";
+        message = "真实模型与本地演示均未完成；上一步已使用静态安全模板。";
         break;
       case "unavailable":
-        message = "Live 执行未完成；本步骤没有生成替代角色决定。";
+        message = "真实模型执行未完成；本步骤没有生成替代角色决定。";
         break;
     }
   }
@@ -264,7 +284,7 @@ function LiveExecutionStatus({
       className="execution-status"
       role="status"
       aria-live="polite"
-      data-testid="live-execution-status"
+      data-testid="execution-status"
     >
       {message}
     </div>
@@ -384,7 +404,7 @@ function ReviewCanvas({ heading, view, commands, busy }: StageProps) {
   const isPlacement = view.stage === "SEMANTIC_PLACEMENT";
   return (
     <section className="stage-shell review-stage" aria-busy={busy}>
-      <p className="section-kicker">双栏审校 Canvas</p>
+      <p className="section-kicker">双栏审校台</p>
       {heading}
       <div className="review-grid">
         <div className="context-panel">
@@ -402,7 +422,7 @@ function ReviewCanvas({ heading, view, commands, busy }: StageProps) {
             <SemanticPlacement view={view} commands={commands} busy={busy} />
           ) : null}
           {view.stage === "PLAIN_REWRITE" || view.stage === "SEMANTIC_REVIEW" ? (
-            <p className="operation-note">Mock 正在生成并校验一个原子语义 bundle…</p>
+            <p className="operation-note">正在生成并校验语义版本…</p>
           ) : null}
         </div>
       </div>
@@ -473,14 +493,14 @@ function ManuscriptDocuments({ view }: { view: Stage5PresentationView }) {
   return (
     <div className="documents">
       <article className="document-card">
-        <header><span>精确版本</span><code>{view.preciseRevisionId}</code></header>
+        <header><span>精确版本</span></header>
         <p>{view.preciseText}</p>
       </article>
       <article className="document-card plain-document">
-        <header><span>朴素版本</span><code>{view.plainRevisionId ?? "尚未生成"}</code></header>
+        <header><span>朴素版本</span></header>
         <p>{view.plainText ?? "尚未生成。三轮审校完成前，不会预先伪造这份文本。"}</p>
       </article>
-      <p className="revision-meta">已保存 revision：{view.revisionCount}</p>
+      <p className="revision-meta">已保存版本：{view.revisionCount}</p>
     </div>
   );
 }
@@ -494,7 +514,7 @@ function DiffReview({ diff, commands, busy }: {
     <section className="diff-review" aria-label="待审阅的局部修改">
       <p className="micro-label">提案状态：尚未应用</p>
       <h2>局部修改</h2>
-      <p><strong>操作：</strong>{diff.operation === "insert" ? "增加" : diff.operation}</p>
+      <p><strong>操作：</strong>{diffOperationLabel(diff.operation)}</p>
       {diff.newText ? <ins>{diff.newText}</ins> : null}
       <p><strong>理由：</strong>{diff.reason}</p>
       <div className="action-row">
@@ -513,7 +533,7 @@ function SemanticContext({ view }: { view: Stage5PresentationView }) {
   return (
     <div className="evidence-card">
       <p className="micro-label">语义偏移状态</p>
-      <h2>{view.semanticStatus ?? "等待复核"}</h2>
+      <h2>{semanticStatusLabel(view.semanticStatus)}</h2>
       <p>不能被朴素版本完整传递的意义，需要由你决定归处。</p>
     </div>
   );
@@ -542,7 +562,7 @@ function SemanticPlacement({
           ) : null}
           {fragment.proposal && ["proposed", "confirmed"].includes(fragment.proposal.status) ? (
             <div className="proposal-card">
-              <p className="micro-label">冻结的恢复提案 · {fragment.proposal.status}</p>
+              <p className="micro-label">恢复提案 · {proposalStatusLabel(fragment.proposal.status)}</p>
               <p><ins>{fragment.proposal.replacementText}</ins></p>
               <div className="action-row">
                 <button className="primary-action" disabled={busy || fragment.proposal.status !== "proposed"} onClick={() => void commands.confirmRestoration(fragment.proposal!.proposalId)}>确认并应用</button>
@@ -596,7 +616,7 @@ function FinalSignatureView({
   return (
     <section className="stage-shell">
       <p className="section-kicker">
-        独立 Final Review 服务 · {requestedMode === "live" ? "Live" : "Mock"}
+        独立签名审阅 · {requestedMode === "live" ? "真实模型" : "本地演示"}
       </p>
       {heading}
       <div className="review-grid">
@@ -607,16 +627,16 @@ function FinalSignatureView({
           <div className="action-stack">
             {!unavailable && requestedMode === "live" ? (
               <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>
-                请求 Live 查理签名审阅
+                请求查理签名审阅
               </button>
             ) : null}
             {unavailable && requestedMode === "live" && view.signatureRetryAvailable ? (
               <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>
-                重试 Live 查理签名审阅（最后一次）
+                重试查理签名审阅（最后一次）
               </button>
             ) : null}
-            {!unavailable && requestedMode === "mock" ? <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>请求 Mock 审阅（签名夹具）</button> : null}
-            {!unavailable && requestedMode === "mock" ? <button className="secondary-action" disabled={busy} onClick={() => void commands.requestSignature("declined")}>请求 Mock 审阅（拒绝夹具）</button> : null}
+            {!unavailable && requestedMode === "mock" ? <button className="primary-action" disabled={busy} onClick={() => void commands.requestSignature("signed")}>演示同意签名</button> : null}
+            {!unavailable && requestedMode === "mock" ? <button className="secondary-action" disabled={busy} onClick={() => void commands.requestSignature("declined")}>演示明确拒绝</button> : null}
             {!unavailable && requestedMode === "mock" ? <button className="secondary-action" disabled={busy} onClick={() => void commands.requestSignature("unavailable")}>模拟技术上未完成</button> : null}
             <button className="text-action" disabled={busy} onClick={() => void commands.skipSignature()}>{unavailable ? "保留技术未完成状态并继续" : "不请求签名，继续"}</button>
             <button className="text-action" disabled={busy} onClick={() => void commands.returnToManuscript()}>返回修改手稿</button>
@@ -635,9 +655,9 @@ function ManuscriptRevisionView({ heading, view, commands, busy }: StageProps) {
       <p className="section-kicker">提交后朴素版本与语义复核会正式失效并重建</p>
       {heading}
       <div className="review-grid">
-        <article className="document-card"><header>当前 canonical precise</header><p>{view.preciseText}</p></article>
+        <article className="document-card"><header>当前精确版本</header><p>{view.preciseText}</p></article>
         <form onSubmit={(event) => { event.preventDefault(); void commands.submitManuscriptRevision({ draftPreciseText: draft, reason }); }}>
-          <label className="field-label" htmlFor="working-draft">Working draft</label>
+          <label className="field-label" htmlFor="working-draft">修改后的精确版本</label>
           <textarea id="working-draft" rows={10} value={draft} onChange={(event) => setDraft(event.target.value)} />
           <label className="field-label" htmlFor="revision-reason">修改理由</label>
           <input id="revision-reason" required value={reason} onChange={(event) => setReason(event.target.value)} />
@@ -676,22 +696,19 @@ function CompleteView({ heading, view, commands }: StageProps) {
   if (!envelope) return <section className="stage-shell">{heading}<p>封套数据缺失。</p></section>;
   return (
     <section className="stage-shell complete-stage">
-      <p className="section-kicker">只读 FinalEnvelope</p>
+      <p className="section-kicker">只读完成档案</p>
       {heading}
       <p className="completed-at">生成于 {new Date(envelope.generatedAt).toLocaleString("zh-CN")}</p>
       <div className="envelope-paper">
         <section><h2>那句被留下的话</h2><p>{envelope.preciseText}</p></section>
         <section><h2>朴素版本</h2><p>{envelope.plainText}</p></section>
-        <section><h2>三次看见之后</h2><p>{envelope.portraitShiftSummary}</p><p>最终选择：{envelope.finalPortraitChoice}</p></section>
+        <section><h2>三次看见之后</h2><p>{envelope.portraitShiftSummary}</p><p>最终选择：{portraitChoiceLabel(envelope.finalPortraitChoice)}</p></section>
         <DynamicFinalPortrait view={view} />
         <section><h2>仍然没有消失的分歧</h2>{envelope.openDissents.length ? <ul>{envelope.openDissents.map((item) => <li key={item}>{item}</li>)}</ul> : <p>没有开放分歧。</p>}</section>
-        <section><h2>签名与归宿</h2><p>{signatureLabel(envelope.signatureStatus)} · {envelope.finalDisposition}</p></section>
+        <section><h2>签名与归宿</h2><p>{signatureLabel(envelope.signatureStatus)} · {dispositionLabel(envelope.finalDisposition)}</p></section>
         <aside className="declaration-card"><strong>原创互动声明</strong><p>{envelope.originalDeclaration}</p><small>{envelope.attribution}</small></aside>
       </div>
-      <details className="technical-details">
-        <summary>生成与完整性信息</summary>
-        <dl><div><dt>Envelope ID</dt><dd>{envelope.finalEnvelopeId}</dd></div><div><dt>内容包版本</dt><dd>{envelope.contentBundleVersion}</dd></div><div><dt>内容 Schema</dt><dd>{envelope.contentSchemaVersion}</dd></div><div><dt>requested Agent mode</dt><dd>{envelope.requestedAgentMode}</dd></div><div><dt>执行 receipts</dt><dd>{envelope.receiptCount}</dd></div><div><dt>完整性校验</dt><dd>{envelope.integrityChecksum}</dd></div></dl>
-      </details>
+      <p className="revision-meta">完成档案已通过本地完整性校验。</p>
       <button className="primary-action" onClick={() => void commands.startNewSession()}>开始新的体验</button>
     </section>
   );
@@ -745,7 +762,12 @@ function DynamicFinalPortrait({ view }: { view: Stage5PresentationView }) {
           setGenerated(false);
         }}
       />
-      <p>{generated ? "可选动态肖像" : "已批准固定肖像（稳定回退）"} · 非事实证据</p>
+      <p>
+        {generated
+          ? "本次肖像由图像模型生成"
+          : "本次使用已批准固定肖像（图像生成未启用或未完成）"}
+        ；仅作氛围呈现，不作为事实证据。
+      </p>
     </section>
   );
 }
@@ -770,7 +792,7 @@ function PortraitImage({ portrait }: { portrait: Stage5PresentationView["portrai
 }
 
 function LoadingView() {
-  return <section className="stage-shell loading-stage" aria-busy="true"><p className="section-kicker">本地准备</p><h1>正在打开体验</h1><p>校验内容包、Contract 版本和 IndexedDB…</p></section>;
+  return <section className="stage-shell loading-stage" aria-busy="true"><p className="section-kicker">本地准备</p><h1>正在打开体验</h1><p>正在校验内容和本地进度…</p></section>;
 }
 
 function BlockedView({ snapshot, commands }: { snapshot: Stage5Snapshot; commands: Stage5Commands }) {
@@ -779,7 +801,7 @@ function BlockedView({ snapshot, commands }: { snapshot: Stage5Snapshot; command
     <section className="stage-shell blocked-stage">
       <h1 tabIndex={-1}>无法安全恢复这个体验</h1>
       <p>{snapshot.recovery?.message ?? snapshot.error}</p>
-      {snapshot.recovery?.kind === "rejected" ? <><code>{snapshot.recovery.code}</code><ul>{snapshot.recovery.details.map((detail) => <li key={detail}>{detail}</li>)}</ul></> : null}
+      {snapshot.recovery?.kind === "rejected" ? <p>这份本地进度无法继续使用，你可以安全地开始一次新体验。</p> : null}
       <div className="action-row">
         {missing ? <button className="primary-action" onClick={() => void commands.startNewSession()}>开始新的体验</button> : null}
         <button className="secondary-action" onClick={() => void commands.retryInitialization()}>重试检查</button>
@@ -812,4 +834,24 @@ function placementLabel(value: string): string {
 }
 function signatureLabel(value: string): string {
   return { hidden: "尚未决定", pending: "正在审阅", signed: "已签名", declined: "明确拒绝", unavailable: "技术上未完成", not_requested: "未请求" }[value] ?? value;
+}
+
+function diffOperationLabel(value: string): string {
+  return { insert: "增加", replace: "替换", delete: "删除", annotate: "添加批注" }[value] ?? "局部修改";
+}
+
+function semanticStatusLabel(value: string | null): string {
+  return { current: "等待你决定语义去向", stale: "需要重新复核" }[value ?? ""] ?? "等待复核";
+}
+
+function proposalStatusLabel(value: string): string {
+  return { proposed: "等待确认", confirmed: "已经确认", applied: "已经应用", rejected: "已经拒绝", stale: "需要重建" }[value] ?? "等待处理";
+}
+
+function portraitChoiceLabel(value: string): string {
+  return { early: "早期查理", peak: "高峰期查理", futureFacing: "面向未来的查理", all_three: "三个都是", no_unique_answer: "不设唯一答案" }[value] ?? "保留开放选择";
+}
+
+function dispositionLabel(value: string): string {
+  return { future_reference: "留给未来参照", present_record: "留在现在", unfinished: "保持未完成" }[value] ?? "保持未完成";
 }

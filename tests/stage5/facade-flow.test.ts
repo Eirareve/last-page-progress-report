@@ -73,6 +73,38 @@ describe("Stage 5 application facade", () => {
     expect(complete.envelope?.originalDeclaration).toContain("原创互动草案");
     expect(facade.getSnapshot().error).toBeNull();
   });
+
+  it("loads the frozen verified bundle for a production Mock session", async () => {
+    const facade = new Stage5ExperienceFacade(null, {
+      requestedMode: "mock",
+      contentMode: "verified",
+      targetEnvironment: "production",
+    });
+
+    await facade.initialize();
+    const welcome = expectReady(facade, "WELCOME");
+    expect(welcome.contentMode).toBe("verified");
+    expect(welcome.portraits.map(({ assetPath }) => assetPath)).toEqual([
+      "/portraits/charlie-original-v2/early.png",
+      "/portraits/charlie-original-v2/peak.png",
+      "/portraits/charlie-original-v2/future-facing.png",
+    ]);
+
+    await facade.start();
+    const prelude = expectReady(facade, "PORTRAIT_PRELUDE");
+    await facade.submitPortraitDescriptors(
+      prelude.portraits.flatMap((portrait) => portrait.selectedDescriptors),
+    );
+    await facade.submitInitialPortrait({
+      choice: "early",
+      reason: "正式内容下仍使用确定性 Mock 执行。",
+    });
+
+    const round = expectReady(facade, "ROUND_1_PAST_SELF");
+    expect(round.currentRound?.evidenceTitle).toBe("过去的我，谁有解释权？");
+    expect(JSON.stringify(round)).not.toContain("PLACEHOLDER:");
+    expect(JSON.stringify(round)).not.toContain("internalExcerpt");
+  });
 });
 
 function expectReady(facade: Stage5ExperienceFacade, stage: string) {

@@ -20,6 +20,9 @@ describe("Stage 5 UI boundary", () => {
     );
     expect(page).toContain("params.session");
     expect(page).not.toContain("params.stage");
+    expect(page).toContain("resolveContentEnvironment(process.env)");
+    expect(page).toContain("contentMode={environment.contentMode}");
+    expect(page).toContain("targetEnvironment={environment.appEnvironment}");
   });
 
   it("projects explicit Live loading, fallback, and no-Mock-signature copy", async () => {
@@ -27,10 +30,11 @@ describe("Stage 5 UI boundary", () => {
       new URL("../../src/stage5/experience-client.tsx", import.meta.url),
       "utf8",
     );
-    expect(source).toContain('data-testid="live-execution-status"');
-    expect(source).toContain("Live Agent 正在处理");
-    expect(source).toContain("已使用本地安全 Mock");
-    expect(source).toContain("签名审阅不会由 Mock 代签");
-    expect(source).toContain("重试 Live 查理签名审阅（最后一次）");
+    expect(source).toContain('data-testid="execution-status"');
+    expect(source).toContain("AI 正在处理");
+    expect(source).toContain("已使用本地安全演示结果");
+    expect(source).toContain("签名审阅不会由演示结果代替");
+    expect(source).toContain("不会调用 DeepSeek");
+    expect(source).toContain("重试查理签名审阅（最后一次）");
   });
 });

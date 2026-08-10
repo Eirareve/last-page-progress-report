@@ -36,7 +36,9 @@ import {
   createBundledContentLoader,
   projectFinalEnvelopeContentSnapshot,
   type ContentAccess,
+  type ContentEnvironment,
   type ContentGateEvaluation,
+  type ContentMode,
 } from "../content";
 import { canonicalizeJson } from "../content/canonical-json";
 import { evaluateContentGate } from "../content/evaluate-content-gate";
@@ -121,7 +123,6 @@ import {
 } from "./operation";
 import { projectStage5View } from "./projection";
 
-const TARGET_ENVIRONMENT = "development" as const;
 const UNAVAILABLE = Object.freeze({
   kind: "unavailable",
   fallbackReason: "stage5_mock_fallback_unavailable",
@@ -134,6 +135,8 @@ type Stage5LoadedContent = Awaited<
 
 export type Stage5ExperienceFacadeOptions = Readonly<{
   requestedMode?: "mock" | "live";
+  contentMode?: ContentMode;
+  targetEnvironment?: ContentEnvironment["appEnvironment"];
   liveClient?: Stage6LiveApplicationClient;
   localFallbackPort?: ProviderNeutralAgentPort;
   loadContent?: (
@@ -160,6 +163,8 @@ export class Stage5ExperienceFacade implements Stage5Commands {
   private gate: ContentGateEvaluation | null = null;
   private requestedSessionId: string | null;
   private readonly requestedMode: "mock" | "live";
+  private readonly contentMode: ContentMode;
+  private readonly targetEnvironment: ContentEnvironment["appEnvironment"];
   private readonly liveClient: Stage6LiveApplicationClient;
   private readonly localFallbackPort: ProviderNeutralAgentPort;
   private readonly loadContent: Stage5ExperienceFacadeOptions["loadContent"];
@@ -173,6 +178,10 @@ export class Stage5ExperienceFacade implements Stage5Commands {
   ) {
     this.requestedSessionId = sessionId;
     this.requestedMode = options.requestedMode ?? "mock";
+    this.contentMode =
+      options.contentMode ??
+      (this.requestedMode === "live" ? "verified" : "placeholder");
+    this.targetEnvironment = options.targetEnvironment ?? "development";
     this.liveClient = options.liveClient ?? new Stage6LiveHttpClient();
     this.localFallbackPort =
       options.localFallbackPort ?? new DeterministicMockAgentAdapter();
@@ -205,14 +214,12 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       view: null,
     });
     try {
-      const loaded = await this.loadContent!(
-        this.requestedMode === "live" ? "verified" : "placeholder",
-      );
+      const loaded = await this.loadContent!(this.contentMode);
       const evaluatedAt = browserClock.now();
       const gate = evaluateContentGate({
         evaluationId: this.idGenerator.next("transition"),
         evaluatedAt,
-        targetEnvironment: TARGET_ENVIRONMENT,
+        targetEnvironment: this.targetEnvironment,
         contentMode: loaded.bundle.contentMode,
         agentMode: this.requestedMode,
         contentBundleId: loaded.bundle.contentBundleId,
@@ -560,7 +567,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
         eventType: "CHOOSE_DISPOSITION",
         disposition,
         finalizationContext: {
-          targetEnvironment: TARGET_ENVIRONMENT,
+          targetEnvironment: this.targetEnvironment,
           contentGateEvaluation: this.requireGate(),
           requiresContentGateAttestation: false,
           contentGateAttestation: null,
@@ -596,7 +603,10 @@ export class Stage5ExperienceFacade implements Stage5Commands {
             };
           });
     const created = createStage4Session({
-      contentBinding: { ...access.binding, targetEnvironment: TARGET_ENVIRONMENT },
+      contentBinding: {
+        ...access.binding,
+        targetEnvironment: this.targetEnvironment,
+      },
       originalInteraction: access.originalInteraction.item,
       preciseRevisionId: this.idGenerator.next("revision"),
       portraitDescriptors: descriptors,
@@ -652,7 +662,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       integrityValid: true,
       expectedContentBinding: {
         ...this.requireAccess().binding,
-        targetEnvironment: TARGET_ENVIRONMENT,
+        targetEnvironment: this.targetEnvironment,
       },
       expectedContractVersionVector: buildStage4ContractVersionVector(),
       now: browserClock.now(),
@@ -1191,7 +1201,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       state,
       contentSnapshot: projectFinalEnvelopeContentSnapshot({
         access: this.requireAccess(),
-        targetEnvironment: TARGET_ENVIRONMENT,
+        targetEnvironment: this.targetEnvironment,
       }),
       clock: browserClock,
       idGenerator: this.idGenerator,
@@ -1438,7 +1448,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       return [];
     }
     const result = evaluateFinalization(this.current.state, {
-      targetEnvironment: TARGET_ENVIRONMENT,
+      targetEnvironment: this.targetEnvironment,
       contentGateEvaluation: this.gate,
       requiresContentGateAttestation: false,
       contentGateAttestation: null,

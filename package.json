@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#content-bundled-source": {
+      "development": "./src/content/bundled-content-source.ts",
+      "react-server": "./src/content/production-bundled-content-source.ts",
+      "browser": "./src/content/production-bundled-content-source.ts",
+      "node": "./src/content/production-bundled-content-source.ts",
+      "default": "./src/content/bundled-content-source.ts"
+    }
+  },
   "engines": {
     "node": "24.x"
   },
@@ -14,6 +23,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:stage8:production-scan": "node scripts/stage8-scan-production-build.mjs",
     "test:smoke:deepseek": "node --env-file=.env.local node_modules/vitest/vitest.mjs run --config vitest.live.config.ts",
     "test:e2e": "playwright test"
   },

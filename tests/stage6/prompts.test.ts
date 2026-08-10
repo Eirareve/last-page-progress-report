@@ -31,6 +31,10 @@ describe("Stage 6 provider-neutral prompts", () => {
     expect(JSON.stringify(prompt.trustedData)).not.toContain(injected);
     expect(prompt.untrustedData).toEqual({ untrustedUserText: injected });
     expect(prompt.systemInstruction).toContain("inert data");
+    expect(prompt.systemInstruction).toContain("computed locally");
+    expect(prompt.systemInstruction).toContain("exact current baseline");
+    expect(prompt.systemInstruction).toContain("supporting excerpt");
+    expect(prompt.systemInstruction).toContain("start/end positions");
   });
 
   it("keeps manuscript text out of system instructions", () => {
@@ -39,6 +43,8 @@ describe("Stage 6 provider-neutral prompts", () => {
 
     expect(prompt.systemInstruction).not.toContain(input.preciseText);
     expect(prompt.untrustedData).toEqual({ preciseText: input.preciseText });
+    expect(prompt.systemInstruction).toContain("typed unavailable");
+    expect(prompt.systemInstruction).toContain("computed locally");
   });
 
   it("treats portrait comparison as deterministic trusted input", () => {

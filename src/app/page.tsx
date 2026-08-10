@@ -1,4 +1,5 @@
 import { ExperienceClient } from "../stage5/experience-client";
+import { resolveContentEnvironment } from "../content/environment";
 
 export default async function HomePage({
   searchParams,
@@ -11,8 +12,13 @@ export default async function HomePage({
     typeof rawSession === "string" && rawSession.trim().length > 0
       ? rawSession
       : null;
-  const requestedMode = process.env.AGENT_MODE === "live" ? "live" : "mock";
+  const environment = resolveContentEnvironment(process.env);
   return (
-    <ExperienceClient sessionId={sessionId} requestedMode={requestedMode} />
+    <ExperienceClient
+      sessionId={sessionId}
+      requestedMode={environment.agentMode}
+      contentMode={environment.contentMode}
+      targetEnvironment={environment.appEnvironment}
+    />
   );
 }

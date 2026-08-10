@@ -80,6 +80,19 @@ export async function sealVerifiedContentBundle(
 export async function verifySealedVerifiedContentBundle(
   input: unknown,
 ): Promise<PublicRuntimeContentBundle> {
+  const publicBundleResult = publicRuntimeContentBundleSchema.safeParse(input);
+  if (publicBundleResult.success) {
+    const { contentBundleChecksum, ...publicMaterial } = publicBundleResult.data;
+    const expectedPublicChecksum = await computePublicContentBundleChecksum(
+      publicMaterial,
+    );
+    if (contentBundleChecksum !== expectedPublicChecksum) {
+      throw new ContentIntegrityError(
+        "The generated public content checksum does not match",
+      );
+    }
+    return deepFreeze(publicBundleResult.data);
+  }
   const internalBundle = sealedVerifiedContentBundleSchema.parse(input);
   const publicBundleWithoutChecksum = projectPublicBundleMaterial(internalBundle);
   const [expectedInternalChecksum, expectedPublicChecksum] = await Promise.all([
