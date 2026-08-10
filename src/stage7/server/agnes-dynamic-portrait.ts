@@ -17,6 +17,7 @@ export type AgnesDynamicPortraitConfig = Readonly<{
 export function readAgnesDynamicPortraitConfig(
   environment: Readonly<Record<string, string | undefined>> = process.env,
 ): AgnesDynamicPortraitConfig | null {
+  if (environment.AGNES_IMAGE_ENABLED !== "true") return null;
   const apiKey = environment.AGNES_API_KEY?.trim();
   if (!apiKey || environment.CONTENT_MODE !== "verified") return null;
   const baseUrl = (

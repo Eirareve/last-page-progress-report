@@ -266,6 +266,16 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     });
   }
 
+  async deleteCurrentSession(): Promise<void> {
+    return this.runCommand(async () => {
+      const sessionId = this.requireCurrent().state.sessionId;
+      await this.requireStore().delete(sessionId);
+      await this.createAndInitializeSession(
+        "已删除上一份本地体验，并创建新的空白体验。",
+      );
+    });
+  }
+
   async start(): Promise<void> {
     return this.runCommand(async () => {
       await this.dispatch({ eventType: "START" }, "已进入肖像序章。");

@@ -60,7 +60,7 @@ export type Stage5EnvelopeView = Readonly<{
   finalPortraitChoice: string;
   portraitShiftSummary: string;
   signatureStatus: string;
-  finalDisposition: string;
+  finalDisposition: FinalDisposition;
   openDissents: readonly string[];
   originalDeclaration: string;
   attribution: string;
@@ -89,6 +89,8 @@ export type Stage5PresentationView = Readonly<{
   stageTitle: string;
   stateRevision: number;
   contentMode: "placeholder" | "verified";
+  contentBundleVersion: string;
+  contentSchemaVersion: string;
   originalDeclaration: string;
   originalAttribution: string;
   portraits: readonly Stage5PortraitView[];
@@ -111,7 +113,7 @@ export type Stage5PresentationView = Readonly<{
   signatureStatus: string;
   signatureSummary: string | null;
   signatureRetryAvailable: boolean;
-  finalDisposition: string | null;
+  finalDisposition: FinalDisposition | null;
   blockers: readonly string[];
   envelope: Stage5EnvelopeView | null;
   executionStatus: Stage5ExecutionStatus | null;
@@ -175,6 +177,8 @@ export interface Stage5Commands {
     reason: string;
   }): Promise<void>;
   chooseDisposition(disposition: Stage5Disposition): Promise<void>;
+  deleteCurrentSession(): Promise<void>;
   startNewSession(): Promise<void>;
   retryInitialization(): Promise<void>;
 }
+import type { FinalDisposition } from "../domain/contracts/signature";

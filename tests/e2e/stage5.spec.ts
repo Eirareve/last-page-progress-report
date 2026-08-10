@@ -25,6 +25,10 @@ test("首个纵向切片原子保存、双击幂等并可刷新恢复", async ({
 });
 
 test("完整 Mock 主路径从欢迎页到只读完成档案", async ({ page }) => {
+  let dynamicPortraitRequests = 0;
+  page.on("request", (request) => {
+    if (request.url().includes("/api/dynamic-portrait")) dynamicPortraitRequests += 1;
+  });
   await reachFinalSignature(page);
   await page.getByRole("button", { name: "不请求签名，继续" }).click();
   await expectStage(page, "这份文稿将被如何留下？");
@@ -34,6 +38,9 @@ test("完整 Mock 主路径从欢迎页到只读完成档案", async ({ page }) 
   await expect(page.getByText("只读完成档案")).toBeVisible();
   await expect(page.getByText("未请求 · 保持未完成")).toBeVisible();
   await expect(page.getByText(/以下内容为基于原著核心矛盾设计的原创互动草案/)).toBeVisible();
+  await expect(page.getByTestId("fixed-final-portrait")).toBeVisible();
+  await expect(page.getByText(/Agnes 动态图片生成暂未启用/)).toBeVisible();
+  expect(dynamicPortraitRequests).toBe(0);
   await expect(page.getByRole("button", { name: "开始新的体验" })).toBeVisible();
   expect(new URL(page.url()).searchParams.has("stage")).toBe(false);
   const completedSession = new URL(page.url()).searchParams.get("session");
@@ -48,6 +55,7 @@ test("production verified Mock 使用冻结内容与正式肖像", async ({ page
   await page.goto("/");
   await expectStage(page, "欢迎");
   await expect(page.getByText("本地演示模式")).toBeVisible();
+  await declineResearchAnalytics(page);
   await page.getByRole("button", { name: "开始体验" }).click();
   await expectStage(page, "三次看见查理");
   await expect(page.locator('img[src*="/portraits/charlie-original-v2/"]')).toHaveCount(3);
@@ -106,6 +114,7 @@ test("320px 视口保持单栏、无横向裁剪且图片失败不阻塞主流�
   await page.route("**/portraits/charlie-original-v2/early.png", (route) => route.abort());
   await page.goto("/");
   await expectStage(page, "欢迎");
+  await declineResearchAnalytics(page);
   await page.getByRole("button", { name: "开始体验" }).click();
   await expectStage(page, "三次看见查理");
   await expect(page.getByRole("img", { name: /图片暂不可用/ })).toBeVisible();
@@ -134,6 +143,7 @@ test("320px production verified Mock 可完整走到 COMPLETE", async ({ page })
 test("键盘可以完成 production verified Mock 主路径", async ({ page }) => {
   await page.goto("/");
   await expectStage(page, "欢迎");
+  await pressButton(page, "不同意记录，继续体验");
   await pressButton(page, "开始体验");
   await expectStage(page, "三次看见查理");
   await pressButton(page, "保存这些描述");
@@ -161,6 +171,7 @@ test("键盘可以完成 production verified Mock 主路径", async ({ page }) =
 async function reachRoundOne(page: Page) {
   await page.goto("/");
   await expectStage(page, "欢迎");
+  await declineResearchAnalytics(page);
   await page.getByRole("button", { name: "开始体验" }).click();
   await expectStage(page, "三次看见查理");
   await expect(page.getByRole("checkbox", { checked: true })).toHaveCount(3);
@@ -215,6 +226,11 @@ async function pressButton(page: Page, name: string | RegExp) {
   await button.focus();
   await expect(button).toBeFocused();
   await button.press("Enter");
+}
+
+async function declineResearchAnalytics(page: Page) {
+  await page.getByRole("button", { name: "不同意记录，继续体验" }).click();
+  await expect(page.getByText("当前选择：不同意记录。")).toBeVisible();
 }
 
 async function expectStage(page: Page, title: string) {

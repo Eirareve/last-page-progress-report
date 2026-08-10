@@ -101,6 +101,7 @@ describe("optional non-blocking Stage 7 dynamic portrait", () => {
     const apiKey = "test-only-secret";
     const config = readAgnesDynamicPortraitConfig({
       CONTENT_MODE: "verified",
+      AGNES_IMAGE_ENABLED: "true",
       AGNES_API_KEY: apiKey,
       AGNES_IMAGE_MODEL: "agnes-image-2.1-flash",
       AGNES_IMAGE_SIZE: "2K",

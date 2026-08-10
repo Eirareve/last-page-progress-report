@@ -1,16 +1,12 @@
 import { DynamicPortraitService, dynamicPortraitRequestSchema } from "../../../stage7/dynamic-portrait";
-import {
-  AgnesDynamicPortraitGenerator,
-  readAgnesDynamicPortraitConfig,
-} from "../../../stage7/server/agnes-dynamic-portrait";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const config = readAgnesDynamicPortraitConfig();
-const service = new DynamicPortraitService(
-  config === null ? null : new AgnesDynamicPortraitGenerator(config),
-);
+// Stage 9/10 submission is intentionally pinned to the three approved assets.
+// The optional Agnes adapter remains isolated for future review, but this public
+// route cannot activate it through environment configuration.
+const service = new DynamicPortraitService(null);
 
 export async function POST(request: Request): Promise<Response> {
   if (!request.headers.get("content-type")?.startsWith("application/json")) {

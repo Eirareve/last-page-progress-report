@@ -34,7 +34,11 @@ describe("Stage 5 UI boundary", () => {
     expect(source).toContain("AI 正在处理");
     expect(source).toContain("已使用本地安全演示结果");
     expect(source).toContain("签名审阅不会由演示结果代替");
-    expect(source).toContain("不会调用 DeepSeek");
+    expect(source).toContain("if (requestedMode === \"mock\")");
+    expect(source).toContain("return null");
     expect(source).toContain("重试查理签名审阅（最后一次）");
+    expect(source).not.toContain('fetch("/api/dynamic-portrait"');
+    expect(source).not.toContain("不会调用 DeepSeek");
+    expect(source).toContain("Agnes 动态图片生成暂未启用");
   });
 });
