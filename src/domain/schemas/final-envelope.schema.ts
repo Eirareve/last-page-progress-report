@@ -7,11 +7,12 @@ import {
   originalInteractionSchema,
 } from "./evidence.schema";
 import { charlieStageSchema } from "./experience.schema";
+import { charlieFinalLetterSchema } from "./final-letter.schema";
 import { revisionEntrySchema } from "./manuscript.schema";
 import {
   finalPortraitChoiceSchema,
   initialPortraitRecordSchema,
-  portraitDescriptorSchema,
+  portraitDescriptorCollectionSchema,
   portraitShiftComparisonSchema,
 } from "./portrait.schema";
 import {
@@ -61,9 +62,8 @@ export const finalEnvelopeContentSnapshotSchema = z.strictObject({
   }),
 });
 
-export const finalEnvelopeSchema = z.strictObject({
+const finalEnvelopeCommonShape = {
   finalEnvelopeId: z.string().min(1),
-  finalEnvelopeSchemaVersion: z.literal(FINAL_ENVELOPE_SCHEMA_VERSION),
   sessionId: z.string().min(1),
   generatedAt: z.iso.datetime(),
   contentSnapshot: finalEnvelopeContentSnapshotSchema,
@@ -81,7 +81,7 @@ export const finalEnvelopeSchema = z.strictObject({
     bouquet: z.array(bouquetEntrySchema),
   }),
   portraits: z.strictObject({
-    descriptors: z.array(portraitDescriptorSchema).length(3),
+    descriptors: portraitDescriptorCollectionSchema,
     initialRecord: initialPortraitRecordSchema,
     finalChoice: finalPortraitChoiceSchema,
     finalReason: z.string().nullable(),
@@ -101,4 +101,20 @@ export const finalEnvelopeSchema = z.strictObject({
   }),
   executionProvenance: z.unknown(),
   integrityChecksum: sha256DigestSchema,
+} as const;
+
+export const legacyFinalEnvelopeV020Schema = z.strictObject({
+  ...finalEnvelopeCommonShape,
+  finalEnvelopeSchemaVersion: z.literal("0.2.0"),
 });
+
+export const finalEnvelopeSchema = z.strictObject({
+  ...finalEnvelopeCommonShape,
+  finalEnvelopeSchemaVersion: z.literal(FINAL_ENVELOPE_SCHEMA_VERSION),
+  letter: charlieFinalLetterSchema,
+});
+
+export const supportedFinalEnvelopeSchema = z.discriminatedUnion(
+  "finalEnvelopeSchemaVersion",
+  [legacyFinalEnvelopeV020Schema, finalEnvelopeSchema],
+);

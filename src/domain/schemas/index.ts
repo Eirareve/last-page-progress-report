@@ -1,6 +1,7 @@
 export * from "./evidence.schema";
 export * from "./experience.schema";
 export * from "./final-envelope.schema";
+export * from "./final-letter.schema";
 export * from "./manuscript.schema";
 export * from "./portrait.schema";
 export * from "./semantic.schema";

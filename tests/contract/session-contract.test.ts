@@ -7,6 +7,7 @@ import {
   sessionStateSchema,
 } from "@/domain/schemas";
 import { STAGE_DESCRIPTORS } from "@/domain/contracts/experience";
+import { generateCharlieFinalLetter } from "@/final-letter";
 import { startNewSession } from "@/runtime/session-lifecycle";
 import { makeFinalizableState } from "../fixtures/finalization";
 
@@ -77,7 +78,7 @@ describe("session and boundary contracts", () => {
   it("does not permit a fabricated Session-level resolved execution mode in FinalEnvelope", () => {
     const candidate = {
       finalEnvelopeId: "envelope-1",
-      finalEnvelopeSchemaVersion: "0.2.0",
+      finalEnvelopeSchemaVersion: "0.3.0",
       sessionId: "session-1",
       generatedAt: "2026-08-06T00:00:00.000Z",
       contentSnapshot: {
@@ -178,12 +179,46 @@ describe("session and boundary contracts", () => {
         currentReview: null,
         futureStatus: "blank",
       },
+      letter: generateCharlieFinalLetter({
+        preciseText: "precise",
+        preciseRevisionId: "precise-1",
+        plainText: "plain",
+        plainRevisionId: "plain-1",
+        contentBundleId: "content-1",
+        contentBundleVersion: "0.2.0",
+        contentBundleChecksum: `sha256:${"a".repeat(64)}`,
+        evidenceIds: [],
+        prohibitedClaims: [],
+        portraitShiftSummary: "unchanged",
+        openDissentCount: 0,
+        signatureStatus: "not_requested",
+        finalDisposition: "unfinished",
+        requestedMode: "mock",
+      }),
       finalDisposition: "unfinished",
       contentAttribution: { evidenceCards: [], contentItems: [] },
       executionProvenance: { requestedAgentMode: "mock", receipts: [] },
       integrityChecksum: `sha256:${"0".repeat(64)}`,
     } as const;
     expect(finalEnvelopeSchema.safeParse(candidate).success).toBe(true);
+    expect(
+      finalEnvelopeSchema.safeParse({
+        ...candidate,
+        portraits: {
+          ...candidate.portraits,
+          descriptors: [
+            ...candidate.portraits.descriptors,
+            { id: "portrait-early-2", stage: "early", label: "hopeful" },
+            { id: "portrait-peak-2", stage: "peak", label: "precise" },
+            {
+              id: "portrait-future-2",
+              stage: "futureFacing",
+              label: "restrained",
+            },
+          ],
+        },
+      }).success,
+    ).toBe(true);
     expect(
       finalEnvelopeSchema.safeParse({ ...candidate, resolvedMode: "mock" }).success,
     ).toBe(false);

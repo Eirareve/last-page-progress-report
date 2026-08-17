@@ -241,7 +241,7 @@ describe("Stage 6 live facade wiring", () => {
     });
 
     await reachFinalSignature(facade);
-    await facade.requestSignature("signed");
+    await facade.requestSignature();
 
     expect(reviewCall).toHaveBeenCalledTimes(1);
     expect(facade.getSnapshot()).toMatchObject({
@@ -288,7 +288,7 @@ describe("Stage 6 live facade wiring", () => {
     });
 
     await reachFinalSignature(facade);
-    await facade.requestSignature("signed");
+    await facade.requestSignature();
 
     expect(facade.getSnapshot()).toMatchObject({
       persistence: "failed",
@@ -322,13 +322,13 @@ describe("Stage 6 live facade wiring", () => {
     });
 
     await reachFinalSignature(facade);
-    await facade.requestSignature("signed");
+    await facade.requestSignature();
     expect(facade.getSnapshot().view).toMatchObject({
       signatureStatus: "unavailable",
       signatureRetryAvailable: true,
     });
 
-    await facade.requestSignature("signed");
+    await facade.requestSignature();
     expect(reviewCall).toHaveBeenCalledTimes(2);
     expect(facade.getSnapshot()).toMatchObject({
       status: "ready",

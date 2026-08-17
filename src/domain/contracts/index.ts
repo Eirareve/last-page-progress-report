@@ -1,6 +1,7 @@
 export * from "./evidence";
 export * from "./experience";
 export * from "./final-envelope";
+export * from "./final-letter";
 export * from "./manuscript";
 export * from "./portrait";
 export * from "./semantic";

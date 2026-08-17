@@ -4,6 +4,7 @@ import { semanticRestorationValidatedOutcomeSchema } from "../agent";
 import { applicationOrchestrationEventSchema, stage3BudgetUsageSchema } from "../application";
 import {
   finalEnvelopeSchema,
+  legacyFinalEnvelopeV020Schema,
   finalPortraitChoiceSchema,
   portraitDescriptorCollectionSchema,
   portraitShiftComparisonSchema,
@@ -29,6 +30,17 @@ export const stage4FinalEnvelopeSchema = finalEnvelopeSchema.extend({
   sessionConfiguration: sessionConfigurationSchema,
   executionProvenance: finalizationProvenanceStateSchema,
 });
+
+export const legacyStage4FinalEnvelopeV020Schema =
+  legacyFinalEnvelopeV020Schema.extend({
+    sessionConfiguration: sessionConfigurationSchema,
+    executionProvenance: finalizationProvenanceStateSchema,
+  });
+
+export const supportedStage4FinalEnvelopeSchema = z.discriminatedUnion(
+  "finalEnvelopeSchemaVersion",
+  [legacyStage4FinalEnvelopeV020Schema, stage4FinalEnvelopeSchema],
+);
 
 const startEventSchema = z.strictObject({ eventType: z.literal("START") });
 const setPortraitDescriptorsEventSchema = z.strictObject({
@@ -219,7 +231,7 @@ export const stage4SessionStateSchema = sessionStateSchema.and(
     configuration: sessionConfigurationSchema,
     runtime: runtimeStateSchema,
     provenance: finalizationProvenanceStateSchema,
-    finalEnvelope: stage4FinalEnvelopeSchema.nullable(),
+    finalEnvelope: supportedStage4FinalEnvelopeSchema.nullable(),
   }),
 );
 
