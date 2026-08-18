@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { activeOperationSchema } from "@/runtime";
 import { recoverStage4Session } from "@/persistence";
 import { buildStage4FinalEnvelope, stage4SessionStateSchema } from "@/fsm";
+import { createBundledContentLoader } from "@/content";
+import { projectStage5View } from "@/stage5/projection";
 import { makeFinalizableState } from "../fixtures/finalization";
 import {
   STAGE4_DIGEST_A,
@@ -185,6 +187,77 @@ describe("Stage 4 recovery", () => {
       access: "read_only",
       action: "none",
     });
+  });
+
+  it("restores a 0.2.0 COMPLETE snapshot read-only without fabricating a letter", async () => {
+    const base = stage4SessionStateSchema.parse({
+      ...makeFinalizableState(),
+      stage: "FINALIZING",
+      lifecycleStatus: "finalizing",
+      finalEnvelope: null,
+    });
+    const envelope = await buildStage4FinalEnvelope({
+      state: base,
+      contentSnapshot: makeStage4FinalEnvelopeContentSnapshot(base),
+      ...makeStage4Ports(STAGE4_LATER),
+    });
+    const { letter: _letter, ...legacyEnvelopePayload } = envelope;
+    expect(_letter).toBeDefined();
+    const currentVector = base.provenance.contractVersionVector;
+    const legacyVector = {
+      ...currentVector,
+      finalEnvelopeSchemaVersion: "0.2.0",
+    };
+    const legacyComplete = stage4SessionStateSchema.parse({
+      ...base,
+      stage: "COMPLETE",
+      lifecycleStatus: "complete",
+      completedAt: STAGE4_LATER,
+      provenance: {
+        ...base.provenance,
+        contractVersionVector: legacyVector,
+      },
+      finalEnvelope: {
+        ...legacyEnvelopePayload,
+        finalEnvelopeSchemaVersion: "0.2.0",
+        executionProvenance: {
+          ...legacyEnvelopePayload.executionProvenance,
+          contractVersionVector: legacyVector,
+        },
+      },
+    });
+    const sidecars = makeNewStage4Session().sidecars;
+    const result = recoverStage4Session({
+      persistedState: legacyComplete,
+      sidecars,
+      integrityValid: true,
+      expectedContentBinding: legacyComplete.contentBinding,
+      expectedContractVersionVector: currentVector,
+      now: STAGE4_LATER,
+      idGenerator: makeStage4Ports().idGenerator,
+    });
+
+    expect(result).toMatchObject({
+      kind: "restored",
+      access: "read_only",
+      action: "none",
+      state: {
+        finalEnvelope: { finalEnvelopeSchemaVersion: "0.2.0" },
+      },
+    });
+
+    const { access } = await createBundledContentLoader().load("placeholder");
+    const view = projectStage5View({
+      state: legacyComplete,
+      sidecars,
+      content: access,
+    });
+    expect(view.envelope?.letter).toMatchObject({
+      kind: "archive_note",
+      sourceMode: "legacy",
+      attribution: "旧版只读封套",
+    });
+    expect(view.envelope?.letter.body).toContain("来信功能上线前");
   });
 });
 

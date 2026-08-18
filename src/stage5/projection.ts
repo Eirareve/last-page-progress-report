@@ -235,6 +235,33 @@ function projectEnvelope(
     finalPortraitChoice: envelope.portraits.finalChoice,
     portraitShiftSummary: envelope.portraits.shiftSummary,
     signatureStatus: envelope.signature.currentStatus,
+    letter:
+      "letter" in envelope
+        ? envelope.letter.letterKind === "charlie_perspective"
+          ? {
+              kind: "charlie_perspective",
+              body: envelope.letter.body,
+              attribution: envelope.letter.attribution,
+              sourceMode: envelope.letter.sourceMode,
+              evidenceIds: envelope.letter.evidenceIds,
+              voicePolicyVersion: envelope.letter.voicePolicyVersion,
+            }
+          : {
+              kind: "archive_note",
+              body: envelope.letter.body,
+              attribution: envelope.letter.attribution,
+              sourceMode: "unavailable",
+              evidenceIds: envelope.letter.evidenceIds,
+              voicePolicyVersion: envelope.letter.voicePolicyVersion,
+            }
+        : {
+            kind: "archive_note",
+            body: "此封套生成于查理来信功能上线前。原始档案保持不变，这里不会补写一封不存在的信。",
+            attribution: "旧版只读封套",
+            sourceMode: "legacy",
+            evidenceIds: [],
+            voicePolicyVersion: null,
+          },
     finalDisposition: envelope.finalDisposition,
     openDissents: envelope.openDissents.map((dissent) => dissent.focus),
     originalDeclaration:

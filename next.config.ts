@@ -22,6 +22,7 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   generateBuildId: async () =>
     process.env.RC_ID ?? "unfrozen-local-build",
   reactStrictMode: true,

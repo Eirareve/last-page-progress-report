@@ -3,10 +3,9 @@ import { expect, test } from "@playwright/test";
 test("Stage 9 consent is explicit, optional, local-only, and allowlisted", async ({ page }) => {
   await page.goto("/");
   const start = page.getByRole("button", { name: "开始体验" });
-  await expect(start).toBeDisabled();
+  await expect(start).toBeEnabled();
   await page.getByRole("button", { name: "同意记录匿名事件" }).click();
   await expect(page.getByText("当前选择：同意本地记录。")).toBeVisible();
-  await expect(start).toBeEnabled();
   await start.click();
   await expect(page.getByTestId("stage-heading")).toHaveText("三次看见查理");
 

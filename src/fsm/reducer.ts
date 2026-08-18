@@ -23,6 +23,7 @@ import { evaluateFinalization } from "../finalization";
 import { operationBindingsEqual, type Clock, type IdGenerator } from "../runtime";
 import type {
   Stage4Event,
+  Stage4FinalEnvelope,
   Stage4PersistenceSidecars,
   Stage4Reduction,
   Stage4SessionState,
@@ -989,7 +990,7 @@ function transition(code: string): Stage4TransitionError {
 
 async function requireFinalEnvelopeMatchesState(
   state: Stage4SessionState,
-  envelope: NonNullable<Stage4SessionState["finalEnvelope"]>,
+  envelope: Stage4FinalEnvelope,
 ): Promise<void> {
   if (!(await verifyStage4FinalEnvelopeIntegrity(envelope))) {
     throw transition("final_envelope_integrity_mismatch");

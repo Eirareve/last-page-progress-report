@@ -6,6 +6,9 @@ dist/
 *.tsbuildinfo
 .env
 .env.*
+.playwright-cli/
+backups/
+output/
 !.env.example
 .vercel/
 playwright-report/

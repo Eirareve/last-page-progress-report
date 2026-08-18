@@ -24,7 +24,7 @@ describe("Stage 5 G1–G5 Contract repairs", () => {
       contentSchemaVersion: "0.2.0",
       agentContractVersion: "0.2.0",
       finalReviewSchemaVersion: "0.1.0",
-      finalEnvelopeSchemaVersion: "0.2.0",
+      finalEnvelopeSchemaVersion: "0.3.0",
     });
   });
 

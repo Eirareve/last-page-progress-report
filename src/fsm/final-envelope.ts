@@ -6,6 +6,7 @@ import {
   finalEnvelopeContentSnapshotSchema,
   sha256NfcUtf8,
 } from "../domain";
+import { generateCharlieFinalLetter } from "../final-letter";
 import type { Clock, IdGenerator } from "../runtime";
 import type { Stage4FinalEnvelope, Stage4SessionState } from "./contracts";
 import { stage4FinalEnvelopeSchema } from "./schemas";
@@ -88,6 +89,22 @@ export async function buildStage4FinalEnvelope(input: {
       currentReview: state.currentCharlieSignatureReview,
       futureStatus: state.futureCharlieSignatureStatus,
     },
+    letter: generateCharlieFinalLetter({
+      preciseText: state.manuscript.preciseText,
+      preciseRevisionId: state.manuscript.preciseRevisionId,
+      plainText: state.manuscript.plainText,
+      plainRevisionId: state.manuscript.plainRevisionId,
+      contentBundleId: state.contentBinding.contentBundleId,
+      contentBundleVersion: state.contentBinding.contentBundleVersion,
+      contentBundleChecksum: state.contentBinding.contentBundleChecksum,
+      evidenceIds: state.evidenceUsed.map(({ id }) => id),
+      prohibitedClaims: [],
+      portraitShiftSummary: state.portraitShiftSummary,
+      openDissentCount: state.openDissents.length,
+      signatureStatus: state.currentCharlieSignatureStatus,
+      finalDisposition: state.finalDisposition,
+      requestedMode: state.configuration.requestedAgentMode,
+    }),
     finalDisposition: state.finalDisposition,
     contentAttribution: {
       evidenceCards: state.evidenceUsed,

@@ -516,11 +516,9 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     });
   }
 
-  async requestSignature(
-    status: "signed" | "declined" | "unavailable",
-  ): Promise<void> {
+  async requestSignature(): Promise<void> {
     return this.runCommand(async () => {
-      await this.runSignatureReview(status);
+      await this.runSignatureReview();
     });
   }
 
@@ -1071,9 +1069,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
     }, "语义安放的一致性检查已完成。");
   }
 
-  private async runSignatureReview(
-    status: "signed" | "declined" | "unavailable",
-  ): Promise<void> {
+  private async runSignatureReview(): Promise<void> {
     const state = this.requireState();
     if (state.manuscript.plainText === null || state.manuscript.plainRevisionId === null) {
       throw new Error("签名审阅需要完整的双文本版本。");
@@ -1164,19 +1160,16 @@ export class Stage5ExperienceFacade implements Stage5Commands {
         });
       }
     } else {
-      const reviewedStatus = status === "declined" ? "declined" : "signed";
+      const reviewedStatus = "signed";
       const service = new DeterministicMockFinalReviewService({
         fixture: {
-          fixtureId: `stage5-${status}`,
+          fixtureId: "stage5-character-signature-review",
           candidate: {
             status: reviewedStatus,
             finalReviewSchemaVersion: FINAL_REVIEW_SCHEMA_VERSION,
             reason:
-              reviewedStatus === "signed"
-                ? "两种文本保留了当前意愿的边界，我愿意为这次呈现签名。"
-                : "这次呈现仍未保留我认为必要的边界，我明确拒绝签名。",
-            evidenceIds:
-              status === "unavailable" ? ["untrusted-missing-evidence"] : [],
+              "两种文本保留了当前意愿的边界，我愿意为这次呈现签名。",
+            evidenceIds: [],
           },
         },
       });
@@ -1196,9 +1189,7 @@ export class Stage5ExperienceFacade implements Stage5Commands {
       outcome.event,
       this.requestedMode === "live"
         ? "Live 签名审阅已完成；技术失败只会记录为 unavailable。"
-        : status === "unavailable"
-          ? "Mock 签名审阅模拟了技术上未完成；这不是角色拒绝。"
-          : `Mock 签名审阅结果：${status}。`,
+        : "Mock 签名审阅已由角色审阅流程给出结果。",
       outcome.budgetUsage,
     );
   }

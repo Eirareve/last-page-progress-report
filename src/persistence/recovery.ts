@@ -60,6 +60,44 @@ export function recoverStage4Session(input: {
       details: ["Snapshot integrity validation failed"],
     };
   }
+  const supportedLegacy = stage4SessionStateSchema.safeParse(
+    input.persistedState,
+  );
+  if (
+    supportedLegacy.success &&
+    supportedLegacy.data.lifecycleStatus === "complete" &&
+    supportedLegacy.data.finalEnvelope?.finalEnvelopeSchemaVersion === "0.2.0"
+  ) {
+    const mismatches = contentBindingMismatches(
+      supportedLegacy.data.contentBinding,
+      input.expectedContentBinding,
+    );
+    mismatches.push(
+      ...contractVersionMismatches(
+        supportedLegacy.data.provenance.contractVersionVector,
+        input.expectedContractVersionVector,
+      ).filter(
+        (field) =>
+          field !==
+          "provenance.contractVersionVector.finalEnvelopeSchemaVersion",
+      ),
+    );
+    if (mismatches.length > 0) {
+      return {
+        kind: "rejected",
+        code: "contract_mismatch",
+        details: mismatches,
+      };
+    }
+    return {
+      kind: "restored",
+      access: "read_only",
+      state: supportedLegacy.data,
+      sidecars: input.sidecars,
+      action: "none",
+      invalidatedOperationId: null,
+    };
+  }
   const recovered = recoverSessionState({
     persistedState: input.persistedState,
     currentSessionSchemaVersion: "0.1.0",

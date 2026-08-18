@@ -60,6 +60,7 @@ export type Stage5EnvelopeView = Readonly<{
   finalPortraitChoice: string;
   portraitShiftSummary: string;
   signatureStatus: string;
+  letter: Stage5LetterView;
   finalDisposition: FinalDisposition;
   openDissents: readonly string[];
   originalDeclaration: string;
@@ -70,6 +71,24 @@ export type Stage5EnvelopeView = Readonly<{
   receiptCount: number;
   integrityChecksum: string;
 }>;
+
+export type Stage5LetterView =
+  | Readonly<{
+      kind: "charlie_perspective";
+      body: string;
+      attribution: string;
+      sourceMode: "mock" | "live";
+      evidenceIds: readonly string[];
+      voicePolicyVersion: string;
+    }>
+  | Readonly<{
+      kind: "archive_note";
+      body: string;
+      attribution: string;
+      sourceMode: "unavailable" | "legacy";
+      evidenceIds: readonly string[];
+      voicePolicyVersion: string | null;
+    }>;
 
 export type Stage5ExecutionStatus = Readonly<{
   capability: string;
@@ -168,7 +187,7 @@ export interface Stage5Commands {
   confirmRestoration(proposalId: string): Promise<void>;
   rejectRestoration(proposalId: string): Promise<void>;
   submitFinalPortrait(input: { choice: string; reason?: string }): Promise<void>;
-  requestSignature(status: "signed" | "declined" | "unavailable"): Promise<void>;
+  requestSignature(): Promise<void>;
   skipSignature(): Promise<void>;
   returnToManuscript(): Promise<void>;
   cancelManuscriptRevision(): Promise<void>;
